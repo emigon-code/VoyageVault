@@ -950,7 +950,6 @@
             e.preventDefault();
             if (!supabaseClient) return;
 
-            // Extraer sesión activa segura en tiempo de ejecución
             const { data: { session } } = await supabaseClient.auth.getSession();
             const activeUid = session ? session.user.id : userSessionId;
 
@@ -1017,6 +1016,7 @@
             }
         }
 
+        // CONTROL DE MODALES
         function openImportModal() { document.getElementById('importModal').classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
@@ -1032,11 +1032,10 @@
             return tokens.map(t => t.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
         }
 
-        // FUNCIÓN DEL ANALIZADOR CSV REVISADA Y BLINDADA CONTRA EL REFERENCE_ERROR
+        // PROCESADOR CSV TOTALMENTE CORREGIDO Y MAQUETADO
         async function handleCSVFile(event) {
             if (!supabaseClient) return;
 
-            // Extraemos la sesión activa de forma asíncrona segura para evitar que declare 'not defined'
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
                 showToast("Error de Acceso", "Inicia sesión para poder importar datos.", true);
@@ -1092,7 +1091,7 @@
                             let paisVal = idxCategoria !== -1 && tokens[idxCategoria] ? tokens[idxCategoria] : 'España';
 
                             nuevosSitios.push({
-                                user_id: activeUid, // Vinculamos directamente el ID de sesión verificado
+                                user_id: activeUid,
                                 nombre: tokens[idxNombre],
                                 categoria: paisVal,
                                 estado: idxEstado !== -1 && tokens[idxEstado] ? tokens[idxEstado] : 'General',
@@ -1120,7 +1119,7 @@
                 } catch (err) {
                     console.error(err);
                     showToast("Error al importar", err.message || "Fallo al procesar el archivo.", true);
-                } finaly {
+                } finally {
                     if (loadingStatusEl) {
                         loadingStatusEl.classList.add('hidden');
                         loadingStatusEl.classList.remove('flex');
