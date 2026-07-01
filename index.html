@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoyageVault — Mi Visor de Viajes Personalizado</title>
     
+    <!-- SDK de Supabase para la conexión online -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
+    <!-- Leaflet CSS y JS cargados en el head síncronamente -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
@@ -15,6 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <!-- Cargamos Tailwind CSS CORRECTAMENTE desde su CDN oficial -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -341,6 +344,7 @@
     <div class="ambient-glow"></div>
     <div class="ambient-glow-2"></div>
 
+    <!-- REGISTRO / ACCESO OBLIGATORIO NUBE -->
     <div id="cloud-login-screen">
         <div class="bg-white p-10 rounded-[24px] border border-slate-200/80 shadow-2xl text-center max-w-[420px] w-[90%] z-50">
             <div class="flex items-center justify-center gap-2 mb-4 text-sky-600">
@@ -355,6 +359,7 @@
         </div>
     </div>
 
+    <!-- Toast de Notificación flotante -->
     <div id="toastMessage" class="notification-toast">
         <i id="toastIcon" class="fa-solid fa-circle-check" style="color:#0284c7; font-size: 18px;"></i>
         <div>
@@ -363,6 +368,7 @@
         </div>
     </div>
 
+    <!-- BARRA SUPERIOR (NAVBAR) -->
     <navbar>
         <div class="nav-left">
             <div class="logo" onclick="navigateTo('home')">
@@ -375,32 +381,37 @@
         </div>
         <div class="nav-right">
             <button class="btn btn-secondary" onclick="exportToCSV()"><i class="fa-solid fa-cloud-arrow-down"></i> Exportar CSV</button>
-            <button class="btn btn-secondary" onclick="openImportModal()"><i class="fa-solid fa-cloud-arrow-up"></i> Sincronizar CSV</button>
+            <button class="btn btn-secondary" onclick="openModal('importModal')"><i class="fa-solid fa-cloud-arrow-up"></i> Sincronizar CSV</button>
             <button class="btn-danger" onclick="clearAllData()"><i class="fa-solid fa-trash"></i> Resetear</button>
             <button class="btn btn-secondary" onclick="signOut()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Salir</button>
         </div>
     </navbar>
 
+    <!-- VIEWPORT CENTRAL -->
     <div class="main-viewport" id="app-viewport">
 
+        <!-- 1. HOME -->
         <div class="view-panel active-view" id="view-home">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="explorer-title">Explora tus destinos</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6" id="explorer-subtitle">Selecciona una región geográfica para organizar y planificar tus escapadas.</p>
             <div class="banner-grid home-grid" id="explorer-cards-container"></div>
         </div>
 
+        <!-- 2. PAÍSES -->
         <div class="view-panel" id="view-countries">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="countries-title">Países</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Naciones con destinos registrados en tu colección personal.</p>
             <div class="banner-grid" id="countries-grid"></div>
         </div>
 
+        <!-- 3. PROVINCIAS/REGIONES -->
         <div class="view-panel" id="view-regions">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="regions-title">Regiones</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una provincia, región o comarca específica de tu catálogo.</p>
             <div class="banner-grid" id="regions-grid"></div>
         </div>
 
+        <!-- 4. DETALLE DE LUGARES + MAPA -->
         <div class="view-panel" id="view-places" style="padding: 0;">
             <div class="mobile-view-tabs">
                 <button id="tab-btn-list" class="active" onclick="switchMobileView('list')"><i class="fa-solid fa-list-ul"></i> Lista</button>
@@ -416,14 +427,17 @@
                         </div>
                         <p id="places-sidebar-subtitle" style="font-size:12px; color:#475569; margin-bottom:10px; font-weight: 600;">Ubicación</p>
                         
+                        <!-- Barra de Búsqueda Dinámica -->
                         <input type="text" id="sidebarSearch" oninput="renderPlacesView()" placeholder="🔍 Buscar por nombre o notas..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none text-xs mb-3">
 
+                        <!-- Filtros Rápidos de Estado -->
                         <div class="flex bg-slate-100 p-1 rounded-xl gap-1 mb-3 text-xs font-bold" id="statusFilterBar">
                             <button onclick="setStatusFilter('todos')" id="filter-status-todos" class="flex-1 py-1.5 px-2 text-center rounded-lg transition-all duration-300 bg-white text-[#0284c7] shadow-sm">Todos</button>
                             <button onclick="setStatusFilter('Visitado')" id="filter-status-visitado" class="flex-1 py-1.5 px-2 text-center rounded-lg transition-all duration-300 text-slate-600 hover:text-emerald-600">🟢 Visitados</button>
                             <button onclick="setStatusFilter('Quiero ir')" id="filter-status-quieroir" class="flex-1 py-1.5 px-2 text-center rounded-lg transition-all duration-300 text-slate-600 hover:text-amber-600">🧡 Quiero ir</button>
                         </div>
 
+                        <!-- Selector de etiquetas -->
                         <div class="tag-filter-container" id="tagFilters"></div>
                     </div>
                     <div class="places-list-container" id="placesList"></div>
@@ -435,7 +449,8 @@
         </div>
     </div>
 
-    <div class="modal-overlay fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[1000] hidden items-center justify-center p-4" id="importModal" onclick="closeModal('importModal')">
+    <!-- MODAL SINCRO CSV (CONMUTACIÓN DE VISIBILIDAD DE TAILWIND RECONCILIADA) -->
+    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[1000] hidden items-center justify-center p-4" id="importModal" onclick="closeModal('importModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[520px] rounded-[24px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-5">
                 <h3 class="text-xl font-extrabold text-slate-800 tracking-tight">Sincronizar CSV en la Nube</h3>
@@ -461,7 +476,8 @@
         </div>
     </div>
 
-    <div class="modal-overlay fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[1000] hidden items-center justify-center p-4" id="placeModal" onclick="closeModal('placeModal')">
+    <!-- MODAL MANUAL FORM LUGAR -->
+    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[1000] hidden items-center justify-center p-4" id="placeModal" onclick="closeModal('placeModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[540px] rounded-[24px] p-6 md:p-8 shadow-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-5">
                 <h3 id="placeModalTitle" class="text-xl font-extrabold text-slate-800 tracking-tight">Añadir Nuevo Lugar</h3>
@@ -911,6 +927,23 @@
             }
         }
 
+        // CONTROL DE VISIBILIDAD MEDIANTE TAILWIND FLEX/HIDDEN EN JS NATIVO
+        function openModal(id) {
+            const targetModal = document.getElementById(id);
+            if (targetModal) {
+                targetModal.classList.remove('hidden');
+                targetModal.classList.add('flex');
+            }
+        }
+
+        function closeModal(id) {
+            const targetModal = document.getElementById(id);
+            if (targetModal) {
+                targetModal.classList.remove('flex');
+                targetModal.classList.add('hidden');
+            }
+        }
+
         function openPlaceModal(isEdit, globalIndex = null) {
             document.getElementById('placeForm').reset();
             const deleteBtn = document.getElementById('deletePlaceBtn');
@@ -943,7 +976,7 @@
                     document.getElementById('formLongitud').value = map.getCenter().lng.toFixed(5);
                 }
             }
-            document.getElementById('placeModal').classList.add('active');
+            openModal('placeModal');
         }
 
         async function savePlaceForm(e) {
@@ -1016,10 +1049,6 @@
             }
         }
 
-        // CONTROL DE MODALES
-        function openImportModal() { document.getElementById('importModal').classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
         function parseCSVLine(text, separator) {
             let tokens = []; let insideQuotes = false; let token = '';
             for (let i = 0; i < text.length; i++) {
@@ -1032,7 +1061,7 @@
             return tokens.map(t => t.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
         }
 
-        // PROCESADOR CSV TOTALMENTE ARREGLADO CON BLOQUE ESTRUCTURAL LIMPIO (FINALLY CORREGIDO)
+        // PROCESADOR CSV TOTALMENTE ARREGLADO CON FLUJOS ASÍNCRONOS SEGUROS
         async function handleCSVFile(event) {
             if (!supabaseClient) return;
 
