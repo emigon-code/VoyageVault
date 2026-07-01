@@ -447,7 +447,7 @@
             <div class="border-2 border-dashed border-slate-300 hover:border-sky-500 rounded-2xl p-8 text-center cursor-pointer bg-slate-50 hover:bg-sky-50/30 transition-all duration-200 mb-5" onclick="document.getElementById('csvFileInput').click()">
                 <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-400 mb-2"></i>
                 <p class="text-sm font-bold text-slate-600">Haz clic para buscar tu archivo .csv</p>
-                <p class="text-xs text-slate-400 mt-1">Soporta formatos con comillas y saltos de línea internos</p>
+                <p class="text-xs text-slate-400 mt-1">Formatos de comillas y notas largas de VoyageVault soportados</p>
                 <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCSVFile(event)">
             </div>
             
@@ -781,7 +781,6 @@
             const searchVal = document.getElementById('sidebarSearch').value.toLowerCase();
             let regionPlaces = viajesData.filter(i => i.categoria === state.country && i.estado === state.region);
             
-            // Reconstrucción de la barra de filtros dinámicos superiores (old21)
             const allTags = new Set();
             regionPlaces.forEach(p => { getTagsList(p.etiquetas).forEach(t => allTags.add(t)); });
             const filterBox = document.getElementById('tagFilters');
@@ -792,7 +791,6 @@
                 filterBox.innerHTML += `<span class="tag-pill ${activeClass}" onclick="filterTag('${t}')">${t}</span>`;
             });
 
-            // Cruzar filtros de búsqueda + estado + multietiqueta
             let filtered = regionPlaces.filter(f => f.nombre.toLowerCase().includes(searchVal) || (f.descripcion || '').toLowerCase().includes(searchVal));
 
             if (state.statusFilter === 'Visitado') {
@@ -869,7 +867,6 @@
                 `;
                 list.appendChild(card);
 
-                // Render Pins con forma de gota estilizada rotada en el mapa (old21)
                 if (map && p.latitud && p.longitud) {
                     const customMarkerIcon = L.divIcon({
                         className: 'custom-marker-wrapper',
@@ -1031,93 +1028,124 @@
             return tokens.map(t => t.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
         }
 
-        // FUNCIÓN DEL ANALIZADOR CSV CORREGIDA CON LOS NUEVOS CONTROLES VISUALES DEL MODAL
+        // FUNCIÓN DEL ANALIZADOR CSV ASÍNCRONA ROBUSTA (CORREGIDA AL 100%)
         async function handleCSVFile(event) {
-            if (!supabaseClient) return;
+            if (!supabaseClient || !userSessionId) {
+                showToast("Error de Acceso", "Inicia sesión para poder importar datos.", true);
+                return;
+            }
             const file = event.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = async function(evt) {
-                // Activamos el indicador de carga del modal (ID reconciliado)
                 const loadingStatusEl = document.getElementById('loadingStatus');
                 if (loadingStatusEl) {
                     loadingStatusEl.classList.remove('hidden');
                     loadingStatusEl.classList.add('flex');
                 }
                 
-                const text = evt.target.result;
-                const lines = text.split(/\r?\n/);
-                if (lines.length < 2) return;
+                try {
+                    const text = evt.target.result;
+                    const lines = text.split(/\r?\n/);
+                    if (lines.length < 2) {
+                        throw new Error("El archivo CSV está vacío o no contiene filas de datos.");
+                    }
 
-                let separator = lines[0].includes(';') ? ';' : ',';
-                const rawHeaders = parseCSVLine(lines[0], separator).map(h => h.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+                    let separator = lines[0].includes(';') ? ';' : ',';
+                    const rawHeaders = parseCSVLine(lines[0], separator).map(h => h.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
 
-                const idxNombre = rawHeaders.findIndex(h => h.includes('nombre') || h.includes('name') || h.includes('lugar'));
-                const idxCategoria = rawHeaders.findIndex(h => h.includes('categoria') || h.includes('pais') || h.includes('country'));
-                const idxEstado = rawHeaders.findIndex(h => h.includes('estado') || h.includes('provincia') || h.includes('region'));
-                const idxLatitud = rawHeaders.findIndex(h => h.includes('latitud') || h.includes('lat'));
-                const idxLongitud = rawHeaders.findIndex(h => h.includes('longitud') || h.includes('lng'));
-                const idxDescripcion = rawHeaders.findIndex(h => h.includes('notas') || h.includes('nota') || h.includes('descripcion') || h.includes('desc'));
-                const idxVisitado = rawHeaders.findIndex(h => h.includes('visitado') || h.includes('status'));
-                const idxEtiquetas = rawHeaders.findIndex(h => h.includes('etiqueta') || h.includes('tag'));
-                const idxUrl = rawHeaders.findIndex(h => h.includes('link') || h.includes('url') || h.includes('enlace'));
+                    const idxNombre = rawHeaders.findIndex(h => h.includes('nombre') || h.includes('name') || h.includes('lugar'));
+                    const idxCategoria = rawHeaders.findIndex(h => h.includes('categoria') || h.includes('pais') || h.includes('country'));
+                    const idxEstado = rawHeaders.findIndex(h => h.includes('estado') || h.includes('provincia') || h.includes('region'));
+                    const idxLatitud = rawHeaders.findIndex(h => h.includes('latitud') || h.includes('lat'));
+                    const idxLongitud = rawHeaders.findIndex(h => h.includes('longitud') || h.includes('lng'));
+                    const idxDescripcion = rawHeaders.findIndex(h => h.includes('notas') || h.includes('nota') || h.includes('descripcion') || h.includes('desc'));
+                    const idxVisitado = rawHeaders.findIndex(h => h.includes('visitado') || h.includes('status'));
+                    const idxEtiquetas = rawHeaders.findIndex(h => h.includes('etiqueta') || h.includes('tag'));
+                    const idxUrl = rawHeaders.findIndex(h => h.includes('link') || h.includes('url') || h.includes('enlace'));
 
-                const nuevosSitios = [];
+                    if (idxNombre === -1) {
+                        throw new Error("No se ha encontrado la columna obligatoria 'Nombre' o 'Lugar' en la cabecera del CSV.");
+                    }
 
-                for (let i = 1; i < lines.length; i++) {
-                    let currentLine = lines[i].trim();
-                    if (!currentLine) continue;
-                    let tokens = parseCSVLine(currentLine, separator);
+                    const nuevosSitios = [];
 
-                    if (tokens.length > 0 && tokens[idxNombre]) {
-                        let lat = parseFloat((tokens[idxLatitud] || '0').replace(',', '.'));
-                        let lng = parseFloat((tokens[idxLongitud] || '0').replace(',', '.'));
-                        let paisVal = idxCategoria !== -1 && tokens[idxCategoria] ? tokens[idxCategoria] : 'España';
+                    for (let i = 1; i < lines.length; i++) {
+                        let currentLine = lines[i].trim();
+                        if (!currentLine) continue;
+                        let tokens = parseCSVLine(currentLine, separator);
+
+                        if (tokens.length > 0 && tokens[idxNombre]) {
+                            let lat = parseFloat((tokens[idxLatitud] || '0').replace(',', '.'));
+                            let lng = parseFloat((tokens[idxLongitud] || '0').replace(',', '.'));
+                            let paisVal = idxCategoria !== -1 && tokens[idxCategoria] ? tokens[idxCategoria] : 'España';
 
                         nuevosSitios.push({
-                            user_id: userSessionId,
-                            nombre: tokens[idxNombre],
-                            categoria: paisVal,
-                            estado: idxEstado !== -1 && tokens[idxEstado] ? tokens[idxEstado] : 'General',
-                            latitud: isNaN(lat) ? 0 : lat,
-                            longitud: isNaN(lng) ? 0 : lng,
-                            descripcion: idxDescripcion !== -1 && tokens[idxDescripcion] ? tokens[idxDescripcion] : '',
-                            nivel: getContinent(paisVal),
-                            visitado: idxVisitado !== -1 && tokens[idxVisitado] ? tokens[idxVisitado] : 'Por visitar',
-                            etiquetas: idxEtiquetas !== -1 && tokens[idxEtiquetas] ? tokens[idxEtiquetas] : '',
-                            link: idxUrl !== -1 && tokens[idxUrl] ? tokens[idxUrl] : ''
-                        });
+                                user_id: userSessionId,
+                                nombre: tokens[idxNombre],
+                                categoria: paisVal,
+                                estado: idxEstado !== -1 && tokens[idxEstado] ? tokens[idxEstado] : 'General',
+                                latitud: isNaN(lat) ? 0 : lat,
+                                longitud: isNaN(lng) ? 0 : lng,
+                                descripcion: idxDescripcion !== -1 && tokens[idxDescripcion] ? tokens[idxDescripcion] : '',
+                                nivel: getContinent(paisVal),
+                                visitado: idxVisitado !== -1 && tokens[idxVisitado] ? tokens[idxVisitado] : 'Por visitar',
+                                etiquetas: idxEtiquetas !== -1 && tokens[idxEtiquetas] ? tokens[idxEtiquetas] : '',
+                                link: idxUrl !== -1 && tokens[idxUrl] ? tokens[idxUrl] : ''
+                            });
+                        }
                     }
-                }
 
-                if (nuevosSitios.length > 0) {
-                    const { error } = await supabaseClient.from('sitios').insert(nuevosSitios);
-                    
-                    // Ocultamos el indicador de carga
-                    if (loadingStatusEl) {
-                        loadingStatusEl.classList.add('hidden');
-                        loadingStatusEl.classList.remove('flex');
-                    }
-                    
-                    if (error) {
-                        showToast("Error al importar", error.message, true);
-                    } else {
-                        showToast("Sincronización Exitosa", `${nuevosSitios.length} destinos añadidos.`);
+                    if (nuevosSitios.length > 0) {
+                        const { error } = await supabaseClient.from('sitios').insert(nuevosSitios);
+                        if (error) throw error;
+
+                        showToast("Sincronización Exitosa", `${nuevosSitios.length} destinos añadidos a la nube.`);
                         closeModal('importModal');
-                        // Limpiamos el valor del input file para permitir volver a cargar el mismo archivo inmediatamente
-                        document.getElementById('csvFileInput').value = "";
-                        loadCloudData();
+                        await loadCloudData();
+                    } else {
+                        showToast("Aviso", "No se encontraron filas con nombres válidos en el archivo.", true);
                     }
-                } else {
+                } catch (err) {
+                    console.error(err);
+                    showToast("Error al importar", err.message || "Fallo al procesar el archivo.", true);
+                } finally {
                     if (loadingStatusEl) {
                         loadingStatusEl.classList.add('hidden');
                         loadingStatusEl.classList.remove('flex');
                     }
-                    showToast("Aviso", "No se encontraron filas válidas en el CSV.", true);
+                    event.target.value = "";
                 }
             };
             reader.readAsText(file);
+        }
+
+        // EXPORTACIÓN INTELIGENTE: SI ESTÁ VACÍA LA BASE DE DATOS TE BAJA UNA PLANTILLA GUÍA ÚTIL
+        function exportToCSV() {
+            let csvContent = "Nombre,Categoria,Estado,Latitud,Longitud,Notas,Nivel,Visitado,Etiquetas,Link\n";
+            
+            if (viajesData && viajesData.length > 0) {
+                viajesData.forEach(v => {
+                    csvContent += `"${v.nombre}","${v.categoria}","${v.estado}",${v.latitud},${v.longitud},"${(v.descripcion || '').replace(/"/g, '""')}","${v.nivel || ''}","${v.visitado || 'Por visitar'}","${v.etiquetas || ''}","${v.link || ''}"\n`;
+                });
+                showToast("Exportación Exitosa", `Descargados ${viajesData.length} destinos de tu diario.`);
+            } else {
+                csvContent += `"Mirador de San Nicolás","España","Granada",37.18121,-3.58914,"Vistas espectaculares a la Alhambra. Ideal ir al atardecer.","Europa","Quiero ir","Cultura, Mirador","https://es.wikipedia.org/wiki/Mirador_de_San_Nicol%C3%A1s"\n`;
+                showToast("Plantilla Generada", "La base de datos está vacía. Descargando plantilla CSV de ejemplo.");
+            }
+            
+            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            
+            const timestamp = new Date().toISOString().slice(0, 10);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `VoyageVault_Catálogos_${timestamp}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         }
 
         async function clearAllData() {
@@ -1130,20 +1158,6 @@
                     navigateTo('home');
                 }
             }
-        }
-
-        function exportToCSV() {
-            if (viajesData.length === 0) return;
-            let csvContent = "Nombre,Categoria,Estado,Latitud,Longitud,Notas,Nivel,Visitado,Etiquetas,Link\n";
-            viajesData.forEach(v => {
-                csvContent += `"${v.nombre}","${v.categoria}","${v.estado}",${v.latitud},${v.longitud},"${(v.descripcion || '').replace(/"/g, '""')}","${v.nivel || ''}","${v.visitado || 'Por visitar'}","${v.etiquetas || ''}","${v.link || ''}"\n`;
-            });
-            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", `VoyageVault_Backup.csv`);
-            document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
 
         function initMap() {
