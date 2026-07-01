@@ -187,7 +187,6 @@
         .banner-name { font-size: 22px; font-weight: 800; color: #ffffff; margin: 4px 0; }
         .banner-count { font-size: 12px; color: #e2e8f0; display: flex; align-items: center; gap: 6px; font-weight: 600; }
 
-        /* Botón de Ajustes de Portada (⚙️ al estilo index old21) */
         .banner-settings-btn {
             position: absolute; top: 16px; right: 16px; z-index: 10;
             background: rgba(15, 23, 42, 0.6); color: white; border-radius: 50%;
@@ -457,7 +456,7 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtdWVyYXZjbndrb3N3dndidm5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMjIxMzIsImV4cCI6MjA5Nzg5ODEzMn0._k2oBg5XwMmPzPZ3zm43EOp-gn1VyM6JDqpCx2BoYvQ';
 
         let viajesData = [];
-        let customBanners = {}; // Objeto de portadas personalizadas guardadas en la nube
+        let customBanners = {}; 
         let userSessionId = null;
         let supabaseClient = null;
         let map, markersGroup;
@@ -466,7 +465,6 @@
 
         const EUROPEAN_COUNTRIES = ["alemania", "andorra", "austria", "españa", "espana", "francia", "italia", "portugal", "suiza", "reino unido", "grecia", "bélgica", "belgica", "paises bajos", "países bajos", "holanda"];
 
-        // Portadas por defecto (fallbacks)
         const DEFAULT_IMAGES = {
             'Europa': 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=1000',
             'Resto del Mundo': 'https://images.unsplash.com/photo-1507608869274-d3177c8bb4c7?w=1000',
@@ -502,16 +500,13 @@
 
         async function signOut() { if (supabaseClient) { await supabaseClient.auth.signOut(); window.location.reload(); } }
 
-        // Carga integrada de sitios y de las imágenes personalizadas guardadas
         async function loadCloudData() {
             if (!supabaseClient) return;
             
-            // 1. Cargar sitios de viaje
             const { data: sitios, error: errorSitios } = await supabaseClient.from('sitios').select('*');
             if (errorSitios) { showToast("Error", errorSitios.message, true); return; }
             viajesData = sitios || [];
 
-            // 2. Cargar diccionario de portadas guardadas de la tabla de metadatos (si existe) o simular almacenamiento seguro
             try {
                 const localMeta = localStorage.getItem(`voyageVault_banners_${userSessionId}`);
                 customBanners = localMeta ? JSON.parse(localMeta) : {};
@@ -520,9 +515,8 @@
             renderViewByCurrentState();
         }
 
-        // Función para cambiar de portada de forma persistente y multidispositivo (old21 style)
         function editBannerImage(event, key) {
-            event.stopPropagation(); // Evita que la tarjeta dispare la navegación por debajo
+            event.stopPropagation(); 
             const currentImg = customBanners[key] || DEFAULT_IMAGES[key] || DEFAULT_IMAGES['pais_default'];
             const newUrl = prompt("Introduce la URL de la nueva imagen de portada para este nivel:", currentImg);
             
@@ -664,7 +658,6 @@
             navigateTo('places');
         }
 
-        // BUSCADOR DE COORDENADAS DINÁMICO (GEOCODING) ESTILO INDEX OLD21 PERFECCIONADO
         async function lookupCoordinates() {
             const queryPlace = document.getElementById('formLugar').value.trim();
             const queryRegion = document.getElementById('formRegion').value.trim();
@@ -679,7 +672,6 @@
             showToast("Buscando...", "Consultando coordenadas espaciales...");
 
             try {
-                // Consultamos el API abierto de OpenStreetMap Nominatim para resolver la dirección de forma instantánea
                 const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`);
                 const data = await response.json();
                 
@@ -691,7 +683,6 @@
                     document.getElementById('formLongitud').value = lon.toFixed(6);
                     showToast("Ubicado con éxito", `Encontrado: lat ${lat.toFixed(4)}, lon ${lon.toFixed(4)}`);
                 } else {
-                    // Intento alternativo más corto si falla el específico
                     const altResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryPlace)}&limit=1`);
                     const altData = await altResponse.json();
                     if (altData && altData.length > 0) {
@@ -891,53 +882,104 @@
             if (tab === 'map' && map) setTimeout(() => map.invalidateSize(), 100);
         }
 
-        // PROCESADOR E IMPORTADOR DE CSV SINCRO ASÍNCRONO
+        function parseCSVLine(text, separator) {
+            let tokens = []; let insideQuotes = false; let token = '';
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char === '"') insideQuotes = !insideQuotes;
+                else if (char === separator && !insideQuotes) { tokens.push(token.trim()); token = ''; }
+                else token += char;
+            }
+            tokens.push(token.trim());
+            return tokens.map(t => t.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+        }
+
+        // PROCESADOR E IMPORTADOR DE CSV REFORZADO Y ULTRA-PERMISIVO
         async function handleCSVFile(event) {
             if (!supabaseClient || !userSessionId) return;
             const file = event.target.files[0]; if (!file) return;
 
             const reader = new FileReader();
             reader.onload = async function(evt) {
-                document.getElementById('loadingStatus').classList.replace('hidden', 'flex');
+                const loadingEl = document.getElementById('loadingStatus');
+                if (loadingEl) loadingEl.classList.replace('hidden', 'flex');
+                
                 try {
                     const text = evt.target.result;
                     const lines = text.split(/\r?\n/);
+                    if (lines.length < 2) {
+                        throw new Error("El archivo CSV está vacío.");
+                    }
+
                     let separator = lines[0].includes(';') ? ';' : ',';
-                    
                     const headers = parseCSVLine(lines[0], separator).map(h => h.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
-                    const idxNombre = headers.findIndex(h => h.includes('nombre') || h.includes('lugar'));
-                    const idxCat = headers.findIndex(h => h.includes('categoria') || h.includes('pais'));
-                    const idxEst = headers.findIndex(h => h.includes('estado') || h.includes('region'));
+                    
+                    const idxNombre = headers.findIndex(h => h.includes('nombre') || h.includes('lugar') || h.includes('title') || h.includes('name'));
+                    const idxCat = headers.findIndex(h => h.includes('categoria') || h.includes('pais') || h.includes('country'));
+                    const idxEst = headers.findIndex(h => h.includes('estado') || h.includes('provincia') || h.includes('region'));
                     const idxLat = headers.findIndex(h => h.includes('latitud') || h.includes('lat'));
                     const idxLng = headers.findIndex(h => h.includes('longitud') || h.includes('lng'));
-                    const idxDesc = headers.findIndex(h => h.includes('notas') || h.includes('descripcion'));
-                    const idxVis = headers.findIndex(h => h.includes('visitado'));
-                    const idxEtiq = headers.findIndex(h => h.includes('etiqueta'));
-                    const idxUrl = headers.findIndex(h => h.includes('link') || h.includes('enlace'));
+                    const idxDesc = headers.findIndex(h => h.includes('notas') || h.includes('descripcion') || h.includes('desc'));
+                    const idxVis = headers.findIndex(h => h.includes('visitado') || h.includes('status'));
+                    const idxEtiq = headers.findIndex(h => h.includes('etiqueta') || h.includes('tag'));
+                    const idxUrl = headers.findIndex(h => h.includes('link') || h.includes('enlace') || h.includes('url'));
+
+                    if (idxNombre === -1) {
+                        throw new Error("No se encontró la columna de Nombre o Lugar.");
+                    }
 
                     const nuevos = [];
                     for (let i = 1; i < lines.length; i++) {
-                        if (!lines[i].trim()) continue;
-                        let tokens = parseCSVLine(lines[i], separator);
-                        if (tokens[idxNombre]) {
-                            let lat = parseFloat((tokens[idxLat] || '0').replace(',', '.'));
-                            let lng = parseFloat((tokens[idxLng] || '0').replace(',', '.'));
-                            let c = tokens[idxCat] || 'España';
+                        let currentLine = lines[i].trim();
+                        if (!currentLine) continue;
+                        
+                        let tokens = parseCSVLine(currentLine, separator);
+                        if (tokens.length > 0 && tokens[idxNombre]) {
+                            let rawLat = idxLat !== -1 ? tokens[idxLat] : '0';
+                            let rawLng = idxLng !== -1 ? tokens[idxLng] : '0';
+                            let lat = parseFloat((rawLat || '0').replace(',', '.'));
+                            let lng = parseFloat((rawLng || '0').replace(',', '.'));
+                            
+                            let c = idxCat !== -1 && tokens[idxCat] ? tokens[idxCat] : 'España';
+                            let estVal = idxEst !== -1 && tokens[idxEst] ? tokens[idxEst] : 'General';
+                            let descVal = idxDesc !== -1 && tokens[idxDesc] ? tokens[idxDesc] : '';
+                            let visVal = idxVis !== -1 && tokens[idxVis] ? tokens[idxVis] : 'Por visitar';
+                            let etiqVal = idxEtiq !== -1 && tokens[idxEtiq] ? tokens[idxEtiq] : 'General';
+                            let urlVal = idxUrl !== -1 && tokens[idxUrl] ? tokens[idxUrl] : '';
+
                             nuevos.push({
-                                user_id: userSessionId, nombre: tokens[idxNombre], categoria: c, estado: tokens[idxEst] || 'General',
-                                latitud: isNaN(lat) ? 0 : lat, longitud: isNaN(lng) ? 0 : lng, descripcion: tokens[idxDesc] || '',
-                                nivel: getContinent(c), visitado: tokens[idxVis] || 'Por visitar', etiquetas: tokens[idxEtiq] || 'General', link: tokens[idxUrl] || ''
+                                user_id: userSessionId,
+                                nombre: tokens[idxNombre].trim(),
+                                categoria: c.trim(),
+                                estado: estVal.trim(),
+                                latitud: isNaN(lat) ? 0 : lat,
+                                longitud: isNaN(lng) ? 0 : lng,
+                                descripcion: descVal.trim(),
+                                nivel: getContinent(c),
+                                visitado: visVal.trim(),
+                                etiquetas: etiqVal.trim(),
+                                link: urlVal.trim()
                             });
                         }
                     }
+
                     if (nuevos.length > 0) {
-                        await supabaseClient.from('sitios').insert(nuevos);
-                        showToast("Sincronización Exitosa", `${nuevos.length} destinos guardados.`);
+                        const { error } = await supabaseClient.from('sitios').insert(nuevos);
+                        if (error) throw error;
+                        
+                        showToast("Sincronización Exitosa", `${nuevos.length} destinos guardados en la nube.`);
                         closeModal('importModal');
                         loadCloudData();
+                    } else {
+                        showToast("Aviso", "No se encontraron filas válidas para importar.", true);
                     }
-                } catch (e) { showToast("Error", "Formato CSV inválido.", true); }
-                finally { document.getElementById('loadingStatus').classList.replace('flex', 'hidden'); event.target.value = ""; }
+                } catch (e) {
+                    console.error(e);
+                    showToast("Error de Importación", e.message || "Formato CSV inválido.", true);
+                } finally {
+                    if (loadingEl) loadingEl.classList.replace('flex', 'hidden');
+                    event.target.value = "";
+                }
             };
             reader.readAsText(file);
         }
