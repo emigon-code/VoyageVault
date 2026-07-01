@@ -689,7 +689,7 @@
 
         function selectCountry(country) {
             state.country = country;
-            const regions = [...new Set(viajesData.filter(i => i.categoria === country && i.estado).map(i => i.estado))];
+            const regions = [...new Set(viajesData.filter(i => getContinent(i.categoria) === state.continent && i.categoria === country && i.estado).map(i => i.estado))];
             const grid = document.getElementById('regions-grid');
             grid.innerHTML = '';
 
@@ -1032,7 +1032,7 @@
             return tokens.map(t => t.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
         }
 
-        // PROCESADOR CSV TOTALMENTE CORREGIDO Y MAQUETADO
+        // PROCESADOR CSV TOTALMENTE ARREGLADO CON BLOQUE ESTRUCTURAL LIMPIO (FINALLY CORREGIDO)
         async function handleCSVFile(event) {
             if (!supabaseClient) return;
 
