@@ -950,9 +950,13 @@
             e.preventDefault();
             if (!supabaseClient) return;
 
+            // Extraer sesión activa segura en tiempo de ejecución
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            const activeUid = session ? session.user.id : userSessionId;
+
             const rowId = document.getElementById('editIndex').value;
             const payload = {
-                user_id: userSessionId,
+                user_id: activeUid,
                 nombre: document.getElementById('formLugar').value.trim(),
                 etiquetas: document.getElementById('formTipo').value.trim(),
                 categoria: document.getElementById('formPais').value.trim(),
@@ -1028,12 +1032,18 @@
             return tokens.map(t => t.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
         }
 
-        // FUNCIÓN DEL ANALIZADOR CSV ASÍNCRONA ROBUSTA (CORREGIDA AL 100%)
+        // FUNCIÓN DEL ANALIZADOR CSV REVISADA Y BLINDADA CONTRA EL REFERENCE_ERROR
         async function handleCSVFile(event) {
-            if (!supabaseClient || !userSessionId) {
+            if (!supabaseClient) return;
+
+            // Extraemos la sesión activa de forma asíncrona segura para evitar que declare 'not defined'
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
                 showToast("Error de Acceso", "Inicia sesión para poder importar datos.", true);
                 return;
             }
+            const activeUid = session.user.id;
+
             const file = event.target.files[0];
             if (!file) return;
 
@@ -1081,8 +1091,8 @@
                             let lng = parseFloat((tokens[idxLongitud] || '0').replace(',', '.'));
                             let paisVal = idxCategoria !== -1 && tokens[idxCategoria] ? tokens[idxCategoria] : 'España';
 
-                        nuevosSitios.push({
-                                user_id: userSessionId,
+                            nuevosSitios.push({
+                                user_id: activeUid, // Vinculamos directamente el ID de sesión verificado
                                 nombre: tokens[idxNombre],
                                 categoria: paisVal,
                                 estado: idxEstado !== -1 && tokens[idxEstado] ? tokens[idxEstado] : 'General',
@@ -1110,7 +1120,7 @@
                 } catch (err) {
                     console.error(err);
                     showToast("Error al importar", err.message || "Fallo al procesar el archivo.", true);
-                } finally {
+                } finaly {
                     if (loadingStatusEl) {
                         loadingStatusEl.classList.add('hidden');
                         loadingStatusEl.classList.remove('flex');
@@ -1121,7 +1131,6 @@
             reader.readAsText(file);
         }
 
-        // EXPORTACIÓN INTELIGENTE: SI ESTÁ VACÍA LA BASE DE DATOS TE BAJA UNA PLANTILLA GUÍA ÚTIL
         function exportToCSV() {
             let csvContent = "Nombre,Categoria,Estado,Latitud,Longitud,Notas,Nivel,Visitado,Etiquetas,Link\n";
             
