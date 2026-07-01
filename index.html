@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoyageVault — Mi Visor de Viajes Personalizado</title>
     
-    <!-- SDK de Supabase -->
+    <!-- SDK de Supabase para la conexión online -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- Leaflet CSS y JS cargados en el head síncronamente -->
@@ -57,7 +57,7 @@
             position: relative;
         }
 
-        /* Ambient Glow Background Blobs */
+        /* Ambient Glow Background Blobs (old21) */
         .ambient-glow {
             position: absolute;
             width: 500px;
@@ -170,12 +170,16 @@
             .view-subtitle { font-size: 15px; margin-bottom: 36px; }
         }
 
-        /* Grid */
+        /* Grid de Portadas */
         .banner-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1400px; margin: 0 auto;
         }
         @media (min-width: 768px) {
             .banner-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 28px; }
+        }
+        .home-grid { grid-template-columns: 1fr; max-width: 1100px; }
+        @media (min-width: 768px) {
+            .home-grid { grid-template-columns: 1fr 1fr; }
         }
 
         .banner-card {
@@ -185,6 +189,7 @@
         }
         @media (min-width: 768px) {
             .banner-card { height: 300px; }
+            .home-grid .banner-card { height: 420px; }
         }
         .banner-card::before {
             content: ''; position: absolute; inset: 0;
@@ -221,6 +226,7 @@
             .split-viewport { flex-direction: row; }
         }
 
+        /* SIDEBAR Y CONTENEDORES */
         .places-sidebar { 
             width: 100%; 
             background-color: rgba(255, 255, 255, 0.85); 
@@ -254,7 +260,7 @@
         .places-list-container::-webkit-scrollbar { width: 6px; }
         .places-list-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
-        /* Tarjetas de Lugar */
+        /* Tarjetas de Lugar (old21) */
         .place-card {
             background-color: rgba(255, 255, 255, 0.9); border: 1px solid rgba(226, 232, 240, 0.8);
             border-radius: 16px; padding: 16px; margin-bottom: 16px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -263,7 +269,7 @@
         }
         .place-card:hover { border-color: #0284c7; transform: translateY(-2px); box-shadow: 0 12px 25px -10px rgba(15, 23, 42, 0.08); }
         
-        /* Colores dinámicos por tipo (Pastel con Contraste) */
+        /* Colores dinámicos por tipo (Pastel con Contraste de old21) */
         .cat-gastronomia { --cat-color: #ea580c; --cat-bg: #ffedd5; --cat-border: #fdba74; }
         .cat-ocio { --cat-color: #db2777; --cat-bg: #fce7f3; --cat-border: #fbcfe8; }
         .cat-cultura { --cat-color: #7c3aed; --cat-bg: #ede9fe; --cat-border: #ddd6fe; }
@@ -302,6 +308,7 @@
             .btn-danger:hover { background-color: #fee2e2; }
         }
 
+        /* Tags de filtrado */
         .tag-filter-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; max-height: 120px; overflow-y: auto; padding-bottom: 4px; }
         @media (min-width: 768px) {
             .tag-filter-container { margin-top: 14px; max-height: none; overflow-y: visible; }
@@ -334,7 +341,7 @@
             background-color: #cbd5e1; 
         }
 
-        /* Marcadores del mapa con diseño pin estilizado (old21) */
+        /* Marcadores de Pin Redondos Estilizados (old21) */
         .custom-pin-marker { display: flex; align-items: center; justify-content: center; width: 36px !important; height: 36px !important; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: -2px 2px 4px rgba(0,0,0,0.3); border: 2px solid #ffffff; }
         .custom-pin-marker i { transform: rotate(45deg); color: white; font-size: 13px; }
 
@@ -348,9 +355,7 @@
             background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); width: 100%; max-width: 520px; border-radius: 24px; padding: 24px; box-shadow: 0 20px 50px -12px rgba(15,23,42,0.15);
             max-height: 90vh; overflow-y: auto;
         }
-        @media (min-width: 768px) {
-            .modal-card { padding: 32px; }
-        }
+        @media (min-width: 768px) { .modal-card { padding: 32px; } }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .modal-header h3 { font-size: 20px; font-weight: 800; color: #1e293b; }
         
@@ -358,9 +363,6 @@
         .form-group label { display: block; font-size: 11px; text-transform: uppercase; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px; }
         .form-group input, .form-group textarea, .form-group select {
             width: 100%; padding: 10px; background-color: #f8fafc; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 10px; color: #0f172a; font-family: inherit; outline: none; transition: all 0.3s ease; font-size: 13px;
-        }
-        @media (min-width: 768px) {
-            .form-group input, .form-group textarea, .form-group select { padding: 12px; font-size: 14px; }
         }
         .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
             background-color: #ffffff; border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
@@ -373,29 +375,8 @@
         .file-upload-zone i { font-size: 28px; color: #64748b; margin-bottom: 8px; }
         .file-upload-zone p { font-size: 13px; font-weight: 600; color: #475569; }
 
-        /* Estilo Leaflet Popups */
-        .leaflet-popup-content-wrapper {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            border: 1px solid rgba(255,255,255,0.6);
-        }
+        .leaflet-popup-content-wrapper { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.6); }
         .leaflet-popup-tip { background: rgba(255, 255, 255, 0.95); }
-
-        /* Toast */
-        .notification-toast {
-            position: fixed; bottom: 16px; left: 16px; right: 16px; background-color: #ffffff; border-left: 5px solid #0284c7;
-            box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.1); padding: 12px 18px; border-radius: 16px; z-index: 1100;
-            display: flex; align-items: center; gap: 12px; transform: translateY(150%); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-        }
-        @media (min-width: 768px) {
-            .notification-toast { bottom: 32px; left: 32px; right: auto; width: 340px; padding: 16px 24px; }
-        }
-        .notification-toast.show { transform: translateY(0); }
-        .notification-toast.error { border-left-color: #ef4444; }
-        .notification-toast.error i { color: #ef4444; }
     </style>
 </head>
 <body>
@@ -403,7 +384,7 @@
     <div class="ambient-glow"></div>
     <div class="ambient-glow-2"></div>
 
-    <!-- PANTALLA DE ACCESO NUBE -->
+    <!-- REGISTRO / ACCESO OBLIGATORIO NUBE -->
     <div id="cloud-login-screen">
         <div class="bg-white p-10 rounded-[24px] border border-slate-200/80 shadow-2xl text-center max-w-[420px] w-[90%] z-50">
             <div class="flex items-center justify-center gap-2 mb-4 text-sky-600">
@@ -411,14 +392,14 @@
                 <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent">VoyageVault</h1>
             </div>
             <h2 class="text-xl font-bold text-slate-800 mb-2">Tu diario de viajes online</h2>
-            <p class="text-slate-500 text-sm mb-8">Sincroniza tus destinos directamente en la base de datos.</p>
+            <p class="text-slate-500 text-sm mb-8">Sincroniza tus destinos favoritos directamente en la nube.</p>
             <button onclick="signInWithGoogle()" class="w-full bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl shadow-sm inline-flex items-center justify-center gap-3 transition">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width="20"> Conectar con Google
             </button>
         </div>
     </div>
 
-    <!-- Notificaciones flotantes -->
+    <!-- Toast Notifications -->
     <div id="toastMessage" class="notification-toast">
         <i id="toastIcon" class="fa-solid fa-circle-check" style="color:#0284c7; font-size: 18px;"></i>
         <div>
@@ -427,7 +408,7 @@
         </div>
     </div>
 
-    <!-- Barra Superior -->
+    <!-- BARRA SUPERIOR (NAVBAR) -->
     <navbar>
         <div class="nav-left">
             <div class="logo" onclick="navigateTo('home')">
@@ -439,21 +420,21 @@
             </div>
         </div>
         <div class="nav-right">
-            <button class="btn btn-secondary" onclick="exportToCSV()" title="Descargar catálogo en formato CSV"><i class="fa-solid fa-cloud-arrow-down"></i> Exportar CSV</button>
+            <button class="btn btn-secondary" onclick="exportToCSV()"><i class="fa-solid fa-cloud-arrow-down"></i> Exportar CSV</button>
             <button class="btn btn-secondary" onclick="openImportModal()"><i class="fa-solid fa-cloud-arrow-up"></i> Sincronizar CSV</button>
             <button class="btn-danger" onclick="clearAllData()"><i class="fa-solid fa-trash"></i> Resetear</button>
             <button class="btn btn-secondary" onclick="signOut()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Salir</button>
         </div>
     </navbar>
 
-    <!-- ÁREA PRINCIPAL -->
+    <!-- VIEWPORT CENTRAL -->
     <div class="main-viewport" id="app-viewport">
 
-        <!-- 1. HOME / EXPLORADOR DE TARJETAS -->
+        <!-- 1. HOME -->
         <div class="view-panel active-view" id="view-home">
             <h2 class="view-title" id="explorer-title">Explora tus destinos</h2>
             <p class="view-subtitle" id="explorer-subtitle">Selecciona una región geográfica para organizar y planificar tus escapadas.</p>
-            <div class="banner-grid" id="explorer-cards-container"></div>
+            <div class="banner-grid home-grid" id="explorer-cards-container"></div>
         </div>
 
         <!-- 2. PAÍSES -->
@@ -470,9 +451,8 @@
             <div class="banner-grid" id="regions-grid"></div>
         </div>
 
-        <!-- 4. MAPA + SIDEBAR DE LUGARES -->
+        <!-- 4. DETALLE DE LUGARES + MAPA -->
         <div class="view-panel" id="view-places" style="padding: 0;">
-            <!-- Tabs móviles -->
             <div class="mobile-view-tabs">
                 <button id="tab-btn-list" class="active" onclick="switchMobileView('list')"><i class="fa-solid fa-list-ul"></i> Lista</button>
                 <button id="tab-btn-map" onclick="switchMobileView('map')"><i class="fa-solid fa-map-location-dot"></i> Mapa</button>
@@ -488,7 +468,7 @@
                         <p id="places-sidebar-subtitle" style="font-size:12px; color:#475569; margin-bottom:10px; font-weight: 600;">Ubicación</p>
                         
                         <!-- Barra de Búsqueda Dinámica -->
-                        <input type="text" id="sidebarSearch" oninput="renderPlacesView()" placeholder="🔍 Buscar por nombre o notas..." class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none text-xs mb-3">
+                        <input type="text" id="sidebarSearch" oninput="renderPlacesView()" placeholder="🔍 Buscar por nombre o notas..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none text-xs mb-3">
 
                         <!-- Filtros Rápidos de Estado -->
                         <div class="flex bg-slate-100 p-1 rounded-xl gap-1 mb-3 text-xs font-bold" id="statusFilterBar">
@@ -497,7 +477,7 @@
                             <button onclick="setStatusFilter('Quiero ir')" id="filter-status-quieroir" class="flex-1 py-1.5 px-2 text-center rounded-lg transition-all duration-300 text-slate-600 hover:text-amber-600">🧡 Quiero ir</button>
                         </div>
 
-                        <!-- Selector múltiple de etiquetas -->
+                        <!-- Selector de etiquetas -->
                         <div class="tag-filter-container" id="tagFilters"></div>
                     </div>
                     <div class="places-list-container" id="placesList"></div>
@@ -509,20 +489,20 @@
         </div>
     </div>
 
-    <!-- MODAL SCRIPT IMPORTACIÓN CSV -->
+    <!-- MODAL SINCRO CSV -->
     <div class="modal-overlay" id="importModal" onclick="closeModal('importModal')">
         <div class="modal-card" onclick="event.stopPropagation()">
-            <div class="modal-header"><h3>Sincronizar CSV de Viajes</h3><button style="background:none; border:none; color:#475569; cursor:pointer; font-size: 18px;" onclick="closeModal('importModal')"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="modal-header"><h3>Sincronizar CSV en la Nube</h3><button style="background:none; border:none; color:#475569; cursor:pointer; font-size: 18px;" onclick="closeModal('importModal')"><i class="fa-solid fa-xmark"></i></button></div>
             <div class="file-upload-zone" onclick="document.getElementById('csvFileInput').click()">
                 <i class="fa-solid fa-cloud-arrow-up"></i>
                 <p>Haz clic para subir tu archivo .csv</p>
                 <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="handleCSVFile(event)">
             </div>
-            <div id="loadingStatus" style="display:none; font-size:13px; color:#0284c7; align-items:center; gap:8px; font-weight: 600;"><i class="fa-solid fa-spinner fa-spin"></i> Sincronizando datos con la base de datos...</div>
+            <div id="loadingStatus" style="display:none; font-size:13px; color:#0284c7; align-items:center; gap:8px; font-weight: 600;"><i class="fa-solid fa-spinner fa-spin"></i> Sincronizando catálogo con Supabase...</div>
         </div>
     </div>
 
-    <!-- MODAL AÑADIR / EDITAR LUGAR -->
+    <!-- MODAL MANUAL FORM LUGAR -->
     <div class="modal-overlay" id="placeModal" onclick="closeModal('placeModal')">
         <div class="modal-card" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -532,24 +512,21 @@
             <form id="placeForm" onsubmit="savePlaceForm(event)">
                 <input type="hidden" id="editIndex">
                 <div class="form-group"><label>Nombre del Lugar *</label><input type="text" id="formLugar" required placeholder="Ej: Mirador de San Nicolás"></div>
-                <div class="form-group"><label>Categorías / Etiquetas *</label>
-                    <input type="text" id="formTipo" required placeholder="Ej: Naturaleza, Miradores, Ocio (separadas por comas)">
-                </div>
+                <div class="form-group"><label>Categorías / Etiquetas *</label><input type="text" id="formTipo" required placeholder="Ej: Naturaleza, Miradores, Ocio"></div>
                 <div class="grid grid-cols-2 gap-3 mb-2">
                     <div class="form-group"><label>Latitud *</label><input type="number" step="any" id="formLatitud" required></div>
                     <div class="form-group"><label>Longitud *</label><input type="number" step="any" id="formLongitud" required></div>
                 </div>
                 <div class="form-group"><label>País *</label><input type="text" id="formPais" required placeholder="Ej: España"></div>
                 <div class="form-group"><label>Provincia / Región *</label><input type="text" id="formRegion" required placeholder="Ej: Andalucía"></div>
-                <div class="form-group"><label>Ciudad / Lugar *</label><input type="text" id="formCity" required placeholder="Ej: Granada"></div>
-                <div class="form-group"><label>Notas / Descripción del Sitio</label><textarea id="formNotas" rows="2" placeholder="Notas útiles, transporte o qué ver..."></textarea></div>
+                <div class="form-group"><label>Notas / Descripción del Sitio</label><textarea id="formNotas" rows="2" placeholder="Notas útiles..."></textarea></div>
                 <div class="form-group"><label>Estado del viaje</label>
                     <select id="formEstado">
                         <option value="Quiero ir">Quiero ir 🧡</option>
                         <option value="Visitado">Visitado 🟢</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Enlace de Interés / URL (Link)</label><input type="url" id="formLink" placeholder="https://..."></div>
+                <div class="form-group"><label>Enlace / URL de interés (Link)</label><input type="url" id="formLink" placeholder="https://..."></div>
                 
                 <div style="display: flex; gap: 12px; margin-top: 24px;">
                     <button type="button" class="btn btn-danger" id="deletePlaceBtn" style="display: none; flex-grow: 1;" onclick="deletePlace()"><i class="fa-solid fa-trash"></i> Eliminar</button>
@@ -560,7 +537,6 @@
     </div>
 
     <script>
-        // Configuración unificada de Supabase
         const SUPABASE_URL = 'https://fmueravcnwkoswvwbvnc.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtdWVyYXZjbndrb3N3dndidm5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMjIxMzIsImV4cCI6MjA5Nzg5ODEzMn0._k2oBg5XwMmPzPZ3zm43EOp-gn1VyM6JDqpCx2BoYvQ';
 
@@ -588,7 +564,6 @@
             "mónaco", "monaco", "san marino", "vaticano", "albania", "bosnia", "montenegro", "macedonia", "serbia", "ucrania"
         ];
 
-        // Inicializar conexión online Supabase
         try {
             if (SUPABASE_ANON_KEY.trim() !== '') {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -622,8 +597,7 @@
             const { data, error } = await supabaseClient.from('sitios').select('*');
             if (error) { showToast("Error", error.message, true); return; }
             viajesData = data || [];
-            updateCounts();
-            if (state.view === 'home') renderHomeView();
+            renderHomeView();
         }
 
         function normalizeString(str) {
@@ -632,8 +606,7 @@
         }
 
         function getContinent(country) {
-            const norm = normalizeString(country);
-            return EUROPEAN_COUNTRIES.some(c => norm.includes(c)) ? 'Europa' : 'Resto del Mundo';
+            return EUROPEAN_COUNTRIES.some(c => normalizeString(country).includes(c)) ? 'Europa' : 'Resto del Mundo';
         }
 
         function showToast(title, text, isError = false) {
@@ -667,10 +640,6 @@
             }
         }
 
-        function updateCounts() {
-            if(state.view === 'home') renderHomeView();
-        }
-
         function renderHomeView() {
             const europeCount = viajesData.filter(i => getContinent(i.categoria) === 'Europa').length;
             const rowCount = viajesData.length - europeCount;
@@ -678,7 +647,7 @@
             const container = document.getElementById('explorer-cards-container');
             container.innerHTML = `
                 <div class="banner-card" onclick="selectContinent('Europa')">
-                    <img src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=1000&auto=format&fit=crop&q=80" class="banner-img">
+                    <img src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=1000" class="banner-img">
                     <div class="banner-content">
                         <span class="banner-category">Continente</span>
                         <div class="banner-name">Europa</div>
@@ -686,7 +655,7 @@
                     </div>
                 </div>
                 <div class="banner-card" onclick="selectContinent('Resto del Mundo')">
-                    <img src="https://images.unsplash.com/photo-1507608869274-d3177c8bb4c7?w=1000&auto=format&fit=crop&q=80" class="banner-img">
+                    <img src="https://images.unsplash.com/photo-1507608869274-d3177c8bb4c7?w=1000" class="banner-img">
                     <div class="banner-content">
                         <span class="banner-category">Continente</span>
                         <div class="banner-name">Resto del Mundo</div>
@@ -776,9 +745,9 @@
 
             if (state.statusFilter === 'todos') {
                 btnTodos.className = "flex-1 py-1.5 px-2 text-center rounded-lg transition-all duration-300 bg-white text-[#0284c7] shadow-sm font-bold";
-            } else if (state.statusFilter === 'Visitado' || state.statusFilter === 'visitado') {
+            } else if (state.statusFilter === 'Visitado') {
                 btnVisitado.className = "flex-1 py-1.5 px-2 text-center rounded-lg transition-all duration-300 bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm font-bold";
-            } else if (state.statusFilter === 'Quiero ir' || state.statusFilter === 'por visitar' || state.statusFilter === 'Por visitar') {
+            } else if (state.statusFilter === 'Quiero ir') {
                 btnQuieroIr.className = "flex-1 py-1.5 px-2 text-center rounded-lg transition-all duration-300 bg-amber-50 text-amber-600 border border-amber-200 shadow-sm font-bold";
             }
         }
@@ -799,7 +768,7 @@
             if (t.includes('museo') || t.includes('arte') || t.includes('cultura') || t.includes('monumento')) {
                 return { cls: 'cat-cultura', icon: 'fa-building-columns', color: '#7c3aed' };
             }
-            if (t.includes('iglesia') || t.includes('templo') || t.includes('catedral') || t.includes('biblioteca') || t.includes('abadia')) {
+            if (t.includes('iglesia') || t.includes('templo') || t.includes('catedral') || t.includes('biblioteca')) {
                 return { cls: 'cat-templos', icon: 'fa-church', color: '#2563eb' };
             }
             if (t.includes('naturaleza') || t.includes('bosque') || t.includes('senderismo') || t.includes('mirador') || t.includes('playa')) {
@@ -816,7 +785,7 @@
             const searchVal = document.getElementById('sidebarSearch').value.toLowerCase();
             let regionPlaces = viajesData.filter(i => i.categoria === state.country && i.estado === state.region);
             
-            // Recopilar etiquetas dinámicas (old21)
+            // Reconstrucción de la barra de filtros dinámicos (old21)
             const allTags = new Set();
             regionPlaces.forEach(p => { getTagsList(p.etiquetas).forEach(t => allTags.add(t)); });
             const filterBox = document.getElementById('tagFilters');
@@ -827,7 +796,7 @@
                 filterBox.innerHTML += `<span class="tag-pill ${activeClass}" onclick="filterTag('${t}')">${t}</span>`;
             });
 
-            // Aplicar Filtros (Búsqueda + Estado + MultiEtiqueta)
+            // Cruzar filtros
             let filtered = regionPlaces.filter(f => f.nombre.toLowerCase().includes(searchVal) || (f.descripcion || '').toLowerCase().includes(searchVal));
 
             if (state.statusFilter === 'Visitado') {
@@ -878,7 +847,7 @@
                     <div style="font-size:12px; color:#475569; margin: 6px 0 10px 0; display:flex; align-items:center; gap:6px; font-weight: 600;">
                         <i class="fa-solid fa-city" style="font-size:11px; color: #94a3b8;"></i> ${p.estado}, ${p.categoria}
                     </div>
-                    <div style="font-size:13px; color:#475569; line-height:1.5; font-weight: 500; margin-bottom: 12px; background-color: rgba(248, 250, 252, 0.8); padding: 10px; border-radius: 12px;">
+                    <div style="font-size:13px; color:#475569; line-height:1.5; font-weight: 500; margin-bottom: 12px;">
                         ${p.descripcion ? p.descripcion : '<span class="italic text-slate-400">Sin notas descriptivas.</span>'}
                     </div>
                     
@@ -898,7 +867,7 @@
                 `;
                 list.appendChild(card);
 
-                // Render Pins En el Mapa (old21 pins redondos estilizados)
+                // Render Pins con forma de gota old21
                 if (map && p.latitud && p.longitud) {
                     const customMarkerIcon = L.divIcon({
                         className: 'custom-marker-wrapper',
@@ -936,7 +905,7 @@
             const cleanStat = newStatus === 'Visitado' ? 'Visitado' : 'Por visitar';
             const { error } = await supabaseClient.from('sitios').update({ visitado: cleanStat }).eq('id', id);
             if (!error) {
-                showToast("Estado Sincronizado", `Establecido como ${cleanStat}`);
+                showToast("Estado Sincronizado", `Marcado como ${cleanStat}`);
                 const idx = viajesData.findIndex(item => String(item.id) === String(id));
                 if (idx !== -1) viajesData[idx].visitado = cleanStat;
                 renderPlacesView();
@@ -959,7 +928,6 @@
                 document.getElementById('formLongitud').value = p.longitud || 0;
                 document.getElementById('formPais').value = p.categoria || "";
                 document.getElementById('formRegion').value = p.estado || "";
-                document.getElementById('formCity').value = p.estado || ""; 
                 document.getElementById('formNotas').value = p.descripcion || "";
                 document.getElementById('formLink').value = p.link || "";
                 document.getElementById('formEstado').value = (p.visitado && normalizeString(p.visitado) === 'visitado') ? 'Visitado' : 'Quiero ir';
@@ -999,11 +967,11 @@
             if (rowId) {
                 const { error } = await supabaseClient.from('sitios').update(payload).eq('id', rowId);
                 if (error) showToast("Error", error.message, true);
-                else showToast("Actualizado con éxito", payload.nombre);
+                else showToast("Actualizado", payload.nombre);
             } else {
                 const { error } = await supabaseClient.from('sitios').insert([payload]);
                 if (error) showToast("Error", error.message, true);
-                else showToast("Guardado con éxito", payload.nombre);
+                else showToast("Guardado", payload.nombre);
             }
 
             closeModal('placeModal');
