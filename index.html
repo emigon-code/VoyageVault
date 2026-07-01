@@ -515,14 +515,12 @@
             renderViewByCurrentState();
         }
 
-        // CONTROL DEL ENGRANAJE TOTALMENTE CORREGIDO E INMUNIZADO ANTE PROPAGACIONES ASÍNCRONAS
         function editBannerImage(event, key) {
             event.preventDefault();
-            event.stopPropagation(); // Evita por completo que la tarjeta dispare su navegación inferior
+            event.stopPropagation();
             
             const currentImg = customBanners[key] || DEFAULT_IMAGES[key] || DEFAULT_IMAGES['pais_default'];
             
-            // Retrasamos un milisegundo el prompt para que el canal asíncrono de Leaflet/Tailwind se cierre limpiamente
             setTimeout(() => {
                 const newUrl = prompt("Introduce la URL de la nueva imagen de portada para este nivel:", currentImg);
                 if (newUrl !== null && newUrl.trim() !== "") {
@@ -534,7 +532,6 @@
             }, 50);
         }
 
-        // CONTROL DE RE-RENDERIZADO REESTRUCTURADO (ELIMINADO BUCLE DE PAÍSES Y REGIONES)
         function renderViewByCurrentState() {
             if (state.view === 'home') renderHomeView();
             else if (state.view === 'countries') drawCountriesGrid();
@@ -685,7 +682,7 @@
             showToast("Buscando...", "Consultando coordenadas espaciales...");
 
             try {
-                const response = await fetch://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`);
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`);
                 const data = await response.json();
                 
                 if (data && data.length > 0) {
@@ -907,7 +904,6 @@
             return tokens.map(t => t.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
         }
 
-        // PROCESADOR E IMPORTADOR DE CSV REFORZADO Y ULTRA-PERMISIVO
         async function handleCSVFile(event) {
             if (!supabaseClient || !userSessionId) return;
             const file = event.target.files[0]; if (!file) return;
