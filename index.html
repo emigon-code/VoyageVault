@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoyageVault — Mi Visor de Viajes Personalizado</title>
     
+    <!-- SDK de Supabase para la conexión online -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
+    <!-- Leaflet CSS y JS cargados en el head síncronamente -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
@@ -15,6 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <!-- Cargamos Tailwind CSS CORRECTAMENTE desde su CDN oficial -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -326,48 +329,9 @@
         .custom-pin-marker { display: flex; align-items: center; justify-content: center; width: 36px !important; height: 36px !important; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: -2px 2px 4px rgba(0,0,0,0.3); border: 2px solid #ffffff; }
         .custom-pin-marker i { transform: rotate(45deg); color: white; font-size: 13px; }
 
-        /* Modales */
-        .modal-overlay {
-            position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px);
-            z-index: 1000; display: none; align-items: center; justify-content: center; padding: 16px;
-        }
-        .modal-overlay.active { display: flex; }
-        .modal-card {
-            background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); width: 100%; max-width: 520px; border-radius: 24px; padding: 24px; box-shadow: 0 20px 50px -12px rgba(15,23,42,0.15);
-            max-height: 90vh; overflow-y: auto;
-        }
-        .form-group { margin-bottom: 14px; }
-        .form-group label { display: block; font-size: 11px; text-transform: uppercase; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px; }
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%; padding: 10px; background-color: #f8fafc; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 10px; color: #0f172a; font-family: inherit; outline: none; transition: all 0.3s ease; font-size: 13px;
-        }
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-            background-color: #ffffff; border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
-        }
-
-        .file-upload-zone {
-            border: 2px dashed #cbd5e1; border-radius: 16px; padding: 24px 16px; text-align: center; cursor: pointer; transition: all 0.3s ease; margin-bottom: 20px; background: #f8fafc;
-        }
-        .file-upload-zone:hover { border-color: #0284c7; background-color: rgba(2, 132, 199, 0.04); }
-        .file-upload-zone i { font-size: 28px; color: #64748b; margin-bottom: 8px; }
-        .file-upload-zone p { font-size: 13px; font-weight: 600; color: #475569; }
-
+        /* Estilo Leaflet Popups */
         .leaflet-popup-content-wrapper { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.6); }
         .leaflet-popup-tip { background: rgba(255, 255, 255, 0.95); }
-
-        /* Toast Notifications */
-        .notification-toast {
-            position: fixed; bottom: 16px; left: 16px; right: 16px; background-color: #ffffff; border-left: 5px solid #0284c7;
-            box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.1); padding: 12px 18px; border-radius: 16px; z-index: 1100;
-            display: flex; align-items: center; gap: 12px; transform: translateY(150%); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-        }
-        @media (min-width: 768px) {
-            .notification-toast { bottom: 32px; left: 32px; right: auto; width: 340px; padding: 16px 24px; }
-        }
-        .notification-toast.show { transform: translateY(0); }
-        .notification-toast.error { border-left-color: #ef4444; }
-        .notification-toast.error i { color: #ef4444; }
     </style>
 </head>
 <body>
@@ -375,6 +339,7 @@
     <div class="ambient-glow"></div>
     <div class="ambient-glow-2"></div>
 
+    <!-- REGISTRO / ACCESO OBLIGATORIO NUBE -->
     <div id="cloud-login-screen">
         <div class="bg-white p-10 rounded-[24px] border border-slate-200/80 shadow-2xl text-center max-w-[420px] w-[90%] z-50">
             <div class="flex items-center justify-center gap-2 mb-4 text-sky-600">
@@ -389,6 +354,7 @@
         </div>
     </div>
 
+    <!-- Toast de Notificación flotante -->
     <div id="toastMessage" class="notification-toast">
         <i id="toastIcon" class="fa-solid fa-circle-check" style="color:#0284c7; font-size: 18px;"></i>
         <div>
@@ -397,6 +363,7 @@
         </div>
     </div>
 
+    <!-- BARRA SUPERIOR (NAVBAR) -->
     <navbar>
         <div class="nav-left">
             <div class="logo" onclick="navigateTo('home')">
@@ -415,26 +382,31 @@
         </div>
     </navbar>
 
+    <!-- VIEWPORT CENTRAL -->
     <div class="main-viewport" id="app-viewport">
 
+        <!-- 1. HOME -->
         <div class="view-panel active-view" id="view-home">
             <h2 class="view-title" id="explorer-title">Explora tus destinos</h2>
             <p class="view-subtitle" id="explorer-subtitle">Selecciona una región geográfica para organizar y planificar tus escapadas.</p>
             <div class="banner-grid home-grid" id="explorer-cards-container"></div>
         </div>
 
+        <!-- 2. PAÍSES -->
         <div class="view-panel" id="view-countries">
             <h2 class="view-title" id="countries-title">Países</h2>
             <p class="view-subtitle">Naciones con destinos registrados en tu colección personal.</p>
             <div class="banner-grid" id="countries-grid"></div>
         </div>
 
+        <!-- 3. PROVINCIAS/REGIONES -->
         <div class="view-panel" id="view-regions">
             <h2 class="view-title" id="regions-title">Regiones</h2>
             <p class="view-subtitle">Selecciona una provincia, región o comarca específica de tu catálogo.</p>
             <div class="banner-grid" id="regions-grid"></div>
         </div>
 
+        <!-- 4. DETALLE DE LUGARES + MAPA -->
         <div class="view-panel" id="view-places" style="padding: 0;">
             <div class="mobile-view-tabs">
                 <button id="tab-btn-list" class="active" onclick="switchMobileView('list')"><i class="fa-solid fa-list-ul"></i> Lista</button>
@@ -450,14 +422,17 @@
                         </div>
                         <p id="places-sidebar-subtitle" style="font-size:12px; color:#475569; margin-bottom:10px; font-weight: 600;">Ubicación</p>
                         
+                        <!-- Barra de Búsqueda Dinámica -->
                         <input type="text" id="sidebarSearch" oninput="renderPlacesView()" placeholder="🔍 Buscar por nombre o notas..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none text-xs mb-3">
 
+                        <!-- Filtros Rápidos de Estado -->
                         <div class="flex bg-slate-100 p-1 rounded-xl gap-1 mb-3 text-xs font-bold" id="statusFilterBar">
                             <button onclick="setStatusFilter('todos')" id="filter-status-todos" class="flex-1 py-1.5 px-2 text-center rounded-lg transition-all duration-300 bg-white text-[#0284c7] shadow-sm">Todos</button>
                             <button onclick="setStatusFilter('Visitado')" id="filter-status-visitado" class="flex-1 py-1.5 px-2 text-center rounded-lg transition-all duration-300 text-slate-600 hover:text-emerald-600">🟢 Visitados</button>
                             <button onclick="setStatusFilter('Quiero ir')" id="filter-status-quieroir" class="flex-1 py-1.5 px-2 text-center rounded-lg transition-all duration-300 text-slate-600 hover:text-amber-600">🧡 Quiero ir</button>
                         </div>
 
+                        <!-- Selector de etiquetas -->
                         <div class="tag-filter-container" id="tagFilters"></div>
                     </div>
                     <div class="places-list-container" id="placesList"></div>
@@ -469,46 +444,98 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="importModal" onclick="closeModal('importModal')">
-        <div class="modal-card" onclick="event.stopPropagation()">
-            <div class="modal-header"><h3>Sincronizar CSV en la Nube</h3><button style="background:none; border:none; color:#475569; cursor:pointer; font-size: 18px;" onclick="closeModal('importModal')"><i class="fa-solid fa-xmark"></i></button></div>
-            <div class="file-upload-zone" onclick="document.getElementById('csvFileInput').click()">
-                <i class="fa-solid fa-cloud-arrow-up"></i>
-                <p>Haz clic para subir tu archivo .csv</p>
-                <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="handleCSVFile(event)">
+    <!-- MODAL SINCRO CSV (MAQUETADO COMPLETO EN TAILWIND) -->
+    <div class="modal-overlay fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[1000] hidden items-center justify-center p-4" id="importModal" onclick="closeModal('importModal')">
+        <div class="bg-white border border-slate-200/80 w-full max-w-[520px] rounded-[24px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-xl font-extrabold text-slate-800 tracking-tight">Sincronizar CSV en la Nube</h3>
+                <button class="text-slate-400 hover:text-slate-600 transition" onclick="closeModal('importModal')">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
-            <div id="loadingStatus" style="display:none; font-size:13px; color:#0284c7; align-items:center; gap:8px; font-weight: 600;"><i class="fa-solid fa-spinner fa-spin"></i> Sincronizando catálogo con Supabase...</div>
+            
+            <!-- Zona de subida corregida (Eliminado el trigger duplicado del input) -->
+            <div class="border-2 border-dashed border-slate-300 hover:border-sky-500 rounded-2xl p-8 text-center cursor-pointer bg-slate-50 hover:bg-sky-50/30 transition-all duration-200 mb-5" onclick="document.getElementById('csvFileInput').click()">
+                <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-400 mb-2"></i>
+                <p class="text-sm font-bold text-slate-600">Haz clic para buscar tu archivo .csv</p>
+                <p class="text-xs text-slate-400 mt-1">Soporta formatos exportados desde Notion o Excel</p>
+                <!-- INPUT OCULTO CON EL EVENTO SIMPLE -->
+                <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCSVFile(event)">
+            </div>
+            
+            <div id="loadingStatus" class="hidden font-bold text-sm text-sky-600 items-center gap-2 mb-2">
+                <i class="fa-solid fa-spinner fa-spin"></i> Procesando datos y sincronizando con Supabase...
+            </div>
+            <div class="flex justify-end pt-2">
+                <button class="py-2.5 px-5 rounded-xl border border-slate-200 text-slate-700 font-bold text-sm bg-white hover:bg-slate-50 transition shadow-sm" onclick="closeModal('importModal')">Cerrar ventana</button>
+            </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="placeModal" onclick="closeModal('placeModal')">
-        <div class="modal-card" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h3 id="placeModalTitle">Añadir Nuevo Lugar</h3>
-                <button style="background:none; border:none; color:#475569; cursor:pointer; font-size: 18px;" onclick="closeModal('placeModal')"><i class="fa-solid fa-xmark"></i></button>
+    <!-- MODAL MANUAL FORM LUGAR (MAQUETADO COMPLETO EN TAILWIND) -->
+    <div class="modal-overlay fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[1000] hidden items-center justify-center p-4" id="placeModal" onclick="closeModal('placeModal')">
+        <div class="bg-white border border-slate-200/80 w-full max-w-[540px] rounded-[24px] p-6 md:p-8 shadow-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-5">
+                <h3 id="placeModalTitle" class="text-xl font-extrabold text-slate-800 tracking-tight">Añadir Nuevo Lugar</h3>
+                <button class="text-slate-400 hover:text-slate-600 transition" onclick="closeModal('placeModal')">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
-            <form id="placeForm" onsubmit="savePlaceForm(event)">
+            <form id="placeForm" onsubmit="savePlaceForm(event)" class="space-y-4">
                 <input type="hidden" id="editIndex">
-                <div class="form-group"><label>Nombre del Lugar *</label><input type="text" id="formLugar" required placeholder="Ej: Mirador de San Nicolás"></div>
-                <div class="form-group"><label>Categorías / Etiquetas *</label><input type="text" id="formTipo" required placeholder="Ej: Naturaleza, Miradores, Ocio"></div>
-                <div class="grid grid-cols-2 gap-3 mb-2">
-                    <div class="form-group"><label>Latitud *</label><input type="number" step="any" id="formLatitud" required></div>
-                    <div class="form-group"><label>Longitud *</label><input type="number" step="any" id="formLongitud" required></div>
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Nombre del Lugar *</label>
+                    <input type="text" id="formLugar" required placeholder="Ej: Mirador de San Nicolás" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-medium focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all duration-200">
                 </div>
-                <div class="form-group"><label>País *</label><input type="text" id="formPais" required placeholder="Ej: España"></div>
-                <div class="form-group"><label>Provincia / Región *</label><input type="text" id="formRegion" required placeholder="Ej: Andalucía"></div>
-                <div class="form-group"><label>Notas / Descripción del Sitio</label><textarea id="formNotas" rows="2" placeholder="Notas útiles..."></textarea></div>
-                <div class="form-group"><label>Estado del viaje</label>
-                    <select id="formEstado">
-                        <option value="Quiero ir">Quiero ir 🧡</option>
-                        <option value="Visitado">Visitado 🟢</option>
-                    </select>
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Categorías / Etiquetas *</label>
+                    <input type="text" id="formTipo" required placeholder="Ej: Naturaleza, Miradores, Ocio" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-medium focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all duration-200">
                 </div>
-                <div class="form-group"><label>Enlace / URL de interés (Link)</label><input type="url" id="formLink" placeholder="https://..."></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Latitud *</label>
+                        <input type="number" step="any" id="formLatitud" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-medium focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all duration-200">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Longitud *</label>
+                        <input type="number" step="any" id="formLongitud" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-medium focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all duration-200">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">País *</label>
+                        <input type="text" id="formPais" required placeholder="Ej: España" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-medium focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all duration-200">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Provincia / Región *</label>
+                        <input type="text" id="formRegion" required placeholder="Ej: Andalucía" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-medium focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all duration-200">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Notas / Descripción del Sitio</label>
+                    <textarea id="formNotas" rows="2" placeholder="Notas útiles, transporte o qué ver..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-medium focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all duration-200"></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Estado del viaje</label>
+                        <select id="formEstado" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-medium focus:bg-white focus:border-sky-500 transition-all duration-200">
+                            <option value="Quiero ir">Quiero ir 🧡</option>
+                            <option value="Visitado">Visitado 🟢</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Enlace / URL (Link)</label>
+                        <input type="url" id="formLink" placeholder="https://..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-medium focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all duration-200">
+                    </div>
+                </div>
                 
-                <div style="display: flex; gap: 12px; margin-top: 24px;">
-                    <button type="button" class="btn btn-danger" id="deletePlaceBtn" style="display: none; flex-grow: 1;" onclick="deletePlace()"><i class="fa-solid fa-trash"></i> Eliminar</button>
-                    <button type="submit" class="btn" style="flex-grow: 2;"><i class="fa-solid fa-floppy-disk"></i> Guardar Destino</button>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" class="btn bg-red-50 hover:bg-red-100 border border-red-200 text-red-500 font-bold text-sm py-2.5 px-4 rounded-xl hidden items-center justify-center gap-2 transition" id="deletePlaceBtn" onclick="deletePlace()">
+                        <i class="fa-solid fa-trash"></i> Eliminar
+                    </button>
+                    <button type="submit" class="flex-grow py-3 px-6 text-white font-extrabold text-sm rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Destino
+                    </button>
                 </div>
             </form>
         </div>
@@ -755,7 +782,6 @@
             return { cls: 'cat-general', icon: 'fa-camera', color: '#ca8a04' };
         }
 
-        // FUNCIÓN MAGNA DE RENDERIZADO DE TARJETAS (RESTAURADA CON TAIWIND CDN)
         function renderPlacesView() {
             const list = document.getElementById('placesList');
             list.innerHTML = '';
@@ -808,7 +834,6 @@
                 const webUrl = p.link || `https://www.google.com/search?q=${encodeURIComponent(p.nombre + ' ' + p.estado)}`;
 
                 const card = document.createElement('div');
-                // Devolvemos el look responsivo, limpio, acolchado y premium de las tarjetas a la barra lateral
                 card.className = `place-card p-5 mb-4 bg-white/95 border border-slate-200/80 rounded-2xl shadow-sm hover:border-sky-500 transition-all duration-300 relative cursor-pointer`;
                 card.onclick = () => {
                     if (p.latitud && p.longitud) {
@@ -820,7 +845,7 @@
                 card.innerHTML = `
                     <div class="flex justify-between items-start gap-4 mb-3">
                         <div class="badges-container flex flex-wrap gap-1.5">${tagsMarkup}</div>
-                        <button class="edit-btn text-slate-400 hover:text-sky-600 bg-slate-100 hover:bg-sky-50 p-2 rounded-xl transition-all duration-200" 
+                        <button class="text-slate-400 hover:text-sky-600 bg-slate-100 hover:bg-sky-50 p-2 rounded-xl transition-all duration-200" 
                                 onclick="event.stopPropagation(); openPlaceModal(true, ${globalIndex})">
                             <i class="fa-solid fa-pen text-xs"></i>
                         </button>
@@ -839,11 +864,11 @@
                     <div class="flex justify-between items-center border-t border-slate-100 pt-3 mt-2">
                         <div class="flex gap-2 flex-1 max-w-[220px]">
                             <button onclick="event.stopPropagation(); togglePlaceStatus('${p.id}', 'Visitado')" 
-                                class="flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 border transition-all duration-300 ${isVisited ? 'bg-emerald-50 text-emerald-600 border-emerald-200 shadow-sm' : 'bg-slate-50 text-slate-500 border-slate-200/60 hover:bg-slate-100'}">
+                                class="flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 border border-slate-200/60 transition-all duration-300 ${isVisited ? 'bg-emerald-50 text-emerald-600 border-emerald-200 shadow-sm' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}">
                                 <i class="${isVisited ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'}"></i> Visitado
                             </button>
                             <button onclick="event.stopPropagation(); togglePlaceStatus('${p.id}', 'Por visitar')" 
-                                class="flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 border transition-all duration-300 ${!isVisited ? 'bg-amber-50 text-amber-600 border-amber-200 shadow-sm' : 'bg-slate-50 text-slate-500 border-slate-200/60 hover:bg-slate-100'}">
+                                class="flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 border border-slate-200/60 transition-all duration-300 ${!isVisited ? 'bg-amber-50 text-amber-600 border-amber-200 shadow-sm' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}">
                                 <i class="${!isVisited ? 'fa-solid fa-heart text-amber-500' : 'fa-regular fa-heart'}"></i> Quiero ir
                             </button>
                         </div>
@@ -905,7 +930,8 @@
 
             if (isEdit) {
                 document.getElementById('placeModalTitle').textContent = "Editar Lugar";
-                deleteBtn.style.display = 'inline-flex';
+                deleteBtn.classList.remove('hidden');
+                deleteBtn.classList.add('flex');
                 
                 const p = viajesData[globalIndex];
                 document.getElementById('editIndex').value = p.id;
@@ -920,7 +946,8 @@
                 document.getElementById('formEstado').value = (p.visitado && normalizeString(p.visitado) === 'visitado') ? 'Visitado' : 'Quiero ir';
             } else {
                 document.getElementById('placeModalTitle').textContent = "Añadir Nuevo Lugar";
-                deleteBtn.style.display = 'none';
+                deleteBtn.classList.add('hidden');
+                deleteBtn.classList.remove('flex');
                 document.getElementById('editIndex').value = "";
                 document.getElementById('formPais').value = state.country || "";
                 document.getElementById('formRegion').value = state.region || "";
@@ -1021,7 +1048,9 @@
 
             const reader = new FileReader();
             reader.onload = async function(evt) {
-                document.getElementById('loadingStatus').style.display = 'flex';
+                document.getElementById('loadingStatus').classList.remove('hidden');
+                document.getElementById('loadingStatus').classList.add('flex');
+                
                 const text = evt.target.result;
                 const lines = text.split(/\r?\n/);
                 if (lines.length < 2) return;
@@ -1069,7 +1098,9 @@
 
                 if (nuevosSitios.length > 0) {
                     const { error } = await supabaseClient.from('sitios').insert(nuevosSitios);
-                    document.getElementById('loadingStatus').style.display = 'none';
+                    document.getElementById('loadingStatus').classList.add('hidden');
+                    document.getElementById('loadingStatus').classList.remove('flex');
+                    
                     if (error) showToast("Error al importar", error.message, true);
                     else {
                         showToast("Sincronización Exitosa", `${nuevosSitios.length} destinos añadidos.`);
