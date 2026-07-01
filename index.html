@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoyageVault — Mi Visor de Viajes Personalizado</title>
     
-    <!-- SDK de Supabase para la conexión online -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Leaflet CSS y JS cargados en el head síncronamente -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
@@ -17,7 +15,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Cargamos Tailwind CSS CORRECTAMENTE desde su CDN oficial -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -159,15 +156,6 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-
-        .view-title { font-size: 28px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.75px; color: #1e293b; }
-        @media (min-width: 768px) {
-            .view-title { font-size: 36px; margin-bottom: 6px; letter-spacing: -1px; }
-        }
-        .view-subtitle { font-size: 13px; color: #475569; margin-bottom: 24px; font-weight: 500; }
-        @media (min-width: 768px) {
-            .view-subtitle { font-size: 15px; margin-bottom: 36px; }
         }
 
         /* Grid de Portadas */
@@ -332,6 +320,20 @@
         /* Estilo Leaflet Popups */
         .leaflet-popup-content-wrapper { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.6); }
         .leaflet-popup-tip { background: rgba(255, 255, 255, 0.95); }
+
+        /* Toast Notifications */
+        .notification-toast {
+            position: fixed; bottom: 16px; left: 16px; right: 16px; background-color: #ffffff; border-left: 5px solid #0284c7;
+            box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.1); padding: 12px 18px; border-radius: 16px; z-index: 1100;
+            display: flex; align-items: center; gap: 12px; transform: translateY(150%); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        @media (min-width: 768px) {
+            .notification-toast { bottom: 32px; left: 32px; right: auto; width: 340px; padding: 16px 24px; }
+        }
+        .notification-toast.show { transform: translateY(0); }
+        .notification-toast.error { border-left-color: #ef4444; }
+        .notification-toast.error i { color: #ef4444; }
     </style>
 </head>
 <body>
@@ -339,7 +341,6 @@
     <div class="ambient-glow"></div>
     <div class="ambient-glow-2"></div>
 
-    <!-- REGISTRO / ACCESO OBLIGATORIO NUBE -->
     <div id="cloud-login-screen">
         <div class="bg-white p-10 rounded-[24px] border border-slate-200/80 shadow-2xl text-center max-w-[420px] w-[90%] z-50">
             <div class="flex items-center justify-center gap-2 mb-4 text-sky-600">
@@ -354,7 +355,6 @@
         </div>
     </div>
 
-    <!-- Toast de Notificación flotante -->
     <div id="toastMessage" class="notification-toast">
         <i id="toastIcon" class="fa-solid fa-circle-check" style="color:#0284c7; font-size: 18px;"></i>
         <div>
@@ -363,7 +363,6 @@
         </div>
     </div>
 
-    <!-- BARRA SUPERIOR (NAVBAR) -->
     <navbar>
         <div class="nav-left">
             <div class="logo" onclick="navigateTo('home')">
@@ -382,31 +381,26 @@
         </div>
     </navbar>
 
-    <!-- VIEWPORT CENTRAL -->
     <div class="main-viewport" id="app-viewport">
 
-        <!-- 1. HOME -->
         <div class="view-panel active-view" id="view-home">
-            <h2 class="view-title" id="explorer-title">Explora tus destinos</h2>
-            <p class="view-subtitle" id="explorer-subtitle">Selecciona una región geográfica para organizar y planificar tus escapadas.</p>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="explorer-title">Explora tus destinos</h2>
+            <p class="text-xs md:text-sm text-slate-500 font-medium mb-6" id="explorer-subtitle">Selecciona una región geográfica para organizar y planificar tus escapadas.</p>
             <div class="banner-grid home-grid" id="explorer-cards-container"></div>
         </div>
 
-        <!-- 2. PAÍSES -->
         <div class="view-panel" id="view-countries">
-            <h2 class="view-title" id="countries-title">Países</h2>
-            <p class="view-subtitle">Naciones con destinos registrados en tu colección personal.</p>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="countries-title">Países</h2>
+            <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Naciones con destinos registrados en tu colección personal.</p>
             <div class="banner-grid" id="countries-grid"></div>
         </div>
 
-        <!-- 3. PROVINCIAS/REGIONES -->
         <div class="view-panel" id="view-regions">
-            <h2 class="view-title" id="regions-title">Regiones</h2>
-            <p class="view-subtitle">Selecciona una provincia, región o comarca específica de tu catálogo.</p>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="regions-title">Regiones</h2>
+            <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una provincia, región o comarca específica de tu catálogo.</p>
             <div class="banner-grid" id="regions-grid"></div>
         </div>
 
-        <!-- 4. DETALLE DE LUGARES + MAPA -->
         <div class="view-panel" id="view-places" style="padding: 0;">
             <div class="mobile-view-tabs">
                 <button id="tab-btn-list" class="active" onclick="switchMobileView('list')"><i class="fa-solid fa-list-ul"></i> Lista</button>
@@ -422,17 +416,14 @@
                         </div>
                         <p id="places-sidebar-subtitle" style="font-size:12px; color:#475569; margin-bottom:10px; font-weight: 600;">Ubicación</p>
                         
-                        <!-- Barra de Búsqueda Dinámica -->
                         <input type="text" id="sidebarSearch" oninput="renderPlacesView()" placeholder="🔍 Buscar por nombre o notas..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none text-xs mb-3">
 
-                        <!-- Filtros Rápidos de Estado -->
                         <div class="flex bg-slate-100 p-1 rounded-xl gap-1 mb-3 text-xs font-bold" id="statusFilterBar">
                             <button onclick="setStatusFilter('todos')" id="filter-status-todos" class="flex-1 py-1.5 px-2 text-center rounded-lg transition-all duration-300 bg-white text-[#0284c7] shadow-sm">Todos</button>
                             <button onclick="setStatusFilter('Visitado')" id="filter-status-visitado" class="flex-1 py-1.5 px-2 text-center rounded-lg transition-all duration-300 text-slate-600 hover:text-emerald-600">🟢 Visitados</button>
                             <button onclick="setStatusFilter('Quiero ir')" id="filter-status-quieroir" class="flex-1 py-1.5 px-2 text-center rounded-lg transition-all duration-300 text-slate-600 hover:text-amber-600">🧡 Quiero ir</button>
                         </div>
 
-                        <!-- Selector de etiquetas -->
                         <div class="tag-filter-container" id="tagFilters"></div>
                     </div>
                     <div class="places-list-container" id="placesList"></div>
@@ -444,7 +435,6 @@
         </div>
     </div>
 
-    <!-- MODAL SINCRO CSV (MAQUETADO COMPLETO EN TAILWIND) -->
     <div class="modal-overlay fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[1000] hidden items-center justify-center p-4" id="importModal" onclick="closeModal('importModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[520px] rounded-[24px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-5">
@@ -454,25 +444,23 @@
                 </button>
             </div>
             
-            <!-- Zona de subida corregida (Eliminado el trigger duplicado del input) -->
             <div class="border-2 border-dashed border-slate-300 hover:border-sky-500 rounded-2xl p-8 text-center cursor-pointer bg-slate-50 hover:bg-sky-50/30 transition-all duration-200 mb-5" onclick="document.getElementById('csvFileInput').click()">
                 <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-400 mb-2"></i>
                 <p class="text-sm font-bold text-slate-600">Haz clic para buscar tu archivo .csv</p>
-                <p class="text-xs text-slate-400 mt-1">Soporta formatos exportados desde Notion o Excel</p>
-                <!-- INPUT OCULTO CON EL EVENTO SIMPLE -->
+                <p class="text-xs text-slate-400 mt-1">Soporta formatos con comillas y saltos de línea internos</p>
                 <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCSVFile(event)">
             </div>
             
-            <div id="loadingStatus" class="hidden font-bold text-sm text-sky-600 items-center gap-2 mb-2">
-                <i class="fa-solid fa-spinner fa-spin"></i> Procesando datos y sincronizando con Supabase...
+            <div id="loadingStatus" class="hidden font-bold text-sm text-sky-600 items-center gap-2 mb-4">
+                <i class="fa-solid fa-spinner fa-spin text-lg"></i> <span>Procesando datos y sincronizando con Supabase...</span>
             </div>
+            
             <div class="flex justify-end pt-2">
                 <button class="py-2.5 px-5 rounded-xl border border-slate-200 text-slate-700 font-bold text-sm bg-white hover:bg-slate-50 transition shadow-sm" onclick="closeModal('importModal')">Cerrar ventana</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL MANUAL FORM LUGAR (MAQUETADO COMPLETO EN TAILWIND) -->
     <div class="modal-overlay fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[1000] hidden items-center justify-center p-4" id="placeModal" onclick="closeModal('placeModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[540px] rounded-[24px] p-6 md:p-8 shadow-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-5">
@@ -592,7 +580,10 @@
 
         async function signInWithGoogle() {
             if (!supabaseClient) return;
-            await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
+            await supabaseClient.auth.signInWithOAuth({ 
+                provider: 'google', 
+                options: { redirectTo: window.location.origin } 
+            });
         }
 
         async function signOut() { if (supabaseClient) { await supabaseClient.auth.signOut(); window.location.reload(); } }
@@ -825,7 +816,6 @@
                 const globalIndex = viajesData.findIndex(item => item.id === p.id);
                 const isVisited = p.visitado && normalizeString(p.visitado) === 'visitado';
 
-                // Generar los badges con los colores pastel de old21
                 let tagsMarkup = pTags.map(t => {
                     const style = getCategoryStyle(t);
                     return `<span class="badge-theme ${style.cls}"><i class="fa-solid ${style.icon}"></i> ${t}</span>`;
@@ -1041,6 +1031,7 @@
             return tokens.map(t => t.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
         }
 
+        // FUNCIÓN DEL ANALIZADOR CSV CORREGIDA CON LOS NUEVOS CONTROLES VISUALES DEL MODAL
         async function handleCSVFile(event) {
             if (!supabaseClient) return;
             const file = event.target.files[0];
@@ -1048,8 +1039,12 @@
 
             const reader = new FileReader();
             reader.onload = async function(evt) {
-                document.getElementById('loadingStatus').classList.remove('hidden');
-                document.getElementById('loadingStatus').classList.add('flex');
+                // Activamos el indicador de carga del modal (ID reconciliado)
+                const loadingStatusEl = document.getElementById('loadingStatus');
+                if (loadingStatusEl) {
+                    loadingStatusEl.classList.remove('hidden');
+                    loadingStatusEl.classList.add('flex');
+                }
                 
                 const text = evt.target.result;
                 const lines = text.split(/\r?\n/);
@@ -1098,15 +1093,28 @@
 
                 if (nuevosSitios.length > 0) {
                     const { error } = await supabaseClient.from('sitios').insert(nuevosSitios);
-                    document.getElementById('loadingStatus').classList.add('hidden');
-                    document.getElementById('loadingStatus').classList.remove('flex');
                     
-                    if (error) showToast("Error al importar", error.message, true);
-                    else {
+                    // Ocultamos el indicador de carga
+                    if (loadingStatusEl) {
+                        loadingStatusEl.classList.add('hidden');
+                        loadingStatusEl.classList.remove('flex');
+                    }
+                    
+                    if (error) {
+                        showToast("Error al importar", error.message, true);
+                    } else {
                         showToast("Sincronización Exitosa", `${nuevosSitios.length} destinos añadidos.`);
                         closeModal('importModal');
+                        // Limpiamos el valor del input file para permitir volver a cargar el mismo archivo inmediatamente
+                        document.getElementById('csvFileInput').value = "";
                         loadCloudData();
                     }
+                } else {
+                    if (loadingStatusEl) {
+                        loadingStatusEl.classList.add('hidden');
+                        loadingStatusEl.classList.remove('flex');
+                    }
+                    showToast("Aviso", "No se encontraron filas válidas en el CSV.", true);
                 }
             };
             reader.readAsText(file);
