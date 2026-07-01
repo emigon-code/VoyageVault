@@ -396,7 +396,7 @@
                 <div>
                     <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Nombre del Lugar *</label>
                     <div class="flex gap-2">
-                        <input type="text" id="formLugar" required placeholder="Ej: Mirador de San Nicolás" class="flex-grow p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none">
+                        <input type="text" id="formLugar" required placeholder="Ej: Mirador de San Nicolás" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none">
                         <button type="button" onclick="lookupCoordinates()" class="btn px-4 bg-slate-800 hover:bg-slate-900 shadow-none text-white text-xs flex items-center justify-center gap-1" title="Buscar coordenadas automáticamente">
                             <i class="fa-solid fa-earth-europe"></i> Ubicar
                         </button>
@@ -698,7 +698,7 @@
                     if (altData && altData.length > 0) {
                         document.getElementById('formLatitud').value = parseFloat(altData[0].lat).toFixed(6);
                         document.getElementById('formLongitud').value = parseFloat(altData[0].lon).toFixed(6);
-                        showToast("Ubicación Aproximada", "Coordenadas del sitio general asignadas.");
+                        showToast("Ubicación Ajustada", "Coordenadas del sitio general asignadas.");
                     } else {
                         showToast("No encontrado", "Introduce las coordenadas manualmente o afina el nombre.", true);
                     }
@@ -722,6 +722,7 @@
             else if (state.statusFilter === 'Quiero ir') btnQuieroIr.className = "flex-1 py-1.5 px-2 text-center rounded-lg bg-amber-50 text-amber-600 font-bold border border-amber-200";
         }
 
+        // CONTROLADORES DE RENDERIZADO DEL MAPA REVISADOS CON PARSE FLOAT NUMÉRICO OBLIGATORIO
         function renderPlacesView() {
             const list = document.getElementById('placesList');
             list.innerHTML = ''; if (markersGroup) markersGroup.clearLayers();
@@ -755,9 +756,13 @@
                 const isVisited = p.visitado === 'Visitado';
                 const style = getCategoryStyle((p.etiquetas || "General").split(',')[0]);
 
+                // Aseguramos que latitud y longitud pasen como flotantes limpios a Leaflet
+                let finalLat = parseFloat(p.latitud);
+                let finalLng = parseFloat(p.longitud);
+
                 const card = document.createElement('div');
                 card.className = `p-4 mb-3 bg-white border border-slate-200 rounded-2xl shadow-sm hover:border-sky-500 transition relative cursor-pointer`;
-                card.onclick = () => { if (p.latitud && p.longitud) { map.flyTo([p.latitud, p.longitud], 14); } };
+                card.onclick = () => { if (!isNaN(finalLat) && !isNaN(finalLng) && finalLat !== 0) { map.flyTo([finalLat, finalLng], 14); } };
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-2">
                         <span class="badge-theme ${style.cls}"><i class="fa-solid ${style.icon}"></i> ${(p.etiquetas || 'General')}</span>
@@ -775,19 +780,19 @@
                 `;
                 list.appendChild(card);
 
-                if (map && p.latitud && p.longitud) {
+                if (map && !isNaN(finalLat) && !isNaN(finalLng) && finalLat !== 0) {
                     const markerIcon = L.divIcon({
                         className: 'custom-marker-wrapper',
                         html: `<div class="custom-pin-marker" style="background-color: ${style.color};"><i class="fa-solid ${style.icon}"></i></div>`,
                         iconSize: [36, 36], iconAnchor: [18, 36]
                     });
-                    L.marker([p.latitud, p.longitud], { icon: markerIcon }).addTo(markersGroup).bindPopup(`<b>${p.nombre}</b><br><span class="text-xs">${p.descripcion || ''}</span>`);
+                    L.marker([finalLat, finalLng], { icon: markerIcon }).addTo(markersGroup).bindPopup(`<b>${p.nombre}</b><br><span class="text-xs">${p.descripcion || ''}</span>`);
                 }
             });
 
             if (filtered.length > 0 && map) {
-                const coords = filtered.map(f => [f.latitud, f.longitud]);
-                map.fitBounds(coords, { maxZoom: 13, padding: [40, 40] });
+                const coords = filtered.map(f => [parseFloat(f.latitud), parseFloat(f.longitud)]).filter(c => !isNaN(c[0]) && c[0] !== 0);
+                if (coords.length > 0) map.fitBounds(coords, { maxZoom: 13, padding: [40, 40] });
             }
         }
 
@@ -814,6 +819,7 @@
         function openModal(id) { document.getElementById(id).classList.replace('hidden', 'flex'); }
         function closeModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); }
 
+        // CONTROL FORMULARIO MODAL REVISADO Y ASEGURADO CON LOS ENLACES DE COORDENADAS CORRECTOS
         function openPlaceModal(isEdit, globalIndex = null) {
             document.getElementById('placeForm').reset();
             const deleteBtn = document.getElementById('deletePlaceBtn');
@@ -822,11 +828,12 @@
                 document.getElementById('placeModalTitle').textContent = "Editar Lugar";
                 deleteBtn.classList.replace('hidden', 'block');
                 const p = viajesData[globalIndex];
+                
                 document.getElementById('editIndex').value = p.id;
                 document.getElementById('formLugar').value = p.nombre || "";
                 document.getElementById('formTipo').value = p.etiquetas || "";
-                document.getElementById('formLatitud').value = p.latitud || 0;
-                document.getElementById('formLongitud').value = p.longitud || 0;
+                document.getElementById('formLatitud').value = p.latitud ? parseFloat(p.latitud) : "";
+                document.getElementById('formLongitud').value = p.longitud ? parseFloat(p.longitud) : "";
                 document.getElementById('formPais').value = p.categoria || "";
                 document.getElementById('formRegion').value = p.estado || "";
                 document.getElementById('formNotas').value = p.descripcion || "";
@@ -839,26 +846,32 @@
                 document.getElementById('formPais').value = state.country || "";
                 document.getElementById('formRegion').value = state.region || "";
                 if (map) {
-                    document.getElementById('formLatitud').value = map.getCenter().lat.toFixed(5);
-                    document.getElementById('formLongitud').value = map.getCenter().lng.toFixed(5);
+                    document.getElementById('formLatitud').value = map.getCenter().lat.toFixed(6);
+                    document.getElementById('formLongitud').value = map.getCenter().lng.toFixed(6);
                 }
             }
             openModal('placeModal');
         }
 
+        // FLUJO DE SUBIDA/GUARDADO DE REGISTROS CORREGIDO PARA INYECTAR LAT/LNG CORRECTAMENTE
         async function savePlaceForm(e) {
             e.preventDefault();
             if (!supabaseClient) return;
 
             const rowId = document.getElementById('editIndex').value;
+            
+            // Forzamos parseFloat para no enviar nulos o vacíos en formato texto
+            let parsedLat = parseFloat(document.getElementById('formLatitud').value);
+            let parsedLng = parseFloat(document.getElementById('formLongitud').value);
+
             const payload = {
                 user_id: userSessionId,
                 nombre: document.getElementById('formLugar').value.trim(),
                 etiquetas: document.getElementById('formTipo').value.trim(),
                 categoria: document.getElementById('formPais').value.trim(),
                 estado: document.getElementById('formRegion').value.trim(),
-                latitud: parseFloat(document.getElementById('formLatitud').value),
-                longitud: parseFloat(document.getElementById('formLongitud').value),
+                latitud: isNaN(parsedLat) ? 0 : parsedLat,
+                longitud: isNaN(parsedLng) ? 0 : parsedLng,
                 descripcion: document.getElementById('formNotas').value.trim(),
                 link: document.getElementById('formLink').value.trim(),
                 visitado: document.getElementById('formEstado').value,
