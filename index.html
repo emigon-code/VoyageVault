@@ -29,10 +29,8 @@
     
     <style>
         body { background-color: #f8fafc; color: #0f172a; height: 100vh; overflow: hidden; display: flex; flex-direction: column; position: relative; }
-        
         .ambient-glow { position: absolute; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(255, 255, 255, 0) 70%); top: -100px; right: -100px; z-index: 1; pointer-events: none; }
         .ambient-glow-2 { position: absolute; width: 450px; height: 450px; border-radius: 50%; background: radial-gradient(circle, rgba(244, 63, 94, 0.1) 0%, rgba(255, 255, 255, 0) 70%); bottom: -100px; left: -100px; z-index: 1; pointer-events: none; }
-        
         #cloud-login-screen { position: fixed; inset: 0; background-color: #f8fafc; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         
         navbar { height: 75px; background-color: rgba(255, 255, 255, 0.85); border-bottom: 1px solid rgba(226, 232, 240, 0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; backdrop-filter: blur(20px); z-index: 100; box-shadow: 0 4px 20px -10px rgba(15, 23, 42, 0.05); }
@@ -236,26 +234,11 @@
                 <input type="hidden" id="editIndex">
                 <div>
                     <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Nombre del Lugar *</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="formLugar" required placeholder="Ej: Mirador de San Nicolás" class="flex-grow p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none">
-                        <button type="button" onclick="lookupCoordinates()" class="btn px-4 bg-slate-800 hover:bg-slate-900 shadow-none text-white text-xs flex items-center justify-center gap-1" title="Buscar coordenadas automáticamente">
-                            <i class="fa-solid fa-earth-europe"></i> Ubicar
-                        </button>
-                    </div>
+                    <input type="text" id="formLugar" required placeholder="Ej: Mirador de San Nicolás" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Categorías / Etiquetas *</label>
                     <input type="text" id="formTipo" required placeholder="Ej: Naturaleza, Miradores" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Latitud</label>
-                        <input type="text" id="formLatitud" placeholder="Ej: 37.1812" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Longitud</label>
-                        <input type="text" id="formLongitud" placeholder="Ej: -3.5891" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none">
-                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -286,7 +269,9 @@
                 </div>
                 <div class="flex gap-3 pt-2">
                     <button type="button" class="btn bg-red-50 text-red-500 border border-red-200 shadow-none hidden py-3 px-5 rounded-xl text-sm font-bold" id="deletePlaceBtn" onclick="deletePlace()">Eliminar</button>
-                    <button type="submit" class="flex-grow py-3 px-6 text-white font-extrabold text-sm rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800 shadow-md">Guardar Destino</button>
+                    <button type="submit" class="flex-grow py-3 px-6 text-white font-extrabold text-sm rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800 shadow-md">
+                        Guardar Destino
+                    </button>
                 </div>
             </form>
         </div>
@@ -500,53 +485,6 @@
             navigateTo('places');
         }
 
-        // ------------------ SISTEMA DE BÚSQUEDA DE COORDENADAS REFORZADO ------------------
-        async function lookupCoordinates() {
-            const queryPlace = document.getElementById('formLugar').value.trim();
-            const queryRegion = document.getElementById('formRegion').value.trim();
-            const queryPais = document.getElementById('formPais').value.trim();
-            
-            if (!queryPlace) {
-                alert("Por favor, introduce primero el nombre del lugar para poder ubicarlo.");
-                return;
-            }
-
-            showToast("Buscando...", "Consultando coordenadas espaciales...");
-
-            try {
-                // Nivel 1: Búsqueda súper específica
-                let searchAddress = `${queryPlace}, ${queryRegion}, ${queryPais}`;
-                let response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`, { headers: { 'Accept-Language': 'es' }});
-                let data = await response.json();
-                
-                // Nivel 2: Búsqueda menos estricta (Solo Lugar + País)
-                if (!data || data.length === 0) {
-                    searchAddress = `${queryPlace}, ${queryPais}`;
-                    response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`, { headers: { 'Accept-Language': 'es' }});
-                    data = await response.json();
-                }
-
-                // Nivel 3: Búsqueda desesperada (Solo Lugar)
-                if (!data || data.length === 0) {
-                    response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryPlace)}&limit=1`, { headers: { 'Accept-Language': 'es' }});
-                    data = await response.json();
-                }
-                
-                if (data && data.length > 0) {
-                    const lat = parseFloat(data[0].lat);
-                    const lon = parseFloat(data[0].lon);
-                    document.getElementById('formLatitud').value = lat.toFixed(6);
-                    document.getElementById('formLongitud').value = lon.toFixed(6);
-                    showToast("Ubicación Encontrada", `Actualizada: lat ${lat.toFixed(4)}, lon ${lon.toFixed(4)}`);
-                } else {
-                    showToast("No encontrado", "Intenta simplificar el nombre del lugar o escribe la ciudad general.", true);
-                }
-            } catch (error) {
-                console.error(error);
-                showToast("Error de conexión", "El servidor de mapas no responde.", true);
-            }
-        }
-
         function setStatusFilter(filter) { state.statusFilter = filter; updateStatusFilterBarUI(); renderPlacesView(); }
 
         function updateStatusFilterBarUI() {
@@ -564,7 +502,7 @@
         function getTagStyle(tag) {
             if (!tag) tag = 'General';
             let hash = 0;
-            // Algoritmo matemático para asignar un color constante basado en la palabra
+            // Algoritmo para asignar siempre el mismo color a la misma etiqueta
             for(let i = 0; i < tag.length; i++) { hash = tag.charCodeAt(i) + ((hash << 5) - hash); }
             const idx = Math.abs(hash) % 8;
             
@@ -608,7 +546,6 @@
             allTags.forEach(t => {
                 const style = getTagStyle(t);
                 const isActive = state.selectedTags.includes(t);
-                // Si está activa, pinta el fondo sólido del pin. Si no, usa el fondo clarito.
                 const bg = isActive ? style.pin : style.bg;
                 const textCol = isActive ? '#ffffff' : style.text;
                 const border = isActive ? style.pin : style.border;
@@ -635,18 +572,14 @@
                 const globalIndex = viajesData.findIndex(item => item.id === p.id);
                 const isVisited = p.visitado === 'Visitado';
 
-                // CORRECCIÓN VITAL DE COORDENADAS: Convertimos la coma en punto si el usuario lo guardó así alguna vez
-                let latClean = p.latitud !== null && p.latitud !== undefined ? String(p.latitud).replace(/,/g, '.') : "0";
-                let lngClean = p.longitud !== null && p.longitud !== undefined ? String(p.longitud).replace(/,/g, '.') : "0";
-                
-                let finalLat = parseFloat(latClean);
-                let finalLng = parseFloat(lngClean);
+                let finalLat = parseFloat(p.latitud);
+                let finalLng = parseFloat(p.longitud);
 
                 const card = document.createElement('div');
                 card.className = `p-4 mb-3 bg-white border border-slate-200 rounded-2xl shadow-sm hover:border-sky-500 transition relative cursor-pointer`;
                 card.onclick = () => { if (!isNaN(finalLat) && !isNaN(finalLng) && (finalLat !== 0 || finalLng !== 0)) { map.flyTo([finalLat, finalLng], 14); } };
                 
-                // TARJETA DE LUGARES REESTRUCTURADA CON TEXTO VISUAL CLARO
+                // TARJETA DE LUGARES CON TEXTO "QUIERO IR / VISITADO" EXCLUVISO
                 card.innerHTML = `
                     <div class="flex flex-col gap-2 mb-3">
                         <div class="flex justify-between items-start">
@@ -673,11 +606,10 @@
                 `;
                 list.appendChild(card);
 
-                // DIBUJAR PINES (Solo si son coordenadas reales)
+                // DIBUJAR PINES EN EL MAPA CON EL COLOR DE LA ETIQUETA
                 if (map && !isNaN(finalLat) && !isNaN(finalLng) && (finalLat !== 0 || finalLng !== 0)) {
                     coordsArray.push([finalLat, finalLng]);
                     
-                    // Extraemos la primera etiqueta para darle color al pin
                     const primaryTag = (p.etiquetas || "General").split(',')[0].trim();
                     const pinStyle = getTagStyle(primaryTag);
 
@@ -690,7 +622,6 @@
                 }
             });
 
-            // ENCUADRE DINÁMICO: Ajusta el mapa solo a la porción de los pines existentes
             if (coordsArray.length > 0 && map) {
                 map.fitBounds(coordsArray, { padding: [50, 50], maxZoom: 14 });
             }
@@ -719,7 +650,7 @@
         function openModal(id) { document.getElementById(id).classList.replace('hidden', 'flex'); }
         function closeModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); }
 
-        // ------------------ CONTROL DEL FORMULARIO CON LIMPIEZA EXTREMA ------------------
+        // ------------------ FORMULARIO SIN COORDENADAS ------------------
         function openPlaceModal(isEdit, globalIndex = null) {
             document.getElementById('placeForm').reset();
             const deleteBtn = document.getElementById('deletePlaceBtn');
@@ -733,16 +664,6 @@
                 document.getElementById('formLugar').value = p.nombre || "";
                 document.getElementById('formTipo').value = p.etiquetas || "";
                 
-                // Inyectamos las coordenadas solo si existen y no son 0, permitiendo que queden vacías si no hay datos
-                let latClean = p.latitud !== null && p.latitud !== undefined ? String(p.latitud).replace(/,/g, '.') : "0";
-                let lngClean = p.longitud !== null && p.longitud !== undefined ? String(p.longitud).replace(/,/g, '.') : "0";
-                
-                let latVal = parseFloat(latClean);
-                let lngVal = parseFloat(lngClean);
-
-                document.getElementById('formLatitud').value = (!isNaN(latVal) && latVal !== 0) ? latVal.toFixed(6) : "";
-                document.getElementById('formLongitud').value = (!isNaN(lngVal) && lngVal !== 0) ? lngVal.toFixed(6) : "";
-                
                 document.getElementById('formPais').value = p.categoria || "";
                 document.getElementById('formRegion').value = p.estado || "";
                 document.getElementById('formNotas').value = p.descripcion || "";
@@ -754,42 +675,67 @@
                 document.getElementById('editIndex').value = "";
                 document.getElementById('formPais').value = state.country || "";
                 document.getElementById('formRegion').value = state.region || "";
-                
-                // No inyectamos ceros ni el centro del mapa a la fuerza, dejamos que el usuario lo haga limpio si quiere.
-                document.getElementById('formLatitud').value = "";
-                document.getElementById('formLongitud').value = "";
             }
             openModal('placeModal');
         }
 
+        // AUTO-GEOCODIFICACIÓN INVISIBLE AL GUARDAR
         async function savePlaceForm(e) {
             e.preventDefault();
             if (!supabaseClient) return;
 
+            showToast("Guardando...", "Asegurando el punto en el mapa...");
+            
             const rowId = document.getElementById('editIndex').value;
+            const nombre = document.getElementById('formLugar').value.trim();
+            const region = document.getElementById('formRegion').value.trim();
+            const pais = document.getElementById('formPais').value.trim();
             
-            // Reemplazamos la coma española por un punto y quitamos espacios antes de guardarlo en Supabase
-            let latStr = document.getElementById('formLatitud').value.replace(/,/g, '.').trim();
-            let lngStr = document.getElementById('formLongitud').value.replace(/,/g, '.').trim();
-            
-            let parsedLat = parseFloat(latStr);
-            let parsedLng = parseFloat(lngStr);
+            let finalLat = null;
+            let finalLng = null;
+
+            // 1. Si estamos editando, recuperamos las coordenadas antiguas por seguridad
+            if (rowId) {
+                const p = viajesData.find(item => String(item.id) === String(rowId));
+                if (p && p.latitud && p.longitud) {
+                    finalLat = parseFloat(p.latitud);
+                    finalLng = parseFloat(p.longitud);
+                }
+            }
+
+            // 2. Si no tenemos coordenadas (es un sitio nuevo), preguntamos a OpenStreetMap de forma invisible
+            if (finalLat === null || finalLng === null) {
+                try {
+                    let searchAddress = `${nombre}, ${region}, ${pais}`;
+                    let res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`, { headers: { 'Accept-Language': 'es' }});
+                    let data = await res.json();
+                    
+                    if (!data || data.length === 0) {
+                        res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(nombre)}&limit=1`, { headers: { 'Accept-Language': 'es' }});
+                        data = await res.json();
+                    }
+                    
+                    if (data && data.length > 0) {
+                        finalLat = parseFloat(data[0].lat);
+                        finalLng = parseFloat(data[0].lon);
+                    }
+                } catch(err) {
+                    console.error("Geocodificación falló silenciosamente:", err);
+                }
+            }
 
             const payload = {
                 user_id: userSessionId,
-                nombre: document.getElementById('formLugar').value.trim(),
+                nombre: nombre,
                 etiquetas: document.getElementById('formTipo').value.trim(),
-                categoria: document.getElementById('formPais').value.trim(),
-                estado: document.getElementById('formRegion').value.trim(),
-                
-                // IMPORTANTE: Si está vacío, inyecta "null", para no forzar la aparición de pines en África (0,0)
-                latitud: isNaN(parsedLat) ? null : parsedLat,
-                longitud: isNaN(parsedLng) ? null : parsedLng,
-                
+                categoria: pais,
+                estado: region,
+                latitud: isNaN(finalLat) ? null : finalLat,
+                longitud: isNaN(finalLng) ? null : finalLng,
                 descripcion: document.getElementById('formNotas').value.trim(),
                 link: document.getElementById('formLink').value.trim(),
                 visitado: document.getElementById('formEstado').value,
-                nivel: getContinent(document.getElementById('formPais').value.trim())
+                nivel: getContinent(pais)
             };
 
             if (rowId) {
@@ -797,8 +743,10 @@
             } else {
                 await supabaseClient.from('sitios').insert([payload]);
             }
+            
             closeModal('placeModal');
             loadCloudData();
+            showToast("Completado", "Lugar guardado exitosamente en tu diario.");
         }
 
         async function deletePlace() {
@@ -868,7 +816,6 @@
                         let tokens = parseCSVLine(currentLine, separator);
                         if (tokens.length > 0 && tokens[idxNombre]) {
                             
-                            // Aseguramos limpiar las comas de los CSVs españoles
                             let rawLat = idxLat !== -1 && tokens[idxLat] ? tokens[idxLat].replace(/,/g, '.') : '';
                             let rawLng = idxLng !== -1 && tokens[idxLng] ? tokens[idxLng].replace(/,/g, '.') : '';
                             let lat = parseFloat(rawLat);
@@ -886,8 +833,8 @@
                                 nombre: tokens[idxNombre].trim(),
                                 categoria: c.trim(),
                                 estado: estVal.trim(),
-                                latitud: isNaN(lat) ? null : lat,
-                                longitud: isNaN(lng) ? null : lng,
+                                latitud: (isNaN(lat) || lat === 0) ? null : lat,
+                                longitud: (isNaN(lng) || lng === 0) ? null : lng,
                                 descripcion: descVal.trim(),
                                 nivel: getContinent(c),
                                 visitado: visVal.trim(),
