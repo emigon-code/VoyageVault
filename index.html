@@ -240,6 +240,7 @@
                     <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Categorías / Etiquetas *</label>
                     <input type="text" id="formTipo" required placeholder="Ej: Naturaleza, Miradores" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none">
                 </div>
+                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">País *</label>
@@ -250,6 +251,23 @@
                         <input type="text" id="formRegion" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none">
                     </div>
                 </div>
+
+                <div class="p-3 bg-slate-100 rounded-xl border border-slate-200">
+                    <div class="grid grid-cols-2 gap-3 mb-2">
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Latitud (Opcional)</label>
+                            <input type="text" id="formLatitud" placeholder="Vacío = Auto" class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-medium outline-none text-slate-600">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Longitud (Opcional)</label>
+                            <input type="text" id="formLongitud" placeholder="Vacío = Auto" class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-medium outline-none text-slate-600">
+                        </div>
+                    </div>
+                    <button type="button" onclick="forceGeocode()" class="w-full py-2 bg-slate-800 hover:bg-slate-900 transition text-white rounded-lg text-xs font-bold shadow-sm">
+                        <i class="fa-solid fa-location-crosshairs mr-1"></i> Autocompletar Coordenadas Ahora
+                    </button>
+                </div>
+
                 <div>
                     <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Notas / Descripción</label>
                     <textarea id="formNotas" rows="2" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none"></textarea>
@@ -499,24 +517,25 @@
         }
 
         // ------------------ SISTEMA DE COLORES UNIFICADOS PARA ETIQUETAS Y PINES ------------------
+        // Ahora asigna colores 100% vibrantes y sólidos, garantizando que todo sea igual
         function getTagStyle(tag) {
             if (!tag) tag = 'General';
             let hash = 0;
-            // Algoritmo para asignar siempre el mismo color a la misma etiqueta
             for(let i = 0; i < tag.length; i++) { hash = tag.charCodeAt(i) + ((hash << 5) - hash); }
             const idx = Math.abs(hash) % 8;
             
-            const palettes = [
-                { bg: '#eff6ff', text: '#1e40af', border: '#bfdbfe', pin: '#3b82f6' }, // Azul
-                { bg: '#f0fdf4', text: '#166534', border: '#bbf7d0', pin: '#22c55e' }, // Verde
-                { bg: '#faf5ff', text: '#6b21a8', border: '#e9d5ff', pin: '#a855f7' }, // Morado
-                { bg: '#fdf2f8', text: '#9d174d', border: '#fbcfe8', pin: '#ec4899' }, // Rosa
-                { bg: '#fffbeb', text: '#92400e', border: '#fde68a', pin: '#f59e0b' }, // Ámbar
-                { bg: '#eef2ff', text: '#3730a3', border: '#c7d2fe', pin: '#6366f1' }, // Índigo
-                { bg: '#fff1f2', text: '#e11d48', border: '#fecdd3', pin: '#f43f5e' }, // Rojo
-                { bg: '#f0fdfa', text: '#115e59', border: '#99f6e4', pin: '#14b8a6' }  // Turquesa
+            const colors = [
+                '#3b82f6', // Azul
+                '#22c55e', // Verde
+                '#a855f7', // Morado
+                '#ec4899', // Rosa
+                '#f59e0b', // Ámbar
+                '#6366f1', // Índigo
+                '#ef4444', // Rojo
+                '#14b8a6'  // Turquesa
             ];
-            return palettes[idx];
+            const solidColor = colors[idx];
+            return { bg: solidColor, text: '#ffffff' };
         }
 
         function getTagsHTMLForCard(tagString) {
@@ -524,7 +543,8 @@
             const tags = tagString.split(',').map(t => t.trim()).filter(t => t !== "");
             return tags.map(tag => {
                 const style = getTagStyle(tag);
-                return `<span style="background-color:${style.bg}; color:${style.text}; border-color:${style.border};" class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold border shadow-sm">${tag}</span>`;
+                // La etiqueta de la tarjeta usa el color sólido y letra blanca
+                return `<span style="background-color:${style.bg}; color:${style.text}; border-color:${style.bg};" class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold border shadow-sm">${tag}</span>`;
             }).join('');
         }
 
@@ -539,17 +559,17 @@
             const allTags = new Set();
             regionPlaces.forEach(p => { (p.etiquetas || "General").split(',').map(t => t.trim()).forEach(t => allTags.add(t)); });
             
-            // CONSTRUIR PANEL SUPERIOR DE ETIQUETAS CON SUS COLORES OFICIALES
+            // CONSTRUIR PANEL SUPERIOR DE ETIQUETAS
             const filterBox = document.getElementById('tagFilters');
             filterBox.innerHTML = `<button class="px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${state.selectedTags.length === 0 ? 'bg-slate-800 text-white shadow-md border border-slate-800' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'}" onclick="filterTag('todas')">Todas</button>`;
             
             allTags.forEach(t => {
                 const style = getTagStyle(t);
                 const isActive = state.selectedTags.includes(t);
-                const bg = isActive ? style.pin : style.bg;
-                const textCol = isActive ? '#ffffff' : style.text;
-                const border = isActive ? style.pin : style.border;
-                filterBox.innerHTML += `<button style="background-color: ${bg}; color: ${textCol}; border-color: ${border};" class="px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all shadow-sm hover:opacity-80" onclick="filterTag('${t}')">${t}</button>`;
+                // Si la etiqueta está activa en el filtro, es sólida con letra blanca. Si no, fondo blanco con letra del color.
+                const bg = isActive ? style.bg : '#ffffff';
+                const textCol = isActive ? '#ffffff' : style.bg;
+                filterBox.innerHTML += `<button style="background-color: ${bg}; color: ${textCol}; border-color: ${style.bg}; border-width: 1px;" class="px-3 py-1.5 rounded-full text-[11px] font-bold shadow-sm transition-all hover:opacity-80" onclick="filterTag('${t}')">${t}</button>`;
             });
 
             let filtered = regionPlaces.filter(f => f.nombre.toLowerCase().includes(searchVal) || (f.descripcion || '').toLowerCase().includes(searchVal));
@@ -577,9 +597,8 @@
 
                 const card = document.createElement('div');
                 card.className = `p-4 mb-3 bg-white border border-slate-200 rounded-2xl shadow-sm hover:border-sky-500 transition relative cursor-pointer`;
-                card.onclick = () => { if (!isNaN(finalLat) && !isNaN(finalLng) && (finalLat !== 0 || finalLng !== 0)) { map.flyTo([finalLat, finalLng], 14); } };
+                card.onclick = () => { if (!isNaN(finalLat) && !isNaN(finalLng) && finalLat !== 0 && finalLng !== 0) { map.flyTo([finalLat, finalLng], 14); } };
                 
-                // TARJETA DE LUGARES CON TEXTO "QUIERO IR / VISITADO" EXCLUVISO
                 card.innerHTML = `
                     <div class="flex flex-col gap-2 mb-3">
                         <div class="flex justify-between items-start">
@@ -606,16 +625,18 @@
                 `;
                 list.appendChild(card);
 
-                // DIBUJAR PINES EN EL MAPA CON EL COLOR DE LA ETIQUETA
-                if (map && !isNaN(finalLat) && !isNaN(finalLng) && (finalLat !== 0 || finalLng !== 0)) {
+                // DIBUJAR PINES (Evitando los 0 geográficos)
+                if (map && !isNaN(finalLat) && !isNaN(finalLng) && finalLat !== 0 && finalLng !== 0) {
                     coordsArray.push([finalLat, finalLng]);
                     
-                    const primaryTag = (p.etiquetas || "General").split(',')[0].trim();
+                    // Aseguramos que el pin usa exactamente el mismo color que la primera etiqueta de la tarjeta
+                    const rawTags = p.etiquetas ? p.etiquetas : "General";
+                    const primaryTag = rawTags.split(',')[0].trim();
                     const pinStyle = getTagStyle(primaryTag);
 
                     const markerIcon = L.divIcon({
                         className: 'custom-marker-wrapper',
-                        html: `<div class="custom-pin-marker" style="background-color: ${pinStyle.pin}; border-color: #ffffff;"><i class="fa-solid fa-location-dot"></i></div>`,
+                        html: `<div class="custom-pin-marker" style="background-color: ${pinStyle.bg};"><i class="fa-solid fa-location-dot"></i></div>`,
                         iconSize: [36, 36], iconAnchor: [18, 36]
                     });
                     L.marker([finalLat, finalLng], { icon: markerIcon }).addTo(markersGroup).bindPopup(`<b>${p.nombre}</b><br><span class="text-xs">${p.descripcion || ''}</span>`);
@@ -650,7 +671,7 @@
         function openModal(id) { document.getElementById(id).classList.replace('hidden', 'flex'); }
         function closeModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); }
 
-        // ------------------ FORMULARIO SIN COORDENADAS ------------------
+        // ------------------ PREPARACIÓN DEL FORMULARIO ------------------
         function openPlaceModal(isEdit, globalIndex = null) {
             document.getElementById('placeForm').reset();
             const deleteBtn = document.getElementById('deletePlaceBtn');
@@ -669,42 +690,85 @@
                 document.getElementById('formNotas').value = p.descripcion || "";
                 document.getElementById('formLink').value = p.link || "";
                 document.getElementById('formEstado').value = p.visitado || 'Quiero ir';
+
+                // Si la coordenada era un 0 invisible o nulo, la casilla se mostrará vacía para provocar la búsqueda
+                let latVal = p.latitud !== null && p.latitud !== undefined ? parseFloat(String(p.latitud).replace(/,/g, '.')) : 0;
+                let lngVal = p.longitud !== null && p.longitud !== undefined ? parseFloat(String(p.longitud).replace(/,/g, '.')) : 0;
+
+                document.getElementById('formLatitud').value = (!isNaN(latVal) && latVal !== 0) ? latVal.toFixed(6) : "";
+                document.getElementById('formLongitud').value = (!isNaN(lngVal) && lngVal !== 0) ? lngVal.toFixed(6) : "";
+
             } else {
                 document.getElementById('placeModalTitle').textContent = "Añadir Nuevo Lugar";
                 deleteBtn.classList.replace('block', 'hidden');
                 document.getElementById('editIndex').value = "";
                 document.getElementById('formPais').value = state.country || "";
                 document.getElementById('formRegion').value = state.region || "";
+                document.getElementById('formLatitud').value = "";
+                document.getElementById('formLongitud').value = "";
             }
             openModal('placeModal');
         }
 
-        // AUTO-GEOCODIFICACIÓN INVISIBLE AL GUARDAR
+        // BÚSQUEDA MANUAL BAJO DEMANDA
+        async function forceGeocode() {
+            const queryPlace = document.getElementById('formLugar').value.trim();
+            const queryRegion = document.getElementById('formRegion').value.trim();
+            const queryPais = document.getElementById('formPais').value.trim();
+            
+            if (!queryPlace) {
+                showToast("Atención", "Escribe el nombre del lugar primero para poder buscarlo.", true);
+                return;
+            }
+
+            document.getElementById('formLatitud').value = "Buscando...";
+            document.getElementById('formLongitud').value = "Buscando...";
+
+            try {
+                let searchAddress = `${queryPlace}, ${queryRegion}, ${queryPais}`;
+                let res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`, { headers: { 'Accept-Language': 'es' }});
+                let data = await res.json();
+                
+                if (!data || data.length === 0) {
+                    res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryPlace)}&limit=1`, { headers: { 'Accept-Language': 'es' }});
+                    data = await res.json();
+                }
+                
+                if (data && data.length > 0) {
+                    document.getElementById('formLatitud').value = parseFloat(data[0].lat).toFixed(6);
+                    document.getElementById('formLongitud').value = parseFloat(data[0].lon).toFixed(6);
+                    showToast("Ubicación Encontrada", "Coordenadas actualizadas con éxito.");
+                } else {
+                    document.getElementById('formLatitud').value = "";
+                    document.getElementById('formLongitud').value = "";
+                    showToast("No encontrado en el mapa", "Nominatim no lo encuentra. Puedes pegar las coordenadas a mano.", true);
+                }
+            } catch(err) {
+                document.getElementById('formLatitud').value = "";
+                document.getElementById('formLongitud').value = "";
+                showToast("Error de Conexión", "El servidor de mapas no responde.", true);
+            }
+        }
+
+        // AUTO-GEOCODIFICACIÓN INVISIBLE (LA TRAMPA DEL CERO SOLUCIONADA)
         async function savePlaceForm(e) {
             e.preventDefault();
             if (!supabaseClient) return;
 
-            showToast("Guardando...", "Asegurando el punto en el mapa...");
-            
+            showToast("Guardando...", "Procesando el destino...");
             const rowId = document.getElementById('editIndex').value;
             const nombre = document.getElementById('formLugar').value.trim();
             const region = document.getElementById('formRegion').value.trim();
             const pais = document.getElementById('formPais').value.trim();
             
-            let finalLat = null;
-            let finalLng = null;
+            let latStr = document.getElementById('formLatitud').value.replace(/,/g, '.').trim();
+            let lngStr = document.getElementById('formLongitud').value.replace(/,/g, '.').trim();
+            
+            let finalLat = parseFloat(latStr);
+            let finalLng = parseFloat(lngStr);
 
-            // 1. Si estamos editando, recuperamos las coordenadas antiguas por seguridad
-            if (rowId) {
-                const p = viajesData.find(item => String(item.id) === String(rowId));
-                if (p && p.latitud && p.longitud) {
-                    finalLat = parseFloat(p.latitud);
-                    finalLng = parseFloat(p.longitud);
-                }
-            }
-
-            // 2. Si no tenemos coordenadas (es un sitio nuevo), preguntamos a OpenStreetMap de forma invisible
-            if (finalLat === null || finalLng === null) {
+            // CORRECCIÓN CLAVE: Si las coordenadas están vacías, son inválidas o son un FALSO CERO, buscamos de nuevo.
+            if (!finalLat || isNaN(finalLat) || finalLat === 0 || !finalLng || isNaN(finalLng) || finalLng === 0) {
                 try {
                     let searchAddress = `${nombre}, ${region}, ${pais}`;
                     let res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`, { headers: { 'Accept-Language': 'es' }});
@@ -720,7 +784,7 @@
                         finalLng = parseFloat(data[0].lon);
                     }
                 } catch(err) {
-                    console.error("Geocodificación falló silenciosamente:", err);
+                    console.error("Autocompletado silencioso falló:", err);
                 }
             }
 
@@ -730,8 +794,8 @@
                 etiquetas: document.getElementById('formTipo').value.trim(),
                 categoria: pais,
                 estado: region,
-                latitud: isNaN(finalLat) ? null : finalLat,
-                longitud: isNaN(finalLng) ? null : finalLng,
+                latitud: (isNaN(finalLat) || finalLat === 0) ? null : finalLat,
+                longitud: (isNaN(finalLng) || finalLng === 0) ? null : finalLng,
                 descripcion: document.getElementById('formNotas').value.trim(),
                 link: document.getElementById('formLink').value.trim(),
                 visitado: document.getElementById('formEstado').value,
