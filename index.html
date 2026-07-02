@@ -356,7 +356,6 @@
             renderViewByCurrentState();
         }
 
-        // ------------------ SISTEMA DE PORTADAS UNIFICADO ------------------
         function editBannerImage(event, key) {
             event.preventDefault(); event.stopPropagation();
             const currentImg = customBanners[key] || DEFAULT_IMAGES[key] || DEFAULT_IMAGES['pais_default'];
@@ -371,7 +370,6 @@
             }, 50);
         }
 
-        // ------------------ CONTROL DE NAVEGACIÓN ------------------
         function renderViewByCurrentState() {
             if (state.view === 'home') renderHomeView();
             else if (state.view === 'countries') drawCountriesGrid();
@@ -508,7 +506,6 @@
             else if (state.statusFilter === 'Quiero ir') btnQuieroIr.className = "flex-1 py-1.5 px-2 text-center rounded-lg bg-amber-50 text-amber-600 font-bold border border-amber-200";
         }
 
-        // ------------------ SISTEMA DE COLORES UNIFICADOS ------------------
         function getTagStyle(tag) {
             if (!tag) tag = 'General';
             let hash = 0;
@@ -516,14 +513,8 @@
             const idx = Math.abs(hash) % 8;
             
             const colors = [
-                '#3b82f6', // Azul
-                '#22c55e', // Verde
-                '#a855f7', // Morado
-                '#ec4899', // Rosa
-                '#f59e0b', // Ámbar
-                '#6366f1', // Índigo
-                '#ef4444', // Rojo
-                '#14b8a6'  // Turquesa
+                '#3b82f6', '#22c55e', '#a855f7', '#ec4899', 
+                '#f59e0b', '#6366f1', '#ef4444', '#14b8a6'
             ];
             const solidColor = colors[idx];
             return { bg: solidColor, text: '#ffffff' };
@@ -538,7 +529,6 @@
             }).join('');
         }
 
-        // ------------------ RENDERIZADO DEL MAPA Y TARJETAS ------------------
         function renderPlacesView() {
             const list = document.getElementById('placesList');
             list.innerHTML = ''; if (markersGroup) markersGroup.clearLayers();
@@ -656,7 +646,7 @@
         function openModal(id) { document.getElementById(id).classList.replace('hidden', 'flex'); }
         function closeModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); }
 
-        // ------------------ MANEJO DEL FORMULARIO Y COORDENADAS MANUALES ------------------
+        // ------------------ MANEJO ROBUSTO DEL FORMULARIO Y COORDENADAS ------------------
         function openPlaceModal(isEdit, globalIndex = null) {
             document.getElementById('placeForm').reset();
             const deleteBtn = document.getElementById('deletePlaceBtn');
@@ -677,12 +667,12 @@
                 document.getElementById('formLink').value = p.link || "";
                 document.getElementById('formEstado').value = p.visitado || 'Quiero ir';
 
-                // Si ya tiene lat/lon válidas, las mostramos juntas en la nueva casilla
-                let latVal = p.latitud !== null && p.latitud !== undefined ? parseFloat(String(p.latitud).replace(/,/g, '.')) : 0;
-                let lngVal = p.longitud !== null && p.longitud !== undefined ? parseFloat(String(p.longitud).replace(/,/g, '.')) : 0;
+                // Mostrar las coordenadas en el nuevo formato "lat, lng" si existen
+                let latVal = p.latitud !== null && p.latitud !== undefined ? parseFloat(String(p.latitud).replace(/,/g, '.')) : null;
+                let lngVal = p.longitud !== null && p.longitud !== undefined ? parseFloat(String(p.longitud).replace(/,/g, '.')) : null;
 
-                if (!isNaN(latVal) && !isNaN(lngVal) && latVal !== 0 && lngVal !== 0) {
-                    coordInput.value = `${latVal.toFixed(6)}, ${lngVal.toFixed(6)}`;
+                if (latVal !== null && lngVal !== null && !isNaN(latVal) && !isNaN(lngVal) && latVal !== 0 && lngVal !== 0) {
+                    coordInput.value = `${latVal}, ${lngVal}`;
                 } else {
                     coordInput.value = "";
                 }
@@ -702,28 +692,30 @@
             e.preventDefault();
             if (!supabaseClient) return;
             
+            showToast("Guardando...", "Procesando información...");
+
             const rowId = document.getElementById('editIndex').value;
             const nombre = document.getElementById('formLugar').value.trim();
             const region = document.getElementById('formRegion').value.trim();
             const pais = document.getElementById('formPais').value.trim();
-            const rawCoords = document.getElementById('formCoordenadasManual').value.trim();
+            
+            // CAPTURA DIRECTA DEL CAMPO
+            const coordInput = document.getElementById('formCoordenadasManual').value.trim();
             
             let finalLat = null;
             let finalLng = null;
 
-            // PARSEADOR INTELIGENTE DE GOOGLE MAPS
-            // Si el usuario ha pegado algo como "39.469, -0.376", lo cortamos por la coma
-            if (rawCoords) {
-                const parts = rawCoords.split(',');
+            // Extraer de "lat, lon" manual
+            if (coordInput) {
+                const parts = coordInput.split(',');
                 if (parts.length >= 2) {
                     finalLat = parseFloat(parts[0].replace(/[^\d.-]/g, ''));
                     finalLng = parseFloat(parts[1].replace(/[^\d.-]/g, ''));
                 }
             }
 
-            // AUTOCOMPLETADO DE RESPALDO (si lo dejan vacío)
-            if (!finalLat || isNaN(finalLat) || !finalLng || isNaN(finalLng)) {
-                showToast("Guardando...", "Buscando coordenadas aproximadas...");
+            // AUTOCOMPLETAR si falla lo anterior o se deja en blanco
+            if (finalLat === null || finalLng === null || isNaN(finalLat) || isNaN(finalLng) || finalLat === 0) {
                 try {
                     let searchAddress = `${nombre}, ${region}, ${pais}`;
                     let res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`);
@@ -741,10 +733,9 @@
                 } catch(err) {
                     console.error("Autocompletado falló:", err);
                 }
-            } else {
-                showToast("Guardando...", "Procesando coordenadas manuales...");
             }
 
+            // ASEGURARNOS DE QUE LAS COLUMNAS SE LLAMAN IGUAL
             const payload = {
                 user_id: userSessionId,
                 nombre: nombre,
@@ -760,14 +751,24 @@
             };
 
             if (rowId) {
-                await supabaseClient.from('sitios').update(payload).eq('id', rowId);
+                const { error } = await supabaseClient.from('sitios').update(payload).eq('id', rowId);
+                if (error) {
+                    console.error("Error al actualizar:", error);
+                    showToast("Error", "Revisa que las columnas en Supabase sean latitud y longitud.", true);
+                    return;
+                }
             } else {
-                await supabaseClient.from('sitios').insert([payload]);
+                const { error } = await supabaseClient.from('sitios').insert([payload]);
+                if (error) {
+                    console.error("Error al insertar:", error);
+                    showToast("Error", "Hubo un problema guardando el sitio.", true);
+                    return;
+                }
             }
             
             closeModal('placeModal');
             loadCloudData();
-            showToast("Completado", "Lugar y coordenadas guardadas con éxito.");
+            showToast("Completado", "Lugar guardado con éxito.");
         }
 
         async function deletePlace() {
