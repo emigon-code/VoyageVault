@@ -256,7 +256,7 @@
                     <label class="block text-xs font-extrabold text-sky-700 uppercase tracking-wider mb-1">
                         <i class="fa-solid fa-map-location-dot mr-1"></i> Coordenadas Google Maps
                     </label>
-                    <p class="text-[10px] text-sky-600 mb-2">Haz clic derecho sobre un lugar en Google Maps, clica en los números (ej: 39.469, -0.376) para copiarlos y pégalos aquí.</p>
+                    <p class="text-[10px] text-sky-600 mb-2">Pega aquí los números separados por coma (ej: 39.469, -0.376)</p>
                     <input type="text" id="formCoordenadasManual" placeholder="Ej: 39.4699075, -0.3762881" class="w-full p-3 bg-white border border-sky-300 rounded-lg text-sm font-medium outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 text-slate-700 shadow-sm">
                 </div>
 
@@ -646,7 +646,7 @@
         function openModal(id) { document.getElementById(id).classList.replace('hidden', 'flex'); }
         function closeModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); }
 
-        // ------------------ MANEJO ROBUSTO DEL FORMULARIO Y COORDENADAS ------------------
+        // ------------------ MANEJO DE FORMULARIO CON AVISOS ------------------
         function openPlaceModal(isEdit, globalIndex = null) {
             document.getElementById('placeForm').reset();
             const deleteBtn = document.getElementById('deletePlaceBtn');
@@ -660,14 +660,12 @@
                 document.getElementById('editIndex').value = p.id;
                 document.getElementById('formLugar').value = p.nombre || "";
                 document.getElementById('formTipo').value = p.etiquetas || "";
-                
                 document.getElementById('formPais').value = p.categoria || "";
                 document.getElementById('formRegion').value = p.estado || "";
                 document.getElementById('formNotas').value = p.descripcion || "";
                 document.getElementById('formLink').value = p.link || "";
                 document.getElementById('formEstado').value = p.visitado || 'Quiero ir';
 
-                // Mostrar las coordenadas en el nuevo formato "lat, lng" si existen
                 let latVal = p.latitud !== null && p.latitud !== undefined ? parseFloat(String(p.latitud).replace(/,/g, '.')) : null;
                 let lngVal = p.longitud !== null && p.longitud !== undefined ? parseFloat(String(p.longitud).replace(/,/g, '.')) : null;
 
@@ -676,7 +674,6 @@
                 } else {
                     coordInput.value = "";
                 }
-
             } else {
                 document.getElementById('placeModalTitle').textContent = "Añadir Nuevo Lugar";
                 deleteBtn.classList.replace('block', 'hidden');
@@ -692,29 +689,28 @@
             e.preventDefault();
             if (!supabaseClient) return;
             
-            showToast("Guardando...", "Procesando información...");
+            showToast("Guardando...", "Enviando datos a Supabase...");
 
             const rowId = document.getElementById('editIndex').value;
             const nombre = document.getElementById('formLugar').value.trim();
             const region = document.getElementById('formRegion').value.trim();
             const pais = document.getElementById('formPais').value.trim();
-            
-            // CAPTURA DIRECTA DEL CAMPO
             const coordInput = document.getElementById('formCoordenadasManual').value.trim();
             
             let finalLat = null;
             let finalLng = null;
 
-            // Extraer de "lat, lon" manual
+            // Extraer las coordenadas limpiando los espacios
             if (coordInput) {
-                const parts = coordInput.split(',');
+                const cleaned = coordInput.replace(/\s+/g, '');
+                const parts = cleaned.split(',');
                 if (parts.length >= 2) {
-                    finalLat = parseFloat(parts[0].replace(/[^\d.-]/g, ''));
-                    finalLng = parseFloat(parts[1].replace(/[^\d.-]/g, ''));
+                    finalLat = parseFloat(parts[0]);
+                    finalLng = parseFloat(parts[1]);
                 }
             }
 
-            // AUTOCOMPLETAR si falla lo anterior o se deja en blanco
+            // Si está vacío, buscamos por internet de forma invisible
             if (finalLat === null || finalLng === null || isNaN(finalLat) || isNaN(finalLng) || finalLat === 0) {
                 try {
                     let searchAddress = `${nombre}, ${region}, ${pais}`;
@@ -730,12 +726,9 @@
                         finalLat = parseFloat(data[0].lat);
                         finalLng = parseFloat(data[0].lon);
                     }
-                } catch(err) {
-                    console.error("Autocompletado falló:", err);
-                }
+                } catch(err) { console.error("Autocompletado falló:", err); }
             }
 
-            // ASEGURARNOS DE QUE LAS COLUMNAS SE LLAMAN IGUAL
             const payload = {
                 user_id: userSessionId,
                 nombre: nombre,
@@ -751,17 +744,21 @@
             };
 
             if (rowId) {
-                const { error } = await supabaseClient.from('sitios').update(payload).eq('id', rowId);
+                // ACTUALIZAR (Usamos .select() para obligar a Supabase a decirnos si realmente ha funcionado)
+                const { data, error } = await supabaseClient.from('sitios').update(payload).eq('id', parseInt(rowId)).select();
+                
                 if (error) {
-                    console.error("Error al actualizar:", error);
-                    showToast("Error", "Revisa que las columnas en Supabase sean latitud y longitud.", true);
+                    alert("❌ ERROR DE SUPABASE: " + error.message);
+                    return;
+                } else if (!data || data.length === 0) {
+                    alert("⚠️ ¡CUIDADO! La base de datos no ha dejado guardar las coordenadas. Ve al SQL Editor de Supabase y lanza este código para desbloquearlo: \n\nALTER TABLE sitios DISABLE ROW LEVEL SECURITY;");
                     return;
                 }
             } else {
-                const { error } = await supabaseClient.from('sitios').insert([payload]);
+                // INSERTAR NUEVO
+                const { data, error } = await supabaseClient.from('sitios').insert([payload]).select();
                 if (error) {
-                    console.error("Error al insertar:", error);
-                    showToast("Error", "Hubo un problema guardando el sitio.", true);
+                    alert("❌ ERROR AL CREAR: " + error.message);
                     return;
                 }
             }
