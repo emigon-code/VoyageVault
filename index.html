@@ -5,20 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoyageVault — Mi Visor de Viajes Personalizado</title>
     
-    <!-- SDK de Supabase para la conexión online -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Leaflet CSS y JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- Fuentes y Estilos base -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -95,9 +91,7 @@
         .btn-danger { background: #fef2f2; border: 1px solid #fecaca; color: #ef4444; font-size: 11px; padding: 6px 12px; border-radius: 10px; transition: all 0.3s ease; font-weight: 700; }
 
         .tag-filter-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-        .tag-pill { padding: 5px 12px; background-color: #ffffff; color: #475569; font-size: 11px; font-weight: 600; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; border: 1px solid rgba(226, 232, 240, 0.8); user-select: none; }
-        .tag-pill.active { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: #ffffff; font-weight: 700; border-color: transparent; }
-
+        
         .mobile-view-tabs { display: flex; background: #ffffff; border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
         @media (min-width: 768px) { .mobile-view-tabs { display: none; } }
         .mobile-view-tabs button { flex: 1; text-align: center; font-size: 13px; font-weight: 700; color: #475569; padding: 12px 0; }
@@ -121,7 +115,6 @@
     <div class="ambient-glow"></div>
     <div class="ambient-glow-2"></div>
 
-    <!-- PANTALLA ACCESO SUPABASE -->
     <div id="cloud-login-screen">
         <div class="bg-white p-10 rounded-[24px] border border-slate-200/80 shadow-2xl text-center max-w-[420px] w-[90%] z-50">
             <div class="flex items-center justify-center gap-2 mb-4 text-sky-600">
@@ -136,7 +129,6 @@
         </div>
     </div>
 
-    <!-- Toast global -->
     <div id="toastMessage" class="notification-toast">
         <i id="toastIcon" class="fa-solid fa-circle-check" style="color:#0284c7; font-size: 18px;"></i>
         <div>
@@ -145,7 +137,6 @@
         </div>
     </div>
 
-    <!-- NAVBAR -->
     <navbar>
         <div class="nav-left">
             <div class="logo" onclick="navigateTo('home')">
@@ -164,30 +155,25 @@
         </div>
     </navbar>
 
-    <!-- VIEWPORT PRINCIPAL -->
     <div class="main-viewport" id="app-viewport">
-        <!-- 1. HOME -->
         <div class="view-panel active-view" id="view-home">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1">Explora tus destinos</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una región geográfica para organizar y planificar tus escapadas.</p>
             <div class="banner-grid home-grid" id="explorer-cards-container"></div>
         </div>
 
-        <!-- 2. PAÍSES -->
         <div class="view-panel" id="view-countries">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="countries-title">Países</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Naciones con destinos registrados en tu colección personal.</p>
             <div class="banner-grid" id="countries-grid"></div>
         </div>
 
-        <!-- 3. REGIONES -->
         <div class="view-panel" id="view-regions">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="regions-title">Regiones</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una provincia o comarca específica de tu catálogo.</p>
             <div class="banner-grid" id="regions-grid"></div>
         </div>
 
-        <!-- 4. DETALLE DE LUGARES Y MAPA -->
         <div class="view-panel" id="view-places" style="padding: 0;">
             <div class="mobile-view-tabs">
                 <button id="tab-btn-list" class="active" onclick="switchMobileView('list')"><i class="fa-solid fa-list-ul"></i> Lista</button>
@@ -222,7 +208,6 @@
         </div>
     </div>
 
-    <!-- MODAL SINCRO CSV -->
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[1000] hidden items-center justify-center p-4" id="importModal" onclick="closeModal('importModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[520px] rounded-[24px] p-6 shadow-2xl" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-5">
@@ -241,7 +226,6 @@
         </div>
     </div>
 
-    <!-- MODAL FORM LUGAR (AÑADIR / EDITAR) -->
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[1000] hidden items-center justify-center p-4" id="placeModal" onclick="closeModal('placeModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[540px] rounded-[24px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4">
@@ -263,7 +247,6 @@
                     <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Categorías / Etiquetas *</label>
                     <input type="text" id="formTipo" required placeholder="Ej: Naturaleza, Miradores" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none">
                 </div>
-                <!-- LATITUD Y LONGITUD REVISADOS A TYPE="TEXT" PARA EVITAR CONFLICTOS DE COMAS/PUNTOS -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Latitud</label>
@@ -310,7 +293,7 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN DE SUPABASE
+        // ------------------ CONFIGURACIÓN DE SUPABASE ------------------
         const SUPABASE_URL = 'https://fmueravcnwkoswvwbvnc.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtdWVyYXZjbndrb3N3dndidm5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMjIxMzIsImV4cCI6MjA5Nzg5ODEzMn0._k2oBg5XwMmPzPZ3zm43EOp-gn1VyM6JDqpCx2BoYvQ';
 
@@ -366,7 +349,6 @@
 
         async function loadCloudData() {
             if (!supabaseClient) return;
-            
             const { data: sitios, error: errorSitios } = await supabaseClient.from('sitios').select('*');
             if (errorSitios) { showToast("Error", errorSitios.message, true); return; }
             viajesData = sitios || [];
@@ -379,12 +361,10 @@
             renderViewByCurrentState();
         }
 
+        // ------------------ SISTEMA DE PORTADAS UNIFICADO ------------------
         function editBannerImage(event, key) {
-            event.preventDefault();
-            event.stopPropagation();
-            
+            event.preventDefault(); event.stopPropagation();
             const currentImg = customBanners[key] || DEFAULT_IMAGES[key] || DEFAULT_IMAGES['pais_default'];
-            
             setTimeout(() => {
                 const newUrl = prompt("Introduce la URL de la nueva imagen de portada para este nivel:", currentImg);
                 if (newUrl !== null && newUrl.trim() !== "") {
@@ -396,6 +376,7 @@
             }, 50);
         }
 
+        // ------------------ CONTROL DE NAVEGACIÓN ------------------
         function renderViewByCurrentState() {
             if (state.view === 'home') renderHomeView();
             else if (state.view === 'countries') drawCountriesGrid();
@@ -435,7 +416,6 @@
         function renderHomeView() {
             const europeCount = viajesData.filter(i => getContinent(i.categoria) === 'Europa').length;
             const rowCount = viajesData.length - europeCount;
-            
             const imgEurope = customBanners['Europa'] || DEFAULT_IMAGES['Europa'];
             const imgWorld = customBanners['Resto del Mundo'] || DEFAULT_IMAGES['Resto del Mundo'];
 
@@ -444,8 +424,7 @@
                     <button class="banner-settings-btn" onclick="editBannerImage(event, 'Europa')"><i class="fa-solid fa-gear text-xs"></i></button>
                     <img src="${imgEurope}" class="banner-img">
                     <div class="banner-content">
-                        <span class="banner-category">Continente</span>
-                        <div class="banner-name">Europa</div>
+                        <span class="banner-category">Continente</span><div class="banner-name">Europa</div>
                         <div class="banner-count"><i class="fa-solid fa-location-dot"></i> ${europeCount} sitios</div>
                     </div>
                 </div>
@@ -453,8 +432,7 @@
                     <button class="banner-settings-btn" onclick="editBannerImage(event, 'Resto del Mundo')"><i class="fa-solid fa-gear text-xs"></i></button>
                     <img src="${imgWorld}" class="banner-img">
                     <div class="banner-content">
-                        <span class="banner-category">Continente</span>
-                        <div class="banner-name">Resto del Mundo</div>
+                        <span class="banner-category">Continente</span><div class="banner-name">Resto del Mundo</div>
                         <div class="banner-count"><i class="fa-solid fa-globe"></i> ${rowCount} sitios</div>
                     </div>
                 </div>
@@ -465,8 +443,7 @@
 
         function drawCountriesGrid() {
             const countries = [...new Set(viajesData.filter(i => getContinent(i.categoria) === state.continent && i.categoria).map(i => i.categoria))];
-            const grid = document.getElementById('countries-grid');
-            grid.innerHTML = '';
+            const grid = document.getElementById('countries-grid'); grid.innerHTML = '';
             
             if (countries.length === 0) {
                 grid.innerHTML = `<p class="col-span-full text-center text-slate-400 text-sm py-10 font-semibold">No tienes países registrados en este continente.</p>`;
@@ -479,8 +456,7 @@
                             <button class="banner-settings-btn" onclick="editBannerImage(event, '${c}')"><i class="fa-solid fa-gear text-xs"></i></button>
                             <img src="${img}" class="banner-img">
                             <div class="banner-content">
-                                <span class="banner-category">País</span>
-                                <div class="banner-name">${c}</div>
+                                <span class="banner-category">País</span><div class="banner-name">${c}</div>
                                 <div class="banner-count"><i class="fa-solid fa-map-pin"></i> ${count} lugares</div>
                             </div>
                         </div>`;
@@ -493,8 +469,7 @@
 
         function drawRegionsGrid() {
             const regions = [...new Set(viajesData.filter(i => i.categoria === state.country && i.estado).map(i => i.estado))];
-            const grid = document.getElementById('regions-grid');
-            grid.innerHTML = '';
+            const grid = document.getElementById('regions-grid'); grid.innerHTML = '';
 
             if (regions.length === 0) {
                 grid.innerHTML = `<p class="col-span-full text-center text-slate-400 text-sm py-10 font-semibold">No tienes regiones registradas.</p>`;
@@ -508,8 +483,7 @@
                             <button class="banner-settings-btn" onclick="editBannerImage(event, '${bannerKey}')"><i class="fa-solid fa-gear text-xs"></i></button>
                             <img src="${img}" class="banner-img">
                             <div class="banner-content">
-                                <span class="banner-category">Región</span>
-                                <div class="banner-name">${r}</div>
+                                <span class="banner-category">Región</span><div class="banner-name">${r}</div>
                                 <div class="banner-count"><i class="fa-solid fa-images"></i> ${count} destinos</div>
                             </div>
                         </div>`;
@@ -526,48 +500,50 @@
             navigateTo('places');
         }
 
-        // BÚSQUEDA DE UBICACIÓN CORREGIDA
+        // ------------------ SISTEMA DE BÚSQUEDA DE COORDENADAS REFORZADO ------------------
         async function lookupCoordinates() {
             const queryPlace = document.getElementById('formLugar').value.trim();
             const queryRegion = document.getElementById('formRegion').value.trim();
             const queryPais = document.getElementById('formPais').value.trim();
             
             if (!queryPlace) {
-                alert("Por favor, introduce primero el nombre de un lugar o monumento para poder ubicarlo.");
+                alert("Por favor, introduce primero el nombre del lugar para poder ubicarlo.");
                 return;
             }
 
-            const searchAddress = `${queryPlace}, ${queryRegion}, ${queryPais}`;
             showToast("Buscando...", "Consultando coordenadas espaciales...");
 
             try {
-                // Se envía la petición limpia. En Nominatim a veces ayuda indicar el language
-                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`, {
-                    headers: { 'Accept-Language': 'es' }
-                });
-                const data = await response.json();
+                // Nivel 1: Búsqueda súper específica
+                let searchAddress = `${queryPlace}, ${queryRegion}, ${queryPais}`;
+                let response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`, { headers: { 'Accept-Language': 'es' }});
+                let data = await response.json();
+                
+                // Nivel 2: Búsqueda menos estricta (Solo Lugar + País)
+                if (!data || data.length === 0) {
+                    searchAddress = `${queryPlace}, ${queryPais}`;
+                    response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`, { headers: { 'Accept-Language': 'es' }});
+                    data = await response.json();
+                }
+
+                // Nivel 3: Búsqueda desesperada (Solo Lugar)
+                if (!data || data.length === 0) {
+                    response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryPlace)}&limit=1`, { headers: { 'Accept-Language': 'es' }});
+                    data = await response.json();
+                }
                 
                 if (data && data.length > 0) {
                     const lat = parseFloat(data[0].lat);
                     const lon = parseFloat(data[0].lon);
-                    
                     document.getElementById('formLatitud').value = lat.toFixed(6);
                     document.getElementById('formLongitud').value = lon.toFixed(6);
-                    showToast("Ubicado con éxito", `Encontrado: lat ${lat.toFixed(4)}, lon ${lon.toFixed(4)}`);
+                    showToast("Ubicación Encontrada", `Actualizada: lat ${lat.toFixed(4)}, lon ${lon.toFixed(4)}`);
                 } else {
-                    const altResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryPlace)}&limit=1`);
-                    const altData = await altResponse.json();
-                    if (altData && altData.length > 0) {
-                        document.getElementById('formLatitud').value = parseFloat(altData[0].lat).toFixed(6);
-                        document.getElementById('formLongitud').value = parseFloat(altData[0].lon).toFixed(6);
-                        showToast("Ubicación Aproximada", "Coordenadas del sitio general asignadas.");
-                    } else {
-                        showToast("No encontrado", "Introduce las coordenadas manualmente o afina el nombre.", true);
-                    }
+                    showToast("No encontrado", "Intenta simplificar el nombre del lugar o escribe la ciudad general.", true);
                 }
             } catch (error) {
                 console.error(error);
-                showToast("Error de conexión", "No se pudo consultar el geolocalizador.", true);
+                showToast("Error de conexión", "El servidor de mapas no responde.", true);
             }
         }
 
@@ -584,30 +560,37 @@
             else if (state.statusFilter === 'Quiero ir') btnQuieroIr.className = "flex-1 py-1.5 px-2 text-center rounded-lg bg-amber-50 text-amber-600 font-bold border border-amber-200";
         }
 
-        // GENERADOR DE ETIQUETAS MULTICOLOR
-        function getTagsHTML(tagString) {
+        // ------------------ SISTEMA DE COLORES UNIFICADOS PARA ETIQUETAS Y PINES ------------------
+        function getTagStyle(tag) {
+            if (!tag) tag = 'General';
+            let hash = 0;
+            // Algoritmo matemático para asignar un color constante basado en la palabra
+            for(let i = 0; i < tag.length; i++) { hash = tag.charCodeAt(i) + ((hash << 5) - hash); }
+            const idx = Math.abs(hash) % 8;
+            
+            const palettes = [
+                { bg: '#eff6ff', text: '#1e40af', border: '#bfdbfe', pin: '#3b82f6' }, // Azul
+                { bg: '#f0fdf4', text: '#166534', border: '#bbf7d0', pin: '#22c55e' }, // Verde
+                { bg: '#faf5ff', text: '#6b21a8', border: '#e9d5ff', pin: '#a855f7' }, // Morado
+                { bg: '#fdf2f8', text: '#9d174d', border: '#fbcfe8', pin: '#ec4899' }, // Rosa
+                { bg: '#fffbeb', text: '#92400e', border: '#fde68a', pin: '#f59e0b' }, // Ámbar
+                { bg: '#eef2ff', text: '#3730a3', border: '#c7d2fe', pin: '#6366f1' }, // Índigo
+                { bg: '#fff1f2', text: '#e11d48', border: '#fecdd3', pin: '#f43f5e' }, // Rojo
+                { bg: '#f0fdfa', text: '#115e59', border: '#99f6e4', pin: '#14b8a6' }  // Turquesa
+            ];
+            return palettes[idx];
+        }
+
+        function getTagsHTMLForCard(tagString) {
             if (!tagString) return '';
             const tags = tagString.split(',').map(t => t.trim()).filter(t => t !== "");
             return tags.map(tag => {
-                let hash = 0;
-                for(let i = 0; i < tag.length; i++) { hash = tag.charCodeAt(i) + ((hash << 5) - hash); }
-                const idx = Math.abs(hash) % 8;
-                const colors = [
-                    {bg: '#dbeafe', text: '#1e40af', border: '#93c5fd'}, // Azul
-                    {bg: '#dcfce7', text: '#166534', border: '#86efac'}, // Verde
-                    {bg: '#f3e8ff', text: '#6b21a8', border: '#d8b4fe'}, // Morado
-                    {bg: '#fce7f3', text: '#9d174d', border: '#f9a8d4'}, // Rosa
-                    {bg: '#fef3c7', text: '#92400e', border: '#fcd34d'}, // Ámbar
-                    {bg: '#e0e7ff', text: '#3730a3', border: '#a5b4fc'}, // Índigo
-                    {bg: '#ffe4e6', text: '#e11d48', border: '#fda4af'}, // Rojo/Rose
-                    {bg: '#ccfbf1', text: '#115e59', border: '#5eead4'}  // Teal/Turquesa
-                ];
-                const c = colors[idx];
-                return `<span style="background-color:${c.bg}; color:${c.text}; border-color:${c.border};" class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold border"><i class="fa-solid fa-tag mr-1 text-[9px] opacity-70"></i> ${tag}</span>`;
+                const style = getTagStyle(tag);
+                return `<span style="background-color:${style.bg}; color:${style.text}; border-color:${style.border};" class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold border shadow-sm">${tag}</span>`;
             }).join('');
         }
 
-        // RENDER DE LUGARES Y MAPA CON TEXTOS Y COLORES SOLICITADOS
+        // ------------------ RENDERIZADO DEL MAPA Y TARJETAS ------------------
         function renderPlacesView() {
             const list = document.getElementById('placesList');
             list.innerHTML = ''; if (markersGroup) markersGroup.clearLayers();
@@ -617,10 +600,19 @@
             
             const allTags = new Set();
             regionPlaces.forEach(p => { (p.etiquetas || "General").split(',').map(t => t.trim()).forEach(t => allTags.add(t)); });
+            
+            // CONSTRUIR PANEL SUPERIOR DE ETIQUETAS CON SUS COLORES OFICIALES
             const filterBox = document.getElementById('tagFilters');
-            filterBox.innerHTML = `<span class="tag-pill ${state.selectedTags.length === 0 ? 'active' : ''}" onclick="filterTag('todas')">Todas</span>`;
+            filterBox.innerHTML = `<button class="px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${state.selectedTags.length === 0 ? 'bg-slate-800 text-white shadow-md border border-slate-800' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'}" onclick="filterTag('todas')">Todas</button>`;
+            
             allTags.forEach(t => {
-                filterBox.innerHTML += `<span class="tag-pill ${state.selectedTags.includes(t) ? 'active' : ''}" onclick="filterTag('${t}')">${t}</span>`;
+                const style = getTagStyle(t);
+                const isActive = state.selectedTags.includes(t);
+                // Si está activa, pinta el fondo sólido del pin. Si no, usa el fondo clarito.
+                const bg = isActive ? style.pin : style.bg;
+                const textCol = isActive ? '#ffffff' : style.text;
+                const border = isActive ? style.pin : style.border;
+                filterBox.innerHTML += `<button style="background-color: ${bg}; color: ${textCol}; border-color: ${border};" class="px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all shadow-sm hover:opacity-80" onclick="filterTag('${t}')">${t}</button>`;
             });
 
             let filtered = regionPlaces.filter(f => f.nombre.toLowerCase().includes(searchVal) || (f.descripcion || '').toLowerCase().includes(searchVal));
@@ -643,33 +635,34 @@
                 const globalIndex = viajesData.findIndex(item => item.id === p.id);
                 const isVisited = p.visitado === 'Visitado';
 
-                let finalLat = parseFloat(p.latitud);
-                let finalLng = parseFloat(p.longitud);
+                // CORRECCIÓN VITAL DE COORDENADAS: Convertimos la coma en punto si el usuario lo guardó así alguna vez
+                let latClean = p.latitud !== null && p.latitud !== undefined ? String(p.latitud).replace(/,/g, '.') : "0";
+                let lngClean = p.longitud !== null && p.longitud !== undefined ? String(p.longitud).replace(/,/g, '.') : "0";
+                
+                let finalLat = parseFloat(latClean);
+                let finalLng = parseFloat(lngClean);
 
                 const card = document.createElement('div');
                 card.className = `p-4 mb-3 bg-white border border-slate-200 rounded-2xl shadow-sm hover:border-sky-500 transition relative cursor-pointer`;
                 card.onclick = () => { if (!isNaN(finalLat) && !isNaN(finalLng) && (finalLat !== 0 || finalLng !== 0)) { map.flyTo([finalLat, finalLng], 14); } };
                 
-                // CONSTRUCCIÓN DE LA TARJETA SOLICITADA
+                // TARJETA DE LUGARES REESTRUCTURADA CON TEXTO VISUAL CLARO
                 card.innerHTML = `
                     <div class="flex flex-col gap-2 mb-3">
                         <div class="flex justify-between items-start">
-                            <!-- TEXTO SUPERIOR IZQUIERDO SOBRE LAS ETIQUETAS -->
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-extrabold border ${isVisited ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200'}">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-extrabold border ${isVisited ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200'}">
                                 ${isVisited ? '🟢 Visitado' : '🧡 Quiero ir'}
                             </span>
                             <button class="text-slate-400 hover:text-sky-600 bg-slate-100 p-1.5 rounded-lg text-xs" onclick="event.stopPropagation(); openPlaceModal(true, ${globalIndex})"><i class="fa-solid fa-pen"></i></button>
                         </div>
-                        <!-- ETIQUETAS MULTICOLOR -->
                         <div class="flex flex-wrap gap-1.5 mt-1">
-                            ${getTagsHTML(p.etiquetas || 'General')}
+                            ${getTagsHTMLForCard(p.etiquetas || 'General')}
                         </div>
                     </div>
                     
                     <h4 class="text-sm font-bold text-slate-800 mb-1">${p.nombre}</h4>
                     <p class="text-slate-600 text-xs p-2.5 bg-slate-50 border rounded-xl mb-3 font-medium">${p.descripcion || '<span class="italic text-slate-300">Sin descripción.</span>'}</p>
                     
-                    <!-- BOTONES INFERIORES CLAROS -->
                     <div class="flex justify-between items-center pt-3 border-t">
                         <div class="flex gap-2">
                             <button onclick="event.stopPropagation(); togglePlaceStatus('${p.id}', 'Visitado')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold border transition-colors ${isVisited ? 'bg-emerald-500 text-white border-emerald-600' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}">Marcar Visitado</button>
@@ -680,20 +673,24 @@
                 `;
                 list.appendChild(card);
 
+                // DIBUJAR PINES (Solo si son coordenadas reales)
                 if (map && !isNaN(finalLat) && !isNaN(finalLng) && (finalLat !== 0 || finalLng !== 0)) {
                     coordsArray.push([finalLat, finalLng]);
                     
-                    // Pin de mapa base para mantener la simplicidad
-                    const style = getCategoryStyle((p.etiquetas || "General").split(',')[0]);
+                    // Extraemos la primera etiqueta para darle color al pin
+                    const primaryTag = (p.etiquetas || "General").split(',')[0].trim();
+                    const pinStyle = getTagStyle(primaryTag);
+
                     const markerIcon = L.divIcon({
                         className: 'custom-marker-wrapper',
-                        html: `<div class="custom-pin-marker" style="background-color: ${style.color};"><i class="fa-solid ${style.icon}"></i></div>`,
+                        html: `<div class="custom-pin-marker" style="background-color: ${pinStyle.pin}; border-color: #ffffff;"><i class="fa-solid fa-location-dot"></i></div>`,
                         iconSize: [36, 36], iconAnchor: [18, 36]
                     });
                     L.marker([finalLat, finalLng], { icon: markerIcon }).addTo(markersGroup).bindPopup(`<b>${p.nombre}</b><br><span class="text-xs">${p.descripcion || ''}</span>`);
                 }
             });
 
+            // ENCUADRE DINÁMICO: Ajusta el mapa solo a la porción de los pines existentes
             if (coordsArray.length > 0 && map) {
                 map.fitBounds(coordsArray, { padding: [50, 50], maxZoom: 14 });
             }
@@ -722,7 +719,7 @@
         function openModal(id) { document.getElementById(id).classList.replace('hidden', 'flex'); }
         function closeModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); }
 
-        // FORMULARIO CON LIMPIEZA TOTAL PARA EVITAR CEROS AL EDITAR
+        // ------------------ CONTROL DEL FORMULARIO CON LIMPIEZA EXTREMA ------------------
         function openPlaceModal(isEdit, globalIndex = null) {
             document.getElementById('placeForm').reset();
             const deleteBtn = document.getElementById('deletePlaceBtn');
@@ -736,9 +733,13 @@
                 document.getElementById('formLugar').value = p.nombre || "";
                 document.getElementById('formTipo').value = p.etiquetas || "";
                 
-                // Inyectar datos numéricos si existen, de lo contrario dejar vacío
-                let latVal = parseFloat(p.latitud);
-                let lngVal = parseFloat(p.longitud);
+                // Inyectamos las coordenadas solo si existen y no son 0, permitiendo que queden vacías si no hay datos
+                let latClean = p.latitud !== null && p.latitud !== undefined ? String(p.latitud).replace(/,/g, '.') : "0";
+                let lngClean = p.longitud !== null && p.longitud !== undefined ? String(p.longitud).replace(/,/g, '.') : "0";
+                
+                let latVal = parseFloat(latClean);
+                let lngVal = parseFloat(lngClean);
+
                 document.getElementById('formLatitud').value = (!isNaN(latVal) && latVal !== 0) ? latVal.toFixed(6) : "";
                 document.getElementById('formLongitud').value = (!isNaN(lngVal) && lngVal !== 0) ? lngVal.toFixed(6) : "";
                 
@@ -754,10 +755,9 @@
                 document.getElementById('formPais').value = state.country || "";
                 document.getElementById('formRegion').value = state.region || "";
                 
-                if (map && state.view === 'places') {
-                    document.getElementById('formLatitud').value = map.getCenter().lat.toFixed(6);
-                    document.getElementById('formLongitud').value = map.getCenter().lng.toFixed(6);
-                }
+                // No inyectamos ceros ni el centro del mapa a la fuerza, dejamos que el usuario lo haga limpio si quiere.
+                document.getElementById('formLatitud').value = "";
+                document.getElementById('formLongitud').value = "";
             }
             openModal('placeModal');
         }
@@ -768,9 +768,10 @@
 
             const rowId = document.getElementById('editIndex').value;
             
-            // Reemplazamos posibles comas españolas por puntos para garantizar la lectura de float
-            let latStr = document.getElementById('formLatitud').value.replace(',', '.').trim();
-            let lngStr = document.getElementById('formLongitud').value.replace(',', '.').trim();
+            // Reemplazamos la coma española por un punto y quitamos espacios antes de guardarlo en Supabase
+            let latStr = document.getElementById('formLatitud').value.replace(/,/g, '.').trim();
+            let lngStr = document.getElementById('formLongitud').value.replace(/,/g, '.').trim();
+            
             let parsedLat = parseFloat(latStr);
             let parsedLng = parseFloat(lngStr);
 
@@ -780,8 +781,11 @@
                 etiquetas: document.getElementById('formTipo').value.trim(),
                 categoria: document.getElementById('formPais').value.trim(),
                 estado: document.getElementById('formRegion').value.trim(),
-                latitud: isNaN(parsedLat) ? 0 : parsedLat,
-                longitud: isNaN(parsedLng) ? 0 : parsedLng,
+                
+                // IMPORTANTE: Si está vacío, inyecta "null", para no forzar la aparición de pines en África (0,0)
+                latitud: isNaN(parsedLat) ? null : parsedLat,
+                longitud: isNaN(parsedLng) ? null : parsedLng,
+                
                 descripcion: document.getElementById('formNotas').value.trim(),
                 link: document.getElementById('formLink').value.trim(),
                 visitado: document.getElementById('formEstado').value,
@@ -863,10 +867,12 @@
                         
                         let tokens = parseCSVLine(currentLine, separator);
                         if (tokens.length > 0 && tokens[idxNombre]) {
-                            let rawLat = idxLat !== -1 ? tokens[idxLat] : '0';
-                            let rawLng = idxLng !== -1 ? tokens[idxLng] : '0';
-                            let lat = parseFloat((rawLat || '0').replace(',', '.'));
-                            let lng = parseFloat((rawLng || '0').replace(',', '.'));
+                            
+                            // Aseguramos limpiar las comas de los CSVs españoles
+                            let rawLat = idxLat !== -1 && tokens[idxLat] ? tokens[idxLat].replace(/,/g, '.') : '';
+                            let rawLng = idxLng !== -1 && tokens[idxLng] ? tokens[idxLng].replace(/,/g, '.') : '';
+                            let lat = parseFloat(rawLat);
+                            let lng = parseFloat(rawLng);
                             
                             let c = idxCat !== -1 && tokens[idxCat] ? tokens[idxCat] : 'España';
                             let estVal = idxEst !== -1 && tokens[idxEst] ? tokens[idxEst] : 'General';
@@ -876,10 +882,17 @@
                             let urlVal = idxUrl !== -1 && tokens[idxUrl] ? tokens[idxUrl] : '';
 
                             nuevos.push({
-                                user_id: userSessionId, nombre: tokens[idxNombre].trim(), categoria: c.trim(),
-                                estado: estVal.trim(), latitud: isNaN(lat) ? 0 : lat, longitud: isNaN(lng) ? 0 : lng,
-                                descripcion: descVal.trim(), nivel: getContinent(c), visitado: visVal.trim(),
-                                etiquetas: etiqVal.trim(), link: urlVal.trim()
+                                user_id: userSessionId,
+                                nombre: tokens[idxNombre].trim(),
+                                categoria: c.trim(),
+                                estado: estVal.trim(),
+                                latitud: isNaN(lat) ? null : lat,
+                                longitud: isNaN(lng) ? null : lng,
+                                descripcion: descVal.trim(),
+                                nivel: getContinent(c),
+                                visitado: visVal.trim(),
+                                etiquetas: etiqVal.trim(),
+                                link: urlVal.trim()
                             });
                         }
                     }
@@ -905,7 +918,9 @@
             let csvContent = "Nombre,Categoria,Estado,Latitud,Longitud,Notas,Nivel,Visitado,Etiquetas,Link\n";
             if (viajesData.length > 0) {
                 viajesData.forEach(v => {
-                    csvContent += `"${v.nombre}","${v.categoria}","${v.estado}",${v.latitud},${v.longitud},"${(v.descripcion || '').replace(/"/g, '""')}","${v.nivel || ''}","${v.visitado || 'Por visitar'}","${v.etiquetas || ''}","${v.link || ''}"\n`;
+                    let eLat = (v.latitud !== null && v.latitud !== undefined) ? v.latitud : '';
+                    let eLng = (v.longitud !== null && v.longitud !== undefined) ? v.longitud : '';
+                    csvContent += `"${v.nombre}","${v.categoria}","${v.estado}",${eLat},${eLng},"${(v.descripcion || '').replace(/"/g, '""')}","${v.nivel || ''}","${v.visitado || 'Por visitar'}","${v.etiquetas || ''}","${v.link || ''}"\n`;
                 });
             } else {
                 csvContent += `"Mirador de San Nicolás","España","Granada",37.18121,-3.58914,"Vistas espectaculares a la Alhambra.","Europa","Quiero ir","Cultura, Mirador",""\n`;
@@ -921,16 +936,6 @@
                 await supabaseClient.from('sitios').delete().neq('id', 0);
                 loadCloudData(); navigateTo('home');
             }
-        }
-
-        function getCategoryStyle(type) {
-            const t = normalizeString(type);
-            if (t.includes('gastro')) return { cls: 'cat-gastronomia', icon: 'fa-utensils', color: '#ea580c' };
-            if (t.includes('ocio')) return { cls: 'cat-ocio', icon: 'fa-glass-cheers', color: '#db2777' };
-            if (t.includes('cultura')) return { cls: 'cat-cultura', icon: 'fa-building-columns', color: '#7c3aed' };
-            if (t.includes('templo')) return { cls: 'cat-templos', icon: 'fa-church', color: '#2563eb' };
-            if (t.includes('naturaleza') || t.includes('mirador')) return { cls: 'cat-naturaleza', icon: 'fa-tree', color: '#16a34a' };
-            return { cls: 'cat-general', icon: 'fa-camera', color: '#ca8a04' };
         }
 
         function initMap() {
