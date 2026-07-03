@@ -5,20 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoyageVault — Mi Visor de Viajes Personalizado</title>
     
-    <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Leaflet CSS y JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- Fuentes y Estilos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -81,14 +77,20 @@
         .banner-settings-btn { position: absolute; top: 16px; right: 16px; z-index: 10; background: rgba(15, 23, 42, 0.7); color: white; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.25); }
         .banner-settings-btn:hover { background: #0284c7; transform: rotate(45deg); }
 
+        /* -------------- REDISEÑO ESTRUCTURAL PARA MÓVIL Y PC -------------- */
         .split-viewport { display: flex; flex-direction: column; width: 100%; height: 100%; position: relative; }
         @media (min-width: 768px) { .split-viewport { flex-direction: row; } }
 
-        .places-sidebar { width: 100%; background-color: rgba(255, 255, 255, 0.85); border-bottom: 1px solid rgba(226, 232, 240, 0.8); display: flex; flex-direction: column; backdrop-filter: blur(20px); z-index: 20; height: calc(100vh - 135px); }
-        @media (min-width: 768px) { .places-sidebar { width: 440px; min-width: 440px; height: 100%; border-bottom: none; border-right: 1px solid rgba(226, 232, 240, 0.8); } }
-        .places-header-area { padding: 16px; }
-        @media (min-width: 768px) { .places-header-area { padding: 24px; } }
+        .places-sidebar { width: 100%; display: flex; flex-direction: column; z-index: 20; background: rgba(255, 255, 255, 0.95); transition: all 0.3s ease; }
+        @media (min-width: 768px) { .places-sidebar { width: 440px; min-width: 440px; height: 100%; border-right: 1px solid rgba(226,232,240,0.8); } }
+        
+        .places-header-area { padding: 16px; flex-shrink: 0; }
+        @media (min-width: 768px) { .places-header-area { padding: 24px; border-bottom: 1px solid rgba(226,232,240,0.5); } }
+        
         .places-list-container { flex-grow: 1; overflow-y: auto; padding: 16px; background-color: rgba(248, 250, 252, 0.5); }
+        @media (max-width: 767px) {
+            .mobile-list-hidden { display: none !important; } /* Oculta solo la lista, mantiene la cabecera visible */
+        }
 
         .btn { background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; border: none; padding: 8px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease; box-shadow: 0 4px 15px -4px rgba(2, 132, 199, 0.3); }
         .btn-secondary { background: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); color: #0f172a; box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08); padding: 8px 12px; }
@@ -96,39 +98,36 @@
         
         .tag-filter-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
         
-        /* TABS MÓVILES ABAJO */
+        /* TABS MÓVILES INTEGRADOS EN LA CABECERA */
         .mobile-view-tabs { display: none; }
         @media (max-width: 767px) { 
-            .mobile-view-tabs { display: flex; background: #ffffff; border-top: 1px solid rgba(226, 232, 240, 0.8); position: fixed; bottom: 0; left: 0; width: 100%; z-index: 1000; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); padding-bottom: env(safe-area-inset-bottom); }
-            .mobile-view-tabs button { flex: 1; text-align: center; font-size: 14px; font-weight: 700; color: #475569; padding: 14px 0; }
-            .mobile-view-tabs button.active { color: #0284c7; border-top: 3px solid #0284c7; background: #f8fafc; }
+            .mobile-view-tabs { display: flex; background: #f1f5f9; border-radius: 12px; margin-top: 16px; padding: 4px; gap: 4px; border: 1px solid rgba(226,232,240,0.8); }
+            .mobile-view-tabs button { flex: 1; text-align: center; font-size: 13px; font-weight: 700; color: #64748b; padding: 8px 0; border-radius: 10px; transition: all 0.2s ease; }
+            .mobile-view-tabs button.active { color: #0284c7; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         }
 
-        /* CORRECCIÓN MAPA MÓVIL: Control total de visibilidad */
-        .map-container { flex-grow: 1; height: 100%; position: relative; }
+        /* MAPA FLUIDO */
+        .map-container { display: none; flex-grow: 1; height: 100%; position: relative; }
+        @media (min-width: 768px) { .map-container { display: block !important; } }
         @media (max-width: 767px) { 
-            .places-sidebar.hidden { display: none !important; } 
-            .map-container { display: none; height: calc(100vh - 135px); width: 100%; } 
-            .map-container.active-mobile-map { display: block !important; } 
+            .map-container.active-mobile-map { display: block !important; flex-grow: 1; min-height: 0; } 
         }
 
         #map { position: absolute; inset: 0; background-color: #cbd5e1; height: 100%; width: 100%; }
-        .custom-pin-marker { display: flex; align-items: center; justify-content: center; width: 36px !important; height: 36px !important; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: -2px 2px 4px rgba(0,0,0,0.3); border: 2px solid #ffffff; }
+        .custom-pin-marker { display: flex; align-items: center; justify-content: center; width: 36px !important; height: 36px !important; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: -2px 2px 4px rgba(0,0,0,0.3); border: 2px solid #ffffff; cursor: pointer; transition: transform 0.2s; }
+        .custom-pin-marker:hover { transform: rotate(-45deg) scale(1.1); z-index: 1000 !important; }
         .custom-pin-marker i { transform: rotate(45deg); color: white; font-size: 13px; }
         
-        /* DISEÑO REDISEÑADO: Tooltips horizontales limpios, amplios y modernos */
-        .leaflet-tooltip.custom-tooltip { background: #ffffff; border: none; border-radius: 16px; padding: 0; box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.2); font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; min-width: 280px; max-width: 340px; overflow: hidden; white-space: normal; }
+        /* TOOLTIPS REDISEÑADOS */
+        .leaflet-tooltip.custom-tooltip { background: #ffffff; border: none; border-radius: 16px; padding: 0; box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.2); font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; min-width: 280px; max-width: 340px; overflow: hidden; white-space: normal; cursor: pointer; }
         .leaflet-tooltip-top:before { border-top-color: #ffffff; }
 
-        .notification-toast { position: fixed; bottom: 16px; left: 16px; right: 16px; background-color: #ffffff; border-left: 5px solid #0284c7; box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.1); padding: 12px 18px; border-radius: 16px; z-index: 2000; display: flex; align-items: center; gap: 12px; transform: translateY(150%); transition: transform 0.3s ease; border: 1px solid rgba(226, 232, 240, 0.8); }
+        .notification-toast { position: fixed; bottom: 16px; left: 16px; right: 16px; background-color: #ffffff; border-left: 5px solid #0284c7; box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.1); padding: 12px 18px; border-radius: 16px; z-index: 3000; display: flex; align-items: center; gap: 12px; transform: translateY(150%); transition: transform 0.3s ease; border: 1px solid rgba(226, 232, 240, 0.8); }
         @media (min-width: 768px) { .notification-toast { bottom: 32px; left: 32px; right: auto; width: 340px; } }
         .notification-toast.show { transform: translateY(0); }
         .notification-toast.error { border-left-color: #ef4444; }
         
         input, select, textarea { font-size: 16px !important; }
-
-        #mobileBackBtn { display: none; }
-        @media (max-width: 767px) { .active-mobile-map #mobileBackBtn { display: flex; } }
     </style>
 </head>
 <body>
@@ -185,28 +184,24 @@
     </navbar>
 
     <div class="main-viewport" id="app-viewport">
-        <!-- 1. HOME -->
         <div class="view-panel active-view" id="view-home">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1">Explora tus destinos</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una región geográfica para organizar y planificar tus escapadas.</p>
             <div class="banner-grid home-grid" id="explorer-cards-container"></div>
         </div>
 
-        <!-- 2. PAÍSES -->
         <div class="view-panel" id="view-countries">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="countries-title">Países</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Naciones con destinos registrados en tu colección.</p>
             <div class="banner-grid" id="countries-grid"></div>
         </div>
 
-        <!-- 3. REGIONES -->
         <div class="view-panel" id="view-regions">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="regions-title">Regiones</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una provincia o comarca específica de tu catálogo.</p>
             <div class="banner-grid" id="regions-grid"></div>
         </div>
 
-        <!-- 4. DETALLE DE LUGARES Y MAPA -->
         <div class="view-panel" id="view-places" style="padding: 0;">
             <div class="split-viewport">
                 <div class="places-sidebar" id="placesSidebarRoot">
@@ -226,26 +221,23 @@
                         </div>
 
                         <div class="tag-filter-container flex flex-wrap gap-1.5" id="tagFilters"></div>
+                        
+                        <div class="mobile-view-tabs">
+                            <button id="tab-btn-list" class="active" onclick="switchMobileView('list')"><i class="fa-solid fa-list-ul mr-1"></i> Lista</button>
+                            <button id="tab-btn-map" onclick="switchMobileView('map')"><i class="fa-solid fa-map-location-dot mr-1"></i> Mapa</button>
+                        </div>
                     </div>
+                    
                     <div class="places-list-container" id="placesList"></div>
                 </div>
                 
                 <div class="map-container" id="mapContainerRoot">
                     <div id="map"></div>
-                    <button id="mobileBackBtn" class="absolute top-4 left-4 z-[400] bg-white border border-slate-200 shadow-lg rounded-full px-4 py-2.5 text-sm font-extrabold text-slate-700 items-center gap-2" onclick="navigateTo('regions')">
-                        <i class="fa-solid fa-arrow-left"></i> Volver a <span id="mobileBackBtnText">Regiones</span>
-                    </button>
                 </div>
-            </div>
-            
-            <div class="mobile-view-tabs">
-                <button id="tab-btn-list" class="active" onclick="switchMobileView('list')"><i class="fa-solid fa-list-ul mb-1 block text-lg"></i> Lista</button>
-                <button id="tab-btn-map" onclick="switchMobileView('map')"><i class="fa-solid fa-map-location-dot mb-1 block text-lg"></i> Mapa</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL FORM LUGAR -->
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4" id="placeModal" onclick="closeModal('placeModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[540px] rounded-[24px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4">
@@ -306,7 +298,6 @@
         </div>
     </div>
 
-    <!-- MODAL SINCRO CSV -->
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4" id="importModal" onclick="closeModal('importModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[520px] rounded-[24px] p-6 shadow-2xl" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-5">
@@ -332,7 +323,6 @@
         let supabaseClient = null;
         let map, markersGroup;
 
-        // AÑADIDO: Modo global para ver un país completo en el mapa
         let state = { view: 'home', continent: null, country: null, region: null, selectedTags: [], statusFilter: 'todos', mobileTab: 'list', isGlobalCountryMode: false };
         const EUROPEAN_COUNTRIES = ["alemania", "andorra", "austria", "españa", "espana", "francia", "italia", "portugal", "suiza", "reino unido", "grecia", "bélgica", "belgica", "paises bajos", "países bajos", "holanda"];
 
@@ -423,20 +413,14 @@
             if (viewId === 'places') {
                 if (state.isGlobalCountryMode) {
                     trail.innerHTML += ` <i class="fa-solid fa-chevron-right mx-1 text-[9px] text-slate-400"></i> <span class="active font-bold">Vista Global</span>`;
-                    document.getElementById('mobileBackBtnText').textContent = "Países";
                 } else {
                     trail.innerHTML += ` <i class="fa-solid fa-chevron-right mx-1 text-[9px] text-slate-400"></i> <span class="active font-bold">${state.region}</span>`;
-                    document.getElementById('mobileBackBtnText').textContent = state.country;
                 }
             }
 
-            // Resetear vistas móviles para evitar fallos de renderizado de Leaflet
-            if(viewId !== 'places') {
-                document.getElementById('placesSidebarRoot').classList.remove('hidden');
-                document.getElementById('mapContainerRoot').classList.remove('active-mobile-map');
-                document.getElementById('tab-btn-list').classList.add('active');
-                document.getElementById('tab-btn-map').classList.remove('active');
-                state.mobileTab = 'list';
+            // Al salir de Places, aseguramos resetear la vista móvil a Lista para evitar cruces
+            if(viewId !== 'places' && window.innerWidth < 768) {
+                switchMobileView('list');
             }
 
             renderViewByCurrentState();
@@ -495,13 +479,11 @@
 
         function selectCountry(country) { state.country = country; navigateTo('regions'); }
 
-        // ------------- AÑADIDO: INTEGRACIÓN DE TARJETA GLOBAL ANTES DE LAS REGIONES -------------
         function drawRegionsGrid() {
             let regions = [...new Set(viajesData.filter(i => i.categoria === state.country && i.estado).map(i => i.estado))];
             regions.sort((a, b) => a.localeCompare(b, 'es'));
             const grid = document.getElementById('regions-grid'); grid.innerHTML = '';
 
-            // 1. Añadimos SIEMPRE en primer lugar la tarjeta de acceso global
             const totalPaisCount = viajesData.filter(i => i.categoria === state.country).length;
             const globalKey = `global_${state.country}`;
             grid.innerHTML += `
@@ -515,7 +497,6 @@
                     </div>
                 </div>`;
 
-            // 2. Pintamos el resto de provincias/regiones
             if (regions.length > 0) {
                 regions.forEach(r => {
                     const count = viajesData.filter(i => i.categoria === state.country && i.estado === r).length;
@@ -535,10 +516,7 @@
         }
 
         function selectGlobalCountryMode() {
-            state.isGlobalCountryMode = true;
-            state.region = null;
-            state.selectedTags = [];
-            state.statusFilter = 'todos';
+            state.isGlobalCountryMode = true; state.region = null; state.selectedTags = []; state.statusFilter = 'todos';
             updateStatusFilterBarUI();
             document.getElementById('places-sidebar-title').textContent = `Todo ${state.country}`;
             document.getElementById('places-sidebar-subtitle').textContent = `🗺️ Visor Completo Nacional`;
@@ -546,8 +524,7 @@
         }
 
         function selectRegion(region) {
-            state.isGlobalCountryMode = false;
-            state.region = region; state.selectedTags = []; state.statusFilter = 'todos'; 
+            state.isGlobalCountryMode = false; state.region = region; state.selectedTags = []; state.statusFilter = 'todos'; 
             updateStatusFilterBarUI();
             document.getElementById('places-sidebar-title').textContent = region;
             document.getElementById('places-sidebar-subtitle').textContent = `📍 ${state.country}`;
@@ -582,14 +559,26 @@
             }).join('');
         }
 
-        // ------------- COMPONENTE DE RENDERIZADO CON FILTRO NACIONAL O REGIONAL -------------
+        function scrollAndHighlightCard(id) {
+            if(window.innerWidth < 768) { switchMobileView('list'); }
+            
+            setTimeout(() => {
+                const targetCard = document.getElementById('card-' + id);
+                if (targetCard) {
+                    targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Animación de resaltado
+                    targetCard.classList.add('ring-4', 'ring-sky-400', 'scale-[1.02]');
+                    setTimeout(() => { targetCard.classList.remove('ring-4', 'ring-sky-400', 'scale-[1.02]'); }, 1500);
+                }
+            }, 100);
+        }
+
         function renderPlacesView() {
             const list = document.getElementById('placesList');
             list.innerHTML = ''; if (markersGroup) markersGroup.clearLayers();
 
             const searchVal = document.getElementById('sidebarSearch').value.toLowerCase();
             
-            // Si estamos en modo global, descargamos todos los sitios de ese país; si no, solo de la provincia
             let regionPlaces = [];
             if (state.isGlobalCountryMode) {
                 regionPlaces = viajesData.filter(i => i.categoria === state.country);
@@ -634,7 +623,8 @@
                 let finalLng = parseFloat(p.longitud);
 
                 const card = document.createElement('div');
-                card.className = `p-4 mb-3 bg-white border border-slate-200 rounded-2xl shadow-sm active:bg-slate-50 transition relative cursor-pointer`;
+                card.id = 'card-' + p.id;
+                card.className = `p-4 mb-3 bg-white border border-slate-200 rounded-2xl shadow-sm active:bg-slate-50 transition-all duration-500 relative cursor-pointer`;
                 card.onclick = () => { 
                     if (!isNaN(finalLat) && !isNaN(finalLng)) { 
                         map.flyTo([finalLat, finalLng], 15, { animate: true, duration: 1.5 });
@@ -650,7 +640,7 @@
                             </span>
                             <button class="text-slate-400 hover:text-sky-600 bg-slate-100 p-2 rounded-lg" onclick="event.stopPropagation(); openPlaceModal(true, ${globalIndex})"><i class="fa-solid fa-pen"></i></button>
                         </div>
-                        <div class="flex flex-wrap gap-1.5 mt-1рам">${getTagsHTMLForCard(p.etiquetas || 'General')}</div>
+                        <div class="flex flex-wrap gap-1.5 mt-1">${getTagsHTMLForCard(p.etiquetas || 'General')}</div>
                     </div>
                     <h4 class="text-base md:text-sm font-bold text-slate-800 mb-1">${p.nombre}</h4>
                     <p class="text-slate-600 text-sm md:text-xs p-3 bg-slate-50 border rounded-xl mb-3 font-medium">${p.descripcion || '<span class="italic text-slate-400">Sin descripción.</span>'}</p>
@@ -675,17 +665,14 @@
                         iconSize: [36, 36], iconAnchor: [18, 36]
                     });
                     
-                    // ------------- REDISEÑO TOTAL: TOOLTIP HORIZONTAL EXCLUSIVO -------------
                     let badgeEstado = isVisited ? '<span style="background-color:#ecfdf5; color:#059669;" class="px-2 py-0.5 rounded text-[9px] font-extrabold mr-2">🟢 VISITADO</span>' : '<span style="background-color:#fffbeb; color:#d97706;" class="px-2 py-0.5 rounded text-[9px] font-extrabold mr-2">🧡 QUIERO IR</span>';
-                    
                     let badgesEtiquetasHTML = listaEtiquetas.slice(0, 2).map(tag => {
                         const s = getTagStyle(tag);
                         return `<span style="background-color:${s.bg}; color:#fff;" class="px-1.5 py-0.5 rounded text-[8px] font-bold">${tag}</span>`;
                     }).join(' ');
 
                     let tooltipContent = `
-                        <div class="flex flex-col w-full font-sans text-left">
-                            <!-- Cabecera superior con color de la etiqueta principal -->
+                        <div class="flex flex-col w-full font-sans text-left" onclick="scrollAndHighlightCard('${p.id}')">
                             <div style="background-color: ${pinStyle.bg};" class="h-1 w-full"></div>
                             <div class="p-3">
                                 <div class="flex items-center justify-between mb-1">
@@ -694,13 +681,17 @@
                                 </div>
                                 <h5 class="text-sm font-bold text-slate-800 leading-tight mb-1">${p.nombre}</h5>
                                 ${p.descripcion ? `<p class="text-xs text-slate-500 font-medium line-clamp-2 mt-1 border-t pt-1 border-slate-100">${p.descripcion}</p>` : ''}
+                                <div class="mt-2 text-center w-full"><span class="text-[9px] font-bold text-sky-600 bg-sky-50 px-2 py-1 rounded"><i class="fa-solid fa-magnifying-glass"></i> Ver detalles</span></div>
                             </div>
                         </div>
                     `;
 
-                    L.marker([finalLat, finalLng], { icon: markerIcon })
+                    let m = L.marker([finalLat, finalLng], { icon: markerIcon })
                         .addTo(markersGroup)
                         .bindTooltip(tooltipContent, { direction: 'top', offset: [0, -15], opacity: 1, className: 'custom-tooltip' });
+                        
+                    // AÑADIDO: Interacción Mapa -> Lista
+                    m.on('click', () => { scrollAndHighlightCard(p.id); });
                 }
             });
 
@@ -814,31 +805,29 @@
             }
         }
 
-        // ------------- CORRECCIÓN CRÍTICA DE INTERFACIAL EN MÓVIL -------------
+        // ------------- COMPORTAMIENTO MÓVIL OPTIMIZADO -------------
         function switchMobileView(tab) {
             state.mobileTab = tab;
             
-            const sidebar = document.getElementById('placesSidebarRoot');
+            const listContainer = document.getElementById('placesList');
             const mapContainer = document.getElementById('mapContainerRoot');
             const btnList = document.getElementById('tab-btn-list');
             const btnMap = document.getElementById('tab-btn-map');
 
             if (tab === 'list') {
-                sidebar.classList.remove('hidden');
+                listContainer.classList.remove('mobile-list-hidden');
                 mapContainer.classList.remove('active-mobile-map');
                 btnList.classList.add('active');
                 btnMap.classList.remove('active');
             } else {
-                sidebar.classList.add('hidden');
+                listContainer.classList.add('mobile-list-hidden');
                 mapContainer.classList.add('active-mobile-map');
                 btnList.classList.remove('active');
                 btnMap.classList.add('active');
                 
-                // Forzamos el rediseño y recalculado de Leaflet para evitar el mapa gris roto
                 setTimeout(() => {
                     if (map) {
                         map.invalidateSize();
-                        // Si hay marcadores en el grupo, reajustamos el encuadre
                         let bounds = markersGroup.getBounds();
                         if (bounds && bounds.isValid()) {
                             map.fitBounds(bounds, { padding: [30, 30] });
@@ -850,7 +839,6 @@
 
         function exportToCSV() { /* Mantenido */ }
         function handleCSVFile(event) { /* Mantenido */ }
-
         async function clearAllData() {
             if (confirm("⚠️ ¿Estás seguro de que quieres VACIAR toda la base de datos?")) {
                 await supabaseClient.from('sitios').delete().neq('id', 0);
@@ -861,13 +849,8 @@
         function initMap() {
             map = L.map('map', { zoomControl: false }).setView([40.4167, -3.7037], 6);
             L.control.zoom({ position: 'bottomright' }).addTo(map);
-            
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
-            
-            markersGroup = L.featureGroup().addTo(map); // Cambiado a FeatureGroup para poder calcular los límites exactos (getBounds)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+            markersGroup = L.featureGroup().addTo(map);
         }
 
         window.onload = function () { initMap(); }
