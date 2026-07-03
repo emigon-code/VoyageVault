@@ -5,20 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoyageVault — Mi Visor de Viajes Personalizado</title>
     
-    <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Leaflet CSS y JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- Fuentes y Estilos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -39,15 +35,18 @@
         
         navbar { height: 75px; background-color: rgba(255, 255, 255, 0.85); border-bottom: 1px solid rgba(226, 232, 240, 0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; backdrop-filter: blur(20px); z-index: 100; box-shadow: 0 4px 20px -10px rgba(15, 23, 42, 0.05); }
         @media (min-width: 768px) { navbar { padding: 0 32px; } }
-        .nav-left, .nav-right { display: flex; align-items: center; gap: 12px; z-index: 5; }
-        @media (min-width: 768px) { .nav-left, .nav-right { gap: 20px; } }
+        .nav-left, .nav-right { display: flex; align-items: center; gap: 8px; z-index: 5; }
+        @media (min-width: 768px) { .nav-left, .nav-right { gap: 12px; } }
+        
         .logo { display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .logo i { font-size: 24px; background: linear-gradient(135deg, #06b6d4, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .logo h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(to right, #0ea5e9, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(to right, #0ea5e9, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: none; }
+        @media (min-width: 768px) { .logo h1 { display: block; } }
         
-        .breadcrumbs { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #475569; font-weight: 500; }
-        @media (min-width: 768px) { .breadcrumbs { gap: 8px; font-size: 13px; } }
-        .breadcrumbs span { cursor: pointer; transition: all 0.3s ease; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
+        .breadcrumbs { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #475569; font-weight: 500; margin-left: 4px; }
+        @media (min-width: 768px) { .breadcrumbs { gap: 8px; font-size: 13px; margin-left: 12px; } }
+        .breadcrumbs span { cursor: pointer; transition: all 0.3s ease; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
+        @media (min-width: 768px) { .breadcrumbs span { max-width: 120px; } }
         .breadcrumbs span:hover { color: #0284c7; }
         .breadcrumbs i { font-size: 9px; color: #94a3b8; }
         .breadcrumbs .active { color: #0f172a; font-weight: 700; cursor: default; }
@@ -88,19 +87,18 @@
         .places-list-container { flex-grow: 1; overflow-y: auto; padding: 16px; background-color: rgba(248, 250, 252, 0.5); }
 
         .btn { background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; border: none; padding: 8px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease; box-shadow: 0 4px 15px -4px rgba(2, 132, 199, 0.3); }
-        .btn-secondary { background: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); color: #0f172a; box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08); }
+        .btn-secondary { background: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); color: #0f172a; box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08); padding: 8px 12px; }
         .btn-secondary:hover { background-color: #f8fafc; color: #0284c7; border-color: #0284c7; }
-        .btn-danger { background: #fef2f2; border: 1px solid #fecaca; color: #ef4444; font-size: 11px; padding: 6px 12px; border-radius: 10px; transition: all 0.3s ease; font-weight: 700; }
-
+        
         .tag-filter-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
         
-        /* OPTIMIZACIÓN MÓVIL: Tabs abajo */
+        /* TABS MÓVILES */
         .mobile-view-tabs { display: none; }
         @media (max-width: 767px) { 
             .mobile-view-tabs { display: flex; background: #ffffff; border-top: 1px solid rgba(226, 232, 240, 0.8); position: fixed; bottom: 0; left: 0; width: 100%; z-index: 1000; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); padding-bottom: env(safe-area-inset-bottom); }
             .mobile-view-tabs button { flex: 1; text-align: center; font-size: 14px; font-weight: 700; color: #475569; padding: 16px 0; }
             .mobile-view-tabs button.active { color: #0284c7; border-top: 3px solid #0284c7; background: #f8fafc; }
-            .places-sidebar { padding-bottom: 60px; } /* Evita que las tarjetas queden debajo de las tabs */
+            .places-sidebar { padding-bottom: 60px; } 
         }
 
         .map-container { flex-grow: 1; height: 100%; position: relative; }
@@ -110,17 +108,22 @@
         .custom-pin-marker { display: flex; align-items: center; justify-content: center; width: 36px !important; height: 36px !important; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: -2px 2px 4px rgba(0,0,0,0.3); border: 2px solid #ffffff; }
         .custom-pin-marker i { transform: rotate(45deg); color: white; font-size: 13px; }
         
-        /* Diseño elegante para los Tooltips del mapa */
-        .leaflet-tooltip { background-color: rgba(255, 255, 255, 0.95); border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 12px; padding: 6px 12px; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; color: #0f172a; }
-        .leaflet-tooltip-top:before { border-top-color: rgba(255, 255, 255, 0.95); }
+        /* TOOLTIPS ENRIQUECIDOS */
+        .leaflet-tooltip.custom-tooltip { background-color: rgba(255, 255, 255, 0.98); border: 1px solid rgba(226, 232, 240, 1); border-radius: 12px; padding: 10px 14px; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15); font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; max-width: 200px; white-space: normal; }
+        .leaflet-tooltip-top:before { border-top-color: rgba(255, 255, 255, 0.98); }
 
-        .notification-toast { position: fixed; bottom: 16px; left: 16px; right: 16px; background-color: #ffffff; border-left: 5px solid #0284c7; box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.1); padding: 12px 18px; border-radius: 16px; z-index: 1100; display: flex; align-items: center; gap: 12px; transform: translateY(150%); transition: transform 0.3s ease; border: 1px solid rgba(226, 232, 240, 0.8); }
+        .notification-toast { position: fixed; bottom: 16px; left: 16px; right: 16px; background-color: #ffffff; border-left: 5px solid #0284c7; box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.1); padding: 12px 18px; border-radius: 16px; z-index: 2000; display: flex; align-items: center; gap: 12px; transform: translateY(150%); transition: transform 0.3s ease; border: 1px solid rgba(226, 232, 240, 0.8); }
         @media (min-width: 768px) { .notification-toast { bottom: 32px; left: 32px; right: auto; width: 340px; } }
         .notification-toast.show { transform: translateY(0); }
         .notification-toast.error { border-left-color: #ef4444; }
         
-        /* Prevenir zoom en móviles Android/iOS */
         input, select, textarea { font-size: 16px !important; }
+
+        /* Botón de volver en el mapa móvil */
+        #mobileBackBtn { display: none; }
+        @media (max-width: 767px) {
+            .active-mobile-map #mobileBackBtn { display: flex; }
+        }
     </style>
 </head>
 <body>
@@ -161,36 +164,40 @@
             </div>
         </div>
         <div class="nav-right">
-            <!-- Botones ocultos en móvil para no sobrecargar la cabecera, visibles en PC -->
-            <button class="btn btn-secondary hidden md:inline-flex" onclick="exportToCSV()"><i class="fa-solid fa-cloud-arrow-down"></i> Exportar</button>
-            <button class="btn btn-secondary hidden md:inline-flex" onclick="openModal('importModal')"><i class="fa-solid fa-cloud-arrow-up"></i> Sincronizar</button>
-            <button class="btn btn-secondary text-red-500" onclick="signOut()"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+            <button class="btn btn-secondary" onclick="exportToCSV()" title="Exportar CSV">
+                <i class="fa-solid fa-cloud-arrow-down"></i> <span class="hidden md:inline ml-1">Exportar</span>
+            </button>
+            <button class="btn btn-secondary" onclick="openModal('importModal')" title="Sincronizar Datos">
+                <i class="fa-solid fa-cloud-arrow-up"></i> <span class="hidden md:inline ml-1">Sincronizar</span>
+            </button>
+            <button class="btn btn-secondary text-red-500" onclick="clearAllData()" title="Vaciar Base de Datos">
+                <i class="fa-solid fa-trash"></i> <span class="hidden md:inline ml-1">Resetear</span>
+            </button>
+            <button class="btn btn-secondary text-slate-700" onclick="signOut()" title="Cerrar Sesión">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </button>
         </div>
     </navbar>
 
     <div class="main-viewport" id="app-viewport">
-        <!-- 1. HOME -->
         <div class="view-panel active-view" id="view-home">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1">Explora tus destinos</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una región geográfica para organizar y planificar tus escapadas.</p>
             <div class="banner-grid home-grid" id="explorer-cards-container"></div>
         </div>
 
-        <!-- 2. PAÍSES -->
         <div class="view-panel" id="view-countries">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="countries-title">Países</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Naciones con destinos registrados en tu colección.</p>
             <div class="banner-grid" id="countries-grid"></div>
         </div>
 
-        <!-- 3. REGIONES -->
         <div class="view-panel" id="view-regions">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="regions-title">Regiones</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una provincia o comarca específica de tu catálogo.</p>
             <div class="banner-grid" id="regions-grid"></div>
         </div>
 
-        <!-- 4. DETALLE DE LUGARES Y MAPA -->
         <div class="view-panel" id="view-places" style="padding: 0;">
             <div class="split-viewport">
                 <div class="places-sidebar">
@@ -213,12 +220,16 @@
                     </div>
                     <div class="places-list-container" id="placesList"></div>
                 </div>
+                
                 <div class="map-container">
                     <div id="map"></div>
+                    
+                    <button id="mobileBackBtn" class="absolute top-4 left-4 z-[400] bg-white border border-slate-200 shadow-lg rounded-full px-4 py-2.5 text-sm font-extrabold text-slate-700 items-center gap-2" onclick="navigateTo('regions')">
+                        <i class="fa-solid fa-arrow-left"></i> Volver a <span id="mobileBackBtnText">Regiones</span>
+                    </button>
                 </div>
             </div>
             
-            <!-- TABS MÓVILES (AHORA ABAJO) -->
             <div class="mobile-view-tabs">
                 <button id="tab-btn-list" class="active" onclick="switchMobileView('list')"><i class="fa-solid fa-list-ul mb-1 block text-lg"></i> Lista</button>
                 <button id="tab-btn-map" onclick="switchMobileView('map')"><i class="fa-solid fa-map-location-dot mb-1 block text-lg"></i> Mapa</button>
@@ -226,7 +237,6 @@
         </div>
     </div>
 
-    <!-- MODAL FORM LUGAR (Aumentados tamaños de padding para dedos en móvil) -->
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4" id="placeModal" onclick="closeModal('placeModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[540px] rounded-[24px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4">
@@ -287,7 +297,6 @@
         </div>
     </div>
 
-    <!-- MODAL SINCRO CSV -->
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4" id="importModal" onclick="closeModal('importModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[520px] rounded-[24px] p-6 shadow-2xl" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-5">
@@ -308,13 +317,12 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtdWVyYXZjbndrb3N3dndidm5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMjIxMzIsImV4cCI6MjA5Nzg5ODEzMn0._k2oBg5XwMmPzPZ3zm43EOp-gn1VyM6JDqpCx2BoYvQ';
 
         let viajesData = [];
-        let customBanners = {}; // AHORA SE CARGA DESDE LA NUBE
+        let customBanners = {};
         let userSessionId = null;
         let supabaseClient = null;
         let map, markersGroup;
 
         let state = { view: 'home', continent: null, country: null, region: null, selectedTags: [], statusFilter: 'todos', mobileTab: 'list' };
-
         const EUROPEAN_COUNTRIES = ["alemania", "andorra", "austria", "españa", "espana", "francia", "italia", "portugal", "suiza", "reino unido", "grecia", "bélgica", "belgica", "paises bajos", "países bajos", "holanda"];
 
         const DEFAULT_IMAGES = {
@@ -344,26 +352,18 @@
         async function signInWithGoogle() { await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); }
         async function signOut() { await supabaseClient.auth.signOut(); window.location.reload(); }
 
-        // ------------- CARGA DATOS Y BANNERS DESDE SUPABASE -------------
         async function loadCloudData() {
             if (!supabaseClient) return;
-            
-            // Cargar Sitios
             const { data: sitios, error: errorSitios } = await supabaseClient.from('sitios').select('*');
             if (errorSitios) { showToast("Error", errorSitios.message, true); return; }
             viajesData = sitios || [];
 
-            // Cargar Banners guardados en la Nube
             const { data: bannersData } = await supabaseClient.from('banners').select('*').eq('user_id', userSessionId);
             customBanners = {};
-            if (bannersData) {
-                bannersData.forEach(b => { customBanners[b.clave] = b.url; });
-            }
-
+            if (bannersData) { bannersData.forEach(b => { customBanners[b.clave] = b.url; }); }
             renderViewByCurrentState();
         }
 
-        // ------------- GUARDADO DE BANNERS EN LA NUBE -------------
         async function editBannerImage(event, key) {
             event.preventDefault(); event.stopPropagation();
             const currentImg = customBanners[key] || DEFAULT_IMAGES[key] || DEFAULT_IMAGES['pais_default'];
@@ -372,20 +372,9 @@
                 const newUrl = prompt("Introduce la URL de la nueva imagen de portada:", currentImg);
                 if (newUrl !== null && newUrl.trim() !== "") {
                     customBanners[key] = newUrl.trim();
-                    
-                    // Sincronizar con Supabase (upsert actualiza si existe, inserta si es nuevo)
-                    const { error } = await supabaseClient.from('banners').upsert(
-                        { user_id: userSessionId, clave: key, url: newUrl.trim() },
-                        { onConflict: 'user_id, clave' }
-                    );
-
-                    if(error) {
-                        showToast("Error", "No se pudo guardar la imagen en la nube.", true);
-                        console.error(error);
-                    } else {
-                        showToast("Portada Actualizada", "Sincronizada en todos tus dispositivos.");
-                        renderViewByCurrentState();
-                    }
+                    const { error } = await supabaseClient.from('banners').upsert({ user_id: userSessionId, clave: key, url: newUrl.trim() }, { onConflict: 'user_id, clave' });
+                    if(error) { showToast("Error", "No se guardó en la nube.", true); } 
+                    else { showToast("Portada Actualizada", "Sincronizada en tus dispositivos."); renderViewByCurrentState(); }
                 }
             }, 50);
         }
@@ -419,7 +408,10 @@
             trail.innerHTML = `<span onclick="navigateTo('home')">Inicio</span>`;
             if (['countries', 'regions', 'places'].includes(viewId)) trail.innerHTML += ` <i class="fa-solid fa-chevron-right mx-1 text-[9px] text-slate-400"></i> <span onclick="selectContinent('${state.continent}')">${state.continent}</span>`;
             if (['regions', 'places'].includes(viewId)) trail.innerHTML += ` <i class="fa-solid fa-chevron-right mx-1 text-[9px] text-slate-400"></i> <span onclick="selectCountry('${state.country}')">${state.country}</span>`;
-            if (viewId === 'places') trail.innerHTML += ` <i class="fa-solid fa-chevron-right mx-1 text-[9px] text-slate-400"></i> <span class="active font-bold">${state.region}</span>`;
+            if (viewId === 'places') {
+                trail.innerHTML += ` <i class="fa-solid fa-chevron-right mx-1 text-[9px] text-slate-400"></i> <span class="active font-bold">${state.region}</span>`;
+                document.getElementById('mobileBackBtnText').textContent = state.country; // Actualiza el botón flotante móvil
+            }
 
             renderViewByCurrentState();
             if (viewId === 'places') { setTimeout(() => { if (map) map.invalidateSize(); }, 200); }
@@ -451,13 +443,9 @@
 
         function selectContinent(continent) { state.continent = continent; navigateTo('countries'); }
 
-        // ------------- ORDENACIÓN ALFABÉTICA (PAÍSES Y REGIONES) -------------
         function drawCountriesGrid() {
             let countries = [...new Set(viajesData.filter(i => getContinent(i.categoria) === state.continent && i.categoria).map(i => i.categoria))];
-            
-            // ORDEN ALFABÉTICO (A-Z)
             countries.sort((a, b) => a.localeCompare(b, 'es'));
-
             const grid = document.getElementById('countries-grid'); grid.innerHTML = '';
             
             if (countries.length === 0) {
@@ -483,10 +471,7 @@
 
         function drawRegionsGrid() {
             let regions = [...new Set(viajesData.filter(i => i.categoria === state.country && i.estado).map(i => i.estado))];
-            
-            // ORDEN ALFABÉTICO (A-Z)
             regions.sort((a, b) => a.localeCompare(b, 'es'));
-
             const grid = document.getElementById('regions-grid'); grid.innerHTML = '';
 
             if (regions.length === 0) {
@@ -552,7 +537,6 @@
             const searchVal = document.getElementById('sidebarSearch').value.toLowerCase();
             let regionPlaces = viajesData.filter(i => i.categoria === state.country && i.estado === state.region);
             
-            // ORDEN ALFABÉTICO DE LOS LUGARES TAMBIÉN (A-Z)
             regionPlaces.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
 
             const allTags = new Set();
@@ -594,7 +578,7 @@
                 card.onclick = () => { 
                     if (!isNaN(finalLat) && !isNaN(finalLng)) { 
                         map.flyTo([finalLat, finalLng], 15, { animate: true, duration: 1.5 });
-                        if(window.innerWidth < 768) switchMobileView('map'); // En móvil, viaja directo al mapa
+                        if(window.innerWidth < 768) switchMobileView('map'); 
                     } 
                 };
                 
@@ -622,7 +606,8 @@
 
                 if (map && !isNaN(finalLat) && !isNaN(finalLng) && finalLat !== 0) {
                     coordsArray.push([finalLat, finalLng]);
-                    const pinStyle = getTagStyle((p.etiquetas || "General").split(',')[0].trim());
+                    const primeraEtiqueta = (p.etiquetas || "General").split(',')[0].trim();
+                    const pinStyle = getTagStyle(primeraEtiqueta);
 
                     const markerIcon = L.divIcon({
                         className: 'custom-marker-wrapper',
@@ -630,11 +615,19 @@
                         iconSize: [36, 36], iconAnchor: [18, 36]
                     });
                     
-                    // AÑADIDO: bindTooltip para que el nombre salga al pasar el ratón
+                    // CREAMOS LA ETIQUETA ENRIQUECIDA PARA EL MAPA
+                    let descCorta = p.descripcion ? (p.descripcion.length > 70 ? p.descripcion.substring(0, 70) + '...' : p.descripcion) : '';
+                    let tooltipContent = `
+                        <div class="text-center">
+                            <b class="text-[13px] text-sky-800 block mb-1">${p.nombre}</b>
+                            <span class="text-[9px] uppercase tracking-wider text-slate-400 font-extrabold block mb-1">${primeraEtiqueta}</span>
+                            ${descCorta ? `<span class="text-[11px] font-medium text-slate-600 block line-clamp-2">${descCorta}</span>` : ''}
+                        </div>
+                    `;
+
                     L.marker([finalLat, finalLng], { icon: markerIcon })
                         .addTo(markersGroup)
-                        .bindTooltip(p.nombre, { direction: 'top', offset: [0, -15], opacity: 1 })
-                        .bindPopup(`<b>${p.nombre}</b><br><span class="text-xs">${p.descripcion || ''}</span>`);
+                        .bindTooltip(tooltipContent, { direction: 'top', offset: [0, -15], opacity: 1, className: 'custom-tooltip' });
                 }
             });
 
@@ -755,10 +748,24 @@
         function exportToCSV() { /* Código de exportación CSV mantenido por brevedad */ }
         function handleCSVFile(event) { /* Código de importación CSV mantenido por brevedad */ }
 
+        async function clearAllData() {
+            if (confirm("⚠️ ¿Estás seguro de que quieres VACIAR toda la base de datos? Se borrarán todos los lugares de la nube para siempre.")) {
+                await supabaseClient.from('sitios').delete().neq('id', 0);
+                loadCloudData(); navigateTo('home');
+                showToast("Base de datos limpia", "Todos los destinos han sido eliminados.");
+            }
+        }
+
         function initMap() {
             map = L.map('map', { zoomControl: false }).setView([40.4167, -3.7037], 6);
             L.control.zoom({ position: 'bottomright' }).addTo(map);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+            
+            // MAPA DE OPENSTREETMAP (MÁXIMO DETALLE: Nombres de tiendas, calles, monumentos de fondo)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+            
             markersGroup = L.layerGroup().addTo(map);
         }
 
