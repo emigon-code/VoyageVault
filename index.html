@@ -2,8 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VoyageVault — Mi Visor de Viajes Personalizado</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
@@ -12,7 +14,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -28,13 +30,13 @@
     </script>
     
     <style>
-        body { background-color: #f8fafc; color: #0f172a; height: 100vh; overflow: hidden; display: flex; flex-direction: column; position: relative; }
+        body { background-color: #f8fafc; color: #0f172a; height: 100vh; overflow: hidden; display: flex; flex-direction: column; position: relative; margin: 0; }
         .ambient-glow { position: absolute; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(255, 255, 255, 0) 70%); top: -100px; right: -100px; z-index: 1; pointer-events: none; }
         .ambient-glow-2 { position: absolute; width: 450px; height: 450px; border-radius: 50%; background: radial-gradient(circle, rgba(244, 63, 94, 0.1) 0%, rgba(255, 255, 255, 0) 70%); bottom: -100px; left: -100px; z-index: 1; pointer-events: none; }
         #cloud-login-screen { position: fixed; inset: 0; background-color: #f8fafc; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         
-        /* NAVBAR FIJA ABSOLUTA */
-        navbar { height: 75px; background-color: rgba(255, 255, 255, 0.95); border-bottom: 1px solid rgba(226, 232, 240, 0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; backdrop-filter: blur(20px); z-index: 100; box-shadow: 0 4px 20px -10px rgba(15, 23, 42, 0.05); position: fixed; top: 0; left: 0; right: 0; flex-shrink: 0; }
+        /* NAVBAR FIJA */
+        navbar { height: 75px; background-color: rgba(255, 255, 255, 0.95); border-bottom: 1px solid rgba(226, 232, 240, 0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; backdrop-filter: blur(20px); z-index: 100; position: fixed; top: 0; left: 0; right: 0; flex-shrink: 0; }
         @media (min-width: 768px) { navbar { padding: 0 32px; } }
         .nav-left, .nav-right { display: flex; align-items: center; gap: 8px; z-index: 5; }
         @media (min-width: 768px) { .nav-left, .nav-right { gap: 12px; } }
@@ -44,7 +46,6 @@
         .logo h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(to right, #0ea5e9, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: none; }
         @media (min-width: 768px) { .logo h1 { display: block; } }
         
-        /* RUTAS DE NAVEGACIÓN TOTALMENTE VISIBLES */
         .breadcrumbs { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #475569; font-weight: 600; margin-left: 4px; flex-wrap: wrap; }
         @media (min-width: 768px) { .breadcrumbs { gap: 8px; font-size: 13px; margin-left: 12px; } }
         .breadcrumbs span { cursor: pointer; transition: all 0.3s ease; white-space: nowrap; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
@@ -53,14 +54,14 @@
         .breadcrumbs i { font-size: 9px; color: #94a3b8; }
         .breadcrumbs .active { color: #0f172a; font-weight: 800; cursor: default; }
 
-        /* CONTENEDOR ENCAPSULADO BAJO LA NAVBAR */
+        /* VIEWPORT PRINCIPAL */
         .main-viewport { margin-top: 75px; flex-grow: 1; position: relative; height: calc(100vh - 75px); z-index: 10; display: none; overflow: hidden; }
         .view-panel { display: none; width: 100%; height: 100%; overflow-y: auto; padding: 20px; }
         @media (min-width: 768px) { .view-panel { padding: 40px; } }
         .view-panel.active-view { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* VISOR DE LUGARES SIN DOBLE SCROLL */
+        /* PANEL DE LUGARES Y MAPA */
         .view-panel#view-places { padding: 0 !important; overflow: hidden !important; }
         .split-viewport { display: flex; flex-direction: column; width: 100%; height: 100%; position: relative; }
         @media (min-width: 768px) { .split-viewport { flex-direction: row; } }
@@ -73,14 +74,15 @@
         
         .places-list-container { flex-grow: 1; overflow-y: auto; padding: 16px; background-color: rgba(248, 250, 252, 0.5); }
         
-        .map-container { display: none; flex-grow: 1; height: 100%; position: relative; z-index: 10; }
+        /* CONTENEDOR DEL MAPA CORREGIDO */
+        .map-container { display: none; flex-grow: 1; height: 100%; width: 100%; position: relative; z-index: 10; }
         @media (min-width: 768px) { .map-container { display: block !important; } }
-
         @media (max-width: 767px) {
             .sidebar-map-active { height: auto !important; flex-shrink: 0; }
             .mobile-list-hidden { display: none !important; } 
             .map-container.active-mobile-map { display: block !important; flex-grow: 1; min-height: 0; }
         }
+        #map { position: absolute; inset: 0; background-color: #cbd5e1; height: 100%; width: 100%; }
 
         .banner-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1400px; margin: 0 auto; }
         @media (min-width: 768px) { .banner-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 28px; } }
@@ -113,10 +115,10 @@
             .mobile-view-tabs button.active { color: #0284c7; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         }
 
-        /* AJUSTES RESPONSIVOS DEL MODAL */
-        .modal-scroll-area { max-height: calc(85vh - 80px); overflow-y: auto; padding-right: 4px; }
-
-        /* ANIMACIÓN EXACTA DE 3 PULSOS EN EL PIN DEL MAPA */
+        /* DISEÑO DE VENTANA MODAL (ROBUSTO Y AUTOCONTENIDO) */
+        .modal-body-scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }
+        
+        /* ANIMACIONES Y PINES DEL MAPA */
         .custom-pin-marker { display: flex; align-items: center; justify-content: center; width: 36px !important; height: 36px !important; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: -2px 2px 4px rgba(0,0,0,0.3); border: 2px solid #ffffff; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .custom-pin-marker:hover { transform: rotate(-45deg) scale(1.15); z-index: 1000 !important; }
         .custom-pin-marker i { transform: rotate(45deg); color: white; font-size: 14px; }
@@ -254,66 +256,76 @@
         </div>
     </div>
 
-    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4 animate-fade-in" id="placeModal" onclick="closeModal('placeModal')">
-        <div class="bg-white border border-slate-200/80 w-full max-w-[540px] rounded-[24px] p-6 shadow-2xl max-h-[85vh] flex flex-col overflow-hidden" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-4 flex-shrink-0">
+    <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4" id="placeModal" onclick="closeModal('placeModal')">
+        <div class="bg-white border border-slate-200/80 w-full max-w-[540px] rounded-[24px] shadow-2xl flex flex-col max-h-[95vh] md:max-h-[90vh]" onclick="event.stopPropagation()">
+            
+            <div class="p-6 pb-4 flex justify-between items-center border-b border-slate-100 flex-shrink-0">
                 <h3 id="placeModalTitle" class="text-xl font-extrabold text-slate-800">Añadir Nuevo Lugar</h3>
-                <button class="text-slate-400 hover:text-slate-600 p-2" onclick="closeModal('placeModal')"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <button type="button" class="text-slate-400 hover:text-slate-600 p-2" onclick="closeModal('placeModal')">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
             </div>
             
-            <form id="placeForm" onsubmit="savePlaceForm(event)" class="modal-scroll-area space-y-4 flex-grow">
-                <input type="hidden" id="editIndex">
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Nombre del Lugar *</label>
-                    <input type="text" id="formLugar" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Categorías / Etiquetas *</label>
-                    <input type="text" id="formTipo" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none" placeholder="Ej: Restaurante, Museo">
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4">
+            <div class="p-6 overflow-y-auto modal-body-scroll flex-grow">
+                <form id="placeForm" onsubmit="savePlaceForm(event)" class="space-y-4">
+                    <input type="hidden" id="editIndex">
                     <div>
-                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">País *</label>
-                        <input type="text" id="formPais" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none">
+                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Nombre del Lugar *</label>
+                        <input type="text" id="formLugar" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Provincia *</label>
-                        <input type="text" id="formRegion" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none">
+                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Categorías / Etiquetas *</label>
+                        <input type="text" id="formTipo" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none" placeholder="Ej: Restaurante, Museo, Parque">
                     </div>
-                </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">País *</label>
+                            <input type="text" id="formPais" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Provincia *</label>
+                            <input type="text" id="formRegion" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none">
+                        </div>
+                    </div>
 
-                <div class="p-3 bg-sky-50 rounded-xl border border-sky-200">
-                    <label class="block text-xs font-extrabold text-sky-700 uppercase tracking-wider mb-1">
-                        <i class="fa-solid fa-map-location-dot mr-1"></i> Coordenadas Manuales
-                    </label>
-                    <input type="text" id="formCoordenadasManual" placeholder="Ej: 39.469, -0.376" class="w-full p-3 bg-white border border-sky-300 rounded-lg font-medium outline-none focus:border-sky-500">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Notas</label>
-                    <textarea id="formNotas" rows="2" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none"></textarea>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Estado</label>
-                        <select id="formEstado" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none">
-                            <option value="Quiero ir">Quiero ir 🧡</option>
-                            <option value="Visitado">Visitado 🟢</option>
-                        </select>
+                    <div class="p-3 bg-sky-50 rounded-xl border border-sky-200">
+                        <label class="block text-xs font-extrabold text-sky-700 uppercase tracking-wider mb-1">
+                            <i class="fa-solid fa-map-location-dot mr-1"></i> Coordenadas Manuales
+                        </label>
+                        <input type="text" id="formCoordenadasManual" placeholder="Ej: 39.469, -0.376" class="w-full p-3 bg-white border border-sky-300 rounded-lg font-medium outline-none focus:border-sky-500">
                     </div>
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Enlace</label>
-                        <input type="url" id="formLink" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none">
-                    </div>
-                </div>
 
-                <div class="flex gap-3 pt-2 flex-shrink-0">
-                    <button type="button" class="btn bg-red-50 text-red-500 border border-red-200 shadow-none hidden py-3 px-5 rounded-xl font-bold" id="deletePlaceBtn" onclick="deletePlace()"><i class="fa-solid fa-trash"></i></button>
-                    <button type="submit" class="flex-grow py-3 px-6 text-white font-extrabold text-sm md:text-base rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 shadow-md">Guardar Destino</button>
-                </div>
-            </form>
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Notas</label>
+                        <textarea id="formNotas" rows="2" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none"></textarea>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Estado</label>
+                            <select id="formEstado" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none">
+                                <option value="Quiero ir">Quiero ir 🧡</option>
+                                <option value="Visitado">Visitado 🟢</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Enlace</label>
+                            <input type="url" id="formLink" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="p-6 pt-4 border-t border-slate-100 flex gap-3 flex-shrink-0 bg-slate-50 rounded-b-[24px]">
+                <button type="button" class="btn bg-red-50 text-red-500 border border-red-200 shadow-none hidden py-3 px-5 rounded-xl font-bold" id="deletePlaceBtn" onclick="deletePlace()">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+                <button type="submit" form="placeForm" class="flex-grow py-3 px-6 text-white font-extrabold text-sm md:text-base rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 shadow-md">
+                    Guardar Destino
+                </button>
+            </div>
+            
         </div>
     </div>
 
@@ -344,7 +356,7 @@
 
         let state = { view: 'home', continent: null, country: null, region: null, selectedTags: [], statusFilter: 'todos', mobileTab: 'list', isGlobalCountryMode: false };
         
-        // --- BASE DE DATOS EUROPEA AMPLIADA Y CORREGIDA ---
+        // BASE DE DATOS EUROPEA AMPLIADA
         const EUROPEAN_COUNTRIES = ["alemania", "andorra", "austria", "españa", "espana", "francia", "italia", "portugal", "suiza", "reino unido", "grecia", "bélgica", "belgica", "paises bajos", "países bajos", "holanda", "eslovenia", "república checa", "republica checa", "rumanía", "rumania", "suecia", "noruega", "dinamarca", "finlandia", "polonia", "hungría", "hungria", "irlanda"];
 
         const DEFAULT_IMAGES = {
@@ -441,8 +453,13 @@
             }
 
             if(viewId !== 'places' && window.innerWidth < 768) { switchMobileView('list', true); }
+            
             renderViewByCurrentState();
-            if (viewId === 'places') { setTimeout(() => { if (map) { map.invalidateSize(); } }, 300); }
+            
+            // CORRECCIÓN MAPA: Forzar renderizado exacto tras abrir la pestaña
+            if (viewId === 'places') { 
+                setTimeout(() => { if (map) { map.invalidateSize(); } }, 350); 
+            }
         }
 
         function renderHomeView() {
@@ -471,7 +488,6 @@
 
         function selectContinent(continent) { state.continent = continent; state.country = null; state.region = null; navigateTo('countries'); }
 
-        // --- CORRECCIÓN CRÍTICA DE ALGORITMO DE ORDENACIÓN (ESPAÑA PRIMERO) ---
         function drawCountriesGrid() {
             let countries = [...new Set(viajesData.filter(i => getContinent(i.categoria) === state.continent && i.categoria).map(i => i.categoria))];
             
@@ -586,7 +602,6 @@
             else if (state.statusFilter === 'Quiero ir') btnQuieroIr.className = "flex-1 py-2 px-2 text-center rounded-lg bg-amber-50 text-amber-600 font-bold border border-amber-200";
         }
 
-        // --- DICCIONARIO DE ICONOS DE CATEGORÍAS ---
         function getTagIcon(tag) {
             if (!tag) return 'fa-location-dot';
             const t = tag.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -637,7 +652,7 @@
                 const pin = document.getElementById('pin-' + id);
                 if (pin) {
                     pin.classList.add('highlight-pin');
-                    setTimeout(() => { pin.classList.remove('highlight-pin'); }, 3000); // 3 segundos exactos
+                    setTimeout(() => { pin.classList.remove('highlight-pin'); }, 3000); 
                 }
             }, 800); 
         }
@@ -709,7 +724,7 @@
                             </span>
                             <button class="text-slate-400 hover:text-sky-600 bg-slate-100 p-2 rounded-lg" onclick="event.stopPropagation(); openPlaceModal(true, ${globalIndex})"><i class="fa-solid fa-pen"></i></button>
                         </div>
-                        <div class="flex flex-wrap gap-1.5 mt-1рам">${getTagsHTMLForCard(p.etiquetas || 'General')}</div>
+                        <div class="flex flex-wrap gap-1.5 mt-1">${getTagsHTMLForCard(p.etiquetas || 'General')}</div>
                     </div>
                     <h4 class="text-base md:text-sm font-bold text-slate-800 mb-1">${p.nombre}</h4>
                     <p class="text-slate-600 text-sm md:text-xs p-3 bg-slate-50 border rounded-xl mb-3 font-medium">${p.descripcion || '<span class="italic text-slate-400">Sin descripción.</span>'}</p>
@@ -891,6 +906,7 @@
                 btnList.classList.remove('active');
                 btnMap.classList.add('active');
                 
+                // CORRECCIÓN MAPA: Forzar renderizado explícito en móvil
                 setTimeout(() => {
                     if (map) {
                         map.invalidateSize();
@@ -924,9 +940,7 @@
             showToast("Backup Descargado", `Copia descargada con éxito.`);
         }
 
-        function handleCSVFile(event) {
-            // Lógica de carga masiva si la requieres en el futuro
-        }
+        function handleCSVFile(event) {}
 
         async function clearAllData() {
             if (confirm("⚠️ ¿Estás seguro de borrar todos los sitios de forma permanente?")) {
