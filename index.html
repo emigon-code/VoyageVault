@@ -5,20 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoyageVault — Mi Visor de Viajes Personalizado</title>
     
-    <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Leaflet CSS y JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- Fuentes y Estilos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -47,9 +43,11 @@
         .logo h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(to right, #0ea5e9, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: none; }
         @media (min-width: 768px) { .logo h1 { display: block; } }
         
-        .breadcrumbs { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #475569; font-weight: 600; margin-left: 4px; flex-wrap: wrap; }
-        @media (min-width: 768px) { .breadcrumbs { gap: 6px; font-size: 13px; margin-left: 12px; } }
-        .breadcrumbs span { cursor: pointer; transition: all 0.3s ease; }
+        /* CORRECCIÓN: Estilos de la ruta (Breadcrumbs) para que nunca desaparezcan */
+        .breadcrumbs { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #475569; font-weight: 600; margin-left: 4px; flex-wrap: wrap; }
+        @media (min-width: 768px) { .breadcrumbs { gap: 8px; font-size: 13px; margin-left: 12px; } }
+        .breadcrumbs span { cursor: pointer; transition: all 0.3s ease; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
+        @media (min-width: 768px) { .breadcrumbs span { max-width: 150px; } }
         .breadcrumbs span:hover { color: #0284c7; }
         .breadcrumbs i { font-size: 9px; color: #94a3b8; }
         .breadcrumbs .active { color: #0f172a; font-weight: 800; cursor: default; }
@@ -117,17 +115,17 @@
 
         #map { position: absolute; inset: 0; background-color: #cbd5e1; height: 100%; width: 100%; }
         
-        /* NUEVO: ESTILOS Y ANIMACIONES DEL PIN */
         .custom-pin-marker { display: flex; align-items: center; justify-content: center; width: 36px !important; height: 36px !important; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: -2px 2px 4px rgba(0,0,0,0.3); border: 2px solid #ffffff; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .custom-pin-marker:hover { transform: rotate(-45deg) scale(1.15); z-index: 1000 !important; }
         .custom-pin-marker i { transform: rotate(45deg); color: white; font-size: 14px; }
         
+        /* CORRECCIÓN: La animación se repetirá solo 3 veces (3 iteraciones) */
         @keyframes pulse-ring {
             0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.8); transform: rotate(-45deg) scale(1.2); }
             70% { box-shadow: 0 0 0 15px rgba(14, 165, 233, 0); transform: rotate(-45deg) scale(1); }
             100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); transform: rotate(-45deg) scale(1); }
         }
-        .highlight-pin { animation: pulse-ring 1s cubic-bezier(0.4, 0, 0.6, 1) infinite; z-index: 9999 !important; border-color: #0ea5e9 !important; }
+        .highlight-pin { animation: pulse-ring 1s cubic-bezier(0.4, 0, 0.6, 1) 3; z-index: 9999 !important; border-color: #0ea5e9 !important; }
         
         .leaflet-tooltip.custom-tooltip { background: #ffffff; border: none; border-radius: 16px; padding: 0; box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.2); font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; min-width: 280px; max-width: 340px; overflow: hidden; white-space: normal; cursor: pointer; }
         .leaflet-tooltip-top:before { border-top-color: #ffffff; }
@@ -194,21 +192,18 @@
     </navbar>
 
     <div class="main-viewport" id="app-viewport">
-        <!-- 1. HOME -->
         <div class="view-panel active-view" id="view-home">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1">Explora tus destinos</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una región geográfica para organizar y planificar tus escapadas.</p>
             <div class="banner-grid home-grid" id="explorer-cards-container"></div>
         </div>
 
-        <!-- 2. PAÍSES -->
         <div class="view-panel" id="view-countries">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="countries-title">Países</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Naciones con destinos registrados en tu colección.</p>
             <div class="banner-grid" id="countries-grid"></div>
         </div>
 
-        <!-- 3. REGIONES -->
         <div class="view-panel" id="view-regions">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                 <div>
@@ -224,10 +219,8 @@
             <div class="banner-grid" id="regions-grid"></div>
         </div>
 
-        <!-- 4. DETALLE DE LUGARES Y MAPA -->
         <div class="view-panel" id="view-places">
             <div class="split-viewport">
-                <!-- PANEL IZQUIERDO -->
                 <div class="places-sidebar" id="placesSidebarRoot">
                     <div class="places-header-area">
                         <div class="flex justify-between items-center mb-2">
@@ -254,7 +247,6 @@
                     <div class="places-list-container" id="placesList"></div>
                 </div>
                 
-                <!-- PANEL DERECHO -->
                 <div class="map-container" id="mapContainerRoot">
                     <div id="map"></div>
                 </div>
@@ -262,7 +254,6 @@
         </div>
     </div>
 
-    <!-- MODAL FORM LUGAR -->
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4" id="placeModal" onclick="closeModal('placeModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[540px] rounded-[24px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4">
@@ -323,7 +314,6 @@
         </div>
     </div>
 
-    <!-- MODAL SINCRO CSV -->
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4" id="importModal" onclick="closeModal('importModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[520px] rounded-[24px] p-6 shadow-2xl" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-5">
@@ -580,7 +570,6 @@
             else if (state.statusFilter === 'Quiero ir') btnQuieroIr.className = "flex-1 py-2 px-2 text-center rounded-lg bg-amber-50 text-amber-600 font-bold border border-amber-200";
         }
 
-        // --- NUEVO: ASIGNADOR DE ICONOS AUTOMÁTICO SEGÚN LA PALABRA ---
         function getTagIcon(tag) {
             if (!tag) return 'fa-location-dot';
             const t = tag.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -596,7 +585,7 @@
             if (t.includes('alojamiento') || t.includes('hotel') || t.includes('camping')) return 'fa-bed';
             if (t.includes('compras') || t.includes('tienda') || t.includes('mercado')) return 'fa-basket-shopping';
             
-            return 'fa-location-dot'; // Por defecto
+            return 'fa-location-dot';
         }
 
         function getTagStyle(tag) {
@@ -606,7 +595,6 @@
             return { bg: colors[Math.abs(hash) % 8], text: '#ffffff' };
         }
 
-        // --- ACTUALIZADO: LAS ETIQUETAS AHORA MUESTRAN SU ICONO ---
         function getTagsHTMLForCard(tagString) {
             if (!tagString) return '';
             return tagString.split(',').map(t => t.trim()).filter(t => t !== "").map(tag => {
@@ -628,17 +616,14 @@
             }, 100);
         }
 
-        // --- NUEVO: FUNCIÓN PARA HACER PARPADEAR EL PIN ---
+        // CORRECCIÓN: El pulso durará solo 3 segundos (3 iteraciones de 1s de CSS)
         function highlightPinOnMap(id) {
             document.querySelectorAll('.highlight-pin').forEach(el => el.classList.remove('highlight-pin'));
-            
-            // Le damos unos milisegundos para que el mapa haga el "flyTo" y el pin esté visible en el DOM
             setTimeout(() => {
                 const pin = document.getElementById('pin-' + id);
                 if (pin) {
                     pin.classList.add('highlight-pin');
-                    // Retiramos el resaltado después de unos 4 segundos
-                    setTimeout(() => { pin.classList.remove('highlight-pin'); }, 4500);
+                    setTimeout(() => { pin.classList.remove('highlight-pin'); }, 3000);
                 }
             }, 800); 
         }
@@ -667,7 +652,6 @@
             allTags.forEach(t => {
                 const style = getTagStyle(t);
                 const isActive = state.selectedTags.includes(t);
-                // Añadido icono en los botones de filtro
                 filterBox.innerHTML += `<button style="background-color: ${isActive ? style.bg : '#fff'}; color: ${isActive ? '#fff' : style.bg}; border: 1px solid ${style.bg};" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold shadow-sm" onclick="filterTag('${t}')"><i class="fa-solid ${getTagIcon(t)}"></i> ${t}</button>`;
             });
 
@@ -701,7 +685,7 @@
                         if(window.innerWidth < 768) switchMobileView('map', true); 
                         setTimeout(() => { 
                             map.flyTo([finalLat, finalLng], 15, { animate: true, duration: 1.5 }); 
-                            highlightPinOnMap(p.id); // Llama a la animación del pin
+                            highlightPinOnMap(p.id); 
                         }, 200);
                     } 
                 };
@@ -734,9 +718,8 @@
                     
                     const primeraEtiqueta = listaEtiquetas[0];
                     const pinStyle = getTagStyle(primeraEtiqueta);
-                    const pinIcon = getTagIcon(primeraEtiqueta); // Extraer icono para el pin
+                    const pinIcon = getTagIcon(primeraEtiqueta); 
 
-                    // ACTUALIZADO: Incluir ID dinámico e Icono dinámico en el marcador HTML
                     const markerIcon = L.divIcon({
                         className: 'custom-marker-wrapper',
                         html: `<div id="pin-${p.id}" class="custom-pin-marker" style="background-color: ${pinStyle.bg}; border-color: #ffffff;"><i class="fa-solid ${pinIcon}"></i></div>`,
@@ -745,7 +728,6 @@
                     
                     let badgeEstado = isVisited ? '<span style="background-color:#ecfdf5; color:#059669;" class="px-2 py-0.5 rounded text-[9px] font-extrabold mr-2">🟢 VISITADO</span>' : '<span style="background-color:#fffbeb; color:#d97706;" class="px-2 py-0.5 rounded text-[9px] font-extrabold mr-2">🧡 QUIERO IR</span>';
                     
-                    // ACTUALIZADO: Tooltip con iconos
                     let badgesEtiquetasHTML = listaEtiquetas.slice(0, 2).map(tag => {
                         const s = getTagStyle(tag);
                         const i = getTagIcon(tag);
