@@ -12,7 +12,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -33,7 +33,8 @@
         .ambient-glow-2 { position: absolute; width: 450px; height: 450px; border-radius: 50%; background: radial-gradient(circle, rgba(244, 63, 94, 0.1) 0%, rgba(255, 255, 255, 0) 70%); bottom: -100px; left: -100px; z-index: 1; pointer-events: none; }
         #cloud-login-screen { position: fixed; inset: 0; background-color: #f8fafc; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         
-        navbar { height: 75px; background-color: rgba(255, 255, 255, 0.85); border-bottom: 1px solid rgba(226, 232, 240, 0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; backdrop-filter: blur(20px); z-index: 100; box-shadow: 0 4px 20px -10px rgba(15, 23, 42, 0.05); flex-shrink: 0; }
+        /* NAVBAR FIJA ABSOLUTA */
+        navbar { height: 75px; background-color: rgba(255, 255, 255, 0.95); border-bottom: 1px solid rgba(226, 232, 240, 0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; backdrop-filter: blur(20px); z-index: 100; box-shadow: 0 4px 20px -10px rgba(15, 23, 42, 0.05); position: fixed; top: 0; left: 0; right: 0; flex-shrink: 0; }
         @media (min-width: 768px) { navbar { padding: 0 32px; } }
         .nav-left, .nav-right { display: flex; align-items: center; gap: 8px; z-index: 5; }
         @media (min-width: 768px) { .nav-left, .nav-right { gap: 12px; } }
@@ -43,22 +44,43 @@
         .logo h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(to right, #0ea5e9, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: none; }
         @media (min-width: 768px) { .logo h1 { display: block; } }
         
-        /* CORRECCIÓN: Estilos de la ruta (Breadcrumbs) para que nunca desaparezcan */
+        /* RUTAS DE NAVEGACIÓN TOTALMENTE VISIBLES */
         .breadcrumbs { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #475569; font-weight: 600; margin-left: 4px; flex-wrap: wrap; }
         @media (min-width: 768px) { .breadcrumbs { gap: 8px; font-size: 13px; margin-left: 12px; } }
-        .breadcrumbs span { cursor: pointer; transition: all 0.3s ease; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
-        @media (min-width: 768px) { .breadcrumbs span { max-width: 150px; } }
+        .breadcrumbs span { cursor: pointer; transition: all 0.3s ease; white-space: nowrap; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
+        @media (min-width: 768px) { .breadcrumbs span { max-width: 160px; } }
         .breadcrumbs span:hover { color: #0284c7; }
         .breadcrumbs i { font-size: 9px; color: #94a3b8; }
         .breadcrumbs .active { color: #0f172a; font-weight: 800; cursor: default; }
 
-        .main-viewport { flex-grow: 1; position: relative; height: calc(100vh - 75px); z-index: 10; display: none; }
+        /* CONTENEDOR ENCAPSULADO BAJO LA NAVBAR */
+        .main-viewport { margin-top: 75px; flex-grow: 1; position: relative; height: calc(100vh - 75px); z-index: 10; display: none; overflow: hidden; }
         .view-panel { display: none; width: 100%; height: 100%; overflow-y: auto; padding: 20px; }
         @media (min-width: 768px) { .view-panel { padding: 40px; } }
         .view-panel.active-view { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* VISOR DE LUGARES SIN DOBLE SCROLL */
         .view-panel#view-places { padding: 0 !important; overflow: hidden !important; }
+        .split-viewport { display: flex; flex-direction: column; width: 100%; height: 100%; position: relative; }
+        @media (min-width: 768px) { .split-viewport { flex-direction: row; } }
+
+        .places-sidebar { width: 100%; display: flex; flex-direction: column; z-index: 20; background: #ffffff; transition: all 0.3s ease; height: 100%; }
+        @media (min-width: 768px) { .places-sidebar { width: 440px; min-width: 440px; border-right: 1px solid rgba(226,232,240,0.8); } }
+        
+        .places-header-area { padding: 16px; flex-shrink: 0; border-bottom: 1px solid rgba(226,232,240,0.8); background: rgba(255, 255, 255, 0.98); z-index: 30; }
+        @media (min-width: 768px) { .places-header-area { padding: 24px; } }
+        
+        .places-list-container { flex-grow: 1; overflow-y: auto; padding: 16px; background-color: rgba(248, 250, 252, 0.5); }
+        
+        .map-container { display: none; flex-grow: 1; height: 100%; position: relative; z-index: 10; }
+        @media (min-width: 768px) { .map-container { display: block !important; } }
+
+        @media (max-width: 767px) {
+            .sidebar-map-active { height: auto !important; flex-shrink: 0; }
+            .mobile-list-hidden { display: none !important; } 
+            .map-container.active-mobile-map { display: block !important; flex-grow: 1; min-height: 0; }
+        }
 
         .banner-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1400px; margin: 0 auto; }
         @media (min-width: 768px) { .banner-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 28px; } }
@@ -80,31 +102,9 @@
         .banner-settings-btn { position: absolute; top: 16px; right: 16px; z-index: 10; background: rgba(15, 23, 42, 0.7); color: white; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.25); }
         .banner-settings-btn:hover { background: #0284c7; transform: rotate(45deg); }
 
-        .split-viewport { display: flex; flex-direction: column; width: 100%; height: 100%; position: relative; }
-        @media (min-width: 768px) { .split-viewport { flex-direction: row; } }
-
-        .places-sidebar { width: 100%; display: flex; flex-direction: column; z-index: 20; background: #ffffff; transition: all 0.3s ease; height: 100%; }
-        @media (min-width: 768px) { .places-sidebar { width: 440px; min-width: 440px; border-right: 1px solid rgba(226,232,240,0.8); } }
-        
-        .places-header-area { padding: 16px; flex-shrink: 0; border-bottom: 1px solid rgba(226,232,240,0.8); background: rgba(255, 255, 255, 0.98); z-index: 30; }
-        @media (min-width: 768px) { .places-header-area { padding: 24px; } }
-        
-        .places-list-container { flex-grow: 1; overflow-y: auto; padding: 16px; background-color: rgba(248, 250, 252, 0.5); }
-        
-        .map-container { display: none; flex-grow: 1; height: 100%; position: relative; z-index: 10; }
-        @media (min-width: 768px) { .map-container { display: block !important; } }
-
-        @media (max-width: 767px) {
-            .sidebar-map-active { height: auto !important; flex-shrink: 0; }
-            .mobile-list-hidden { display: none !important; } 
-            .map-container.active-mobile-map { display: block !important; }
-        }
-
         .btn { background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; border: none; padding: 8px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease; box-shadow: 0 4px 15px -4px rgba(2, 132, 199, 0.3); }
         .btn-secondary { background: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); color: #0f172a; box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08); padding: 8px 12px; }
         .btn-secondary:hover { background-color: #f8fafc; color: #0284c7; border-color: #0284c7; }
-        
-        .tag-filter-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
         
         .mobile-view-tabs { display: none; }
         @media (max-width: 767px) { 
@@ -113,13 +113,14 @@
             .mobile-view-tabs button.active { color: #0284c7; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         }
 
-        #map { position: absolute; inset: 0; background-color: #cbd5e1; height: 100%; width: 100%; }
-        
+        /* AJUSTES RESPONSIVOS DEL MODAL */
+        .modal-scroll-area { max-height: calc(85vh - 80px); overflow-y: auto; padding-right: 4px; }
+
+        /* ANIMACIÓN EXACTA DE 3 PULSOS EN EL PIN DEL MAPA */
         .custom-pin-marker { display: flex; align-items: center; justify-content: center; width: 36px !important; height: 36px !important; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: -2px 2px 4px rgba(0,0,0,0.3); border: 2px solid #ffffff; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .custom-pin-marker:hover { transform: rotate(-45deg) scale(1.15); z-index: 1000 !important; }
         .custom-pin-marker i { transform: rotate(45deg); color: white; font-size: 14px; }
         
-        /* CORRECCIÓN: La animación se repetirá solo 3 veces (3 iteraciones) */
         @keyframes pulse-ring {
             0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.8); transform: rotate(-45deg) scale(1.2); }
             70% { box-shadow: 0 0 0 15px rgba(14, 165, 233, 0); transform: rotate(-45deg) scale(1); }
@@ -133,7 +134,6 @@
         .notification-toast { position: fixed; bottom: 16px; left: 16px; right: 16px; background-color: #ffffff; border-left: 5px solid #0284c7; box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.1); padding: 12px 18px; border-radius: 16px; z-index: 3000; display: flex; align-items: center; gap: 12px; transform: translateY(150%); transition: transform 0.3s ease; border: 1px solid rgba(226, 232, 240, 0.8); }
         @media (min-width: 768px) { .notification-toast { bottom: 32px; left: 32px; right: auto; width: 340px; } }
         .notification-toast.show { transform: translateY(0); }
-        .notification-toast.error { border-left-color: #ef4444; }
         
         input, select, textarea { font-size: 16px !important; }
     </style>
@@ -192,6 +192,7 @@
     </navbar>
 
     <div class="main-viewport" id="app-viewport">
+        
         <div class="view-panel active-view" id="view-home">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1">Explora tus destinos</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una región geográfica para organizar y planificar tus escapadas.</p>
@@ -215,7 +216,6 @@
                     <input type="text" id="regionSearchInput" oninput="drawRegionsGrid()" placeholder="Buscar región..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl font-medium outline-none shadow-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500 text-sm transition-all">
                 </div>
             </div>
-            
             <div class="banner-grid" id="regions-grid"></div>
         </div>
 
@@ -254,13 +254,14 @@
         </div>
     </div>
 
-    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4" id="placeModal" onclick="closeModal('placeModal')">
-        <div class="bg-white border border-slate-200/80 w-full max-w-[540px] rounded-[24px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-4">
+    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4 animate-fade-in" id="placeModal" onclick="closeModal('placeModal')">
+        <div class="bg-white border border-slate-200/80 w-full max-w-[540px] rounded-[24px] p-6 shadow-2xl max-h-[85vh] flex flex-col overflow-hidden" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4 flex-shrink-0">
                 <h3 id="placeModalTitle" class="text-xl font-extrabold text-slate-800">Añadir Nuevo Lugar</h3>
                 <button class="text-slate-400 hover:text-slate-600 p-2" onclick="closeModal('placeModal')"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <form id="placeForm" onsubmit="savePlaceForm(event)" class="space-y-4">
+            
+            <form id="placeForm" onsubmit="savePlaceForm(event)" class="modal-scroll-area space-y-4 flex-grow">
                 <input type="hidden" id="editIndex">
                 <div>
                     <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Nombre del Lugar *</label>
@@ -268,7 +269,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Categorías / Etiquetas *</label>
-                    <input type="text" id="formTipo" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none">
+                    <input type="text" id="formTipo" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none" placeholder="Ej: Restaurante, Museo">
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
@@ -282,9 +283,9 @@
                     </div>
                 </div>
 
-                <div class="p-3 bg-sky-50 rounded-xl border border-sky-200 mb-2">
+                <div class="p-3 bg-sky-50 rounded-xl border border-sky-200">
                     <label class="block text-xs font-extrabold text-sky-700 uppercase tracking-wider mb-1">
-                        <i class="fa-solid fa-map-location-dot mr-1"></i> Coordenadas Google Maps
+                        <i class="fa-solid fa-map-location-dot mr-1"></i> Coordenadas Manuales
                     </label>
                     <input type="text" id="formCoordenadasManual" placeholder="Ej: 39.469, -0.376" class="w-full p-3 bg-white border border-sky-300 rounded-lg font-medium outline-none focus:border-sky-500">
                 </div>
@@ -293,6 +294,7 @@
                     <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Notas</label>
                     <textarea id="formNotas" rows="2" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none"></textarea>
                 </div>
+                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1">Estado</label>
@@ -306,7 +308,8 @@
                         <input type="url" id="formLink" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none">
                     </div>
                 </div>
-                <div class="flex gap-3 pt-2">
+
+                <div class="flex gap-3 pt-2 flex-shrink-0">
                     <button type="button" class="btn bg-red-50 text-red-500 border border-red-200 shadow-none hidden py-3 px-5 rounded-xl font-bold" id="deletePlaceBtn" onclick="deletePlace()"><i class="fa-solid fa-trash"></i></button>
                     <button type="submit" class="flex-grow py-3 px-6 text-white font-extrabold text-sm md:text-base rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 shadow-md">Guardar Destino</button>
                 </div>
@@ -340,7 +343,9 @@
         let map, markersGroup;
 
         let state = { view: 'home', continent: null, country: null, region: null, selectedTags: [], statusFilter: 'todos', mobileTab: 'list', isGlobalCountryMode: false };
-        const EUROPEAN_COUNTRIES = ["alemania", "andorra", "austria", "españa", "espana", "francia", "italia", "portugal", "suiza", "reino unido", "grecia", "bélgica", "belgica", "paises bajos", "países bajos", "holanda"];
+        
+        // --- BASE DE DATOS EUROPEA AMPLIADA Y CORREGIDA ---
+        const EUROPEAN_COUNTRIES = ["alemania", "andorra", "austria", "españa", "espana", "francia", "italia", "portugal", "suiza", "reino unido", "grecia", "bélgica", "belgica", "paises bajos", "países bajos", "holanda", "eslovenia", "república checa", "republica checa", "rumanía", "rumania", "suecia", "noruega", "dinamarca", "finlandia", "polonia", "hungría", "hungria", "irlanda"];
 
         const DEFAULT_IMAGES = {
             'Europa': 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=1000',
@@ -408,11 +413,8 @@
 
         function showToast(title, text, isError = false) {
             const toast = document.getElementById('toastMessage');
-            document.getElementById('toastTitle').textContent = title;
-            document.getElementById('toastText').textContent = text;
-            toast.className = `notification-toast ${isError ? 'error' : ''}`;
-            document.getElementById('toastIcon').className = isError ? 'fa-solid fa-circle-exclamation text-red-500' : 'fa-solid fa-circle-check text-[#0284c7]';
-            toast.classList.add('show');
+            toast.className = `notification-toast ${isError ? 'bg-red-50 border-red-500' : 'bg-white border-sky-500'} show`;
+            document.getElementById('toastText').innerHTML = `<strong>${title}</strong>: ${text}`;
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
@@ -421,14 +423,19 @@
             document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active-view'));
             document.getElementById(`view-${viewId}`).classList.add('active-view');
             
+            // CONSTRUCCIÓN ESTABLE DE BREADCRUMBS
             const trail = document.getElementById('breadcrumbsTrail');
             trail.innerHTML = `<span onclick="navigateTo('home')">Inicio</span>`;
-            if (['countries', 'regions', 'places'].includes(viewId)) trail.innerHTML += ` <i class="fa-solid fa-chevron-right"></i> <span onclick="selectContinent('${state.continent}')">${state.continent}</span>`;
-            if (['regions', 'places'].includes(viewId)) trail.innerHTML += ` <i class="fa-solid fa-chevron-right"></i> <span onclick="selectCountry('${state.country}')">${state.country}</span>`;
+            if (['countries', 'regions', 'places'].includes(viewId) && state.continent) {
+                trail.innerHTML += ` <i class="fa-solid fa-chevron-right"></i> <span onclick="selectContinent('${state.continent}')">${state.continent}</span>`;
+            }
+            if (['regions', 'places'].includes(viewId) && state.country) {
+                trail.innerHTML += ` <i class="fa-solid fa-chevron-right"></i> <span onclick="selectCountry('${state.country}')">${state.country}</span>`;
+            }
             if (viewId === 'places') {
                 if (state.isGlobalCountryMode) {
                     trail.innerHTML += ` <i class="fa-solid fa-chevron-right"></i> <span class="active">Vista Global</span>`;
-                } else {
+                } else if (state.region) {
                     trail.innerHTML += ` <i class="fa-solid fa-chevron-right"></i> <span class="active">${state.region}</span>`;
                 }
             }
@@ -462,13 +469,23 @@
             `;
         }
 
-        function selectContinent(continent) { state.continent = continent; navigateTo('countries'); }
+        function selectContinent(continent) { state.continent = continent; state.country = null; state.region = null; navigateTo('countries'); }
 
+        // --- CORRECCIÓN CRÍTICA DE ALGORITMO DE ORDENACIÓN (ESPAÑA PRIMERO) ---
         function drawCountriesGrid() {
             let countries = [...new Set(viajesData.filter(i => getContinent(i.categoria) === state.continent && i.categoria).map(i => i.categoria))];
-            countries.sort((a, b) => a.localeCompare(b, 'es'));
-            const grid = document.getElementById('countries-grid'); grid.innerHTML = '';
             
+            countries.sort((a, b) => {
+                const normA = normalizeString(a);
+                const normB = normalizeString(b);
+                const esA = (normA === 'espana' || normA === 'espana');
+                const esB = (normB === 'espana' || normB === 'espana');
+                if (esA && !esB) return -1;
+                if (!esA && esB) return 1;
+                return a.localeCompare(b, 'es');
+            });
+
+            const grid = document.getElementById('countries-grid'); grid.innerHTML = '';
             if (countries.length === 0) {
                 grid.innerHTML = `<p class="col-span-full text-center text-slate-400 py-10 font-semibold">No tienes países registrados en este continente.</p>`;
             } else {
@@ -480,7 +497,7 @@
                             <img src="${customBanners[c] || DEFAULT_IMAGES['pais_default']}" class="banner-img">
                             <div class="banner-content">
                                 <span class="banner-category">País</span><div class="banner-name">${c}</div>
-                                <div class="banner-count"><i class="fa-solid fa-map-pin"></i> ${count} lugares</div>
+                                <div class="banner-count"><i class="fa-solid pointer-events-none fa-map-pin"></i> ${count} lugares</div>
                             </div>
                         </div>`;
                 });
@@ -489,7 +506,7 @@
         }
 
         function selectCountry(country) { 
-            state.country = country; 
+            state.country = country; state.region = null;
             const searchInput = document.getElementById('regionSearchInput');
             if (searchInput) searchInput.value = '';
             navigateTo('regions'); 
@@ -501,12 +518,11 @@
             
             const searchInput = document.getElementById('regionSearchInput');
             const searchVal = searchInput ? searchInput.value.toLowerCase() : '';
-            
             if (searchVal) regions = regions.filter(r => r.toLowerCase().includes(searchVal));
 
             const grid = document.getElementById('regions-grid'); grid.innerHTML = '';
 
-            if (!searchVal || "exploración total".includes(searchVal) || state.country.toLowerCase().includes(searchVal)) {
+            if (!searchVal || "exploracion total".includes(searchVal) || state.country.toLowerCase().includes(searchVal)) {
                 const totalPaisCount = viajesData.filter(i => i.categoria === state.country).length;
                 const globalKey = `global_${state.country}`;
                 grid.innerHTML += `
@@ -570,10 +586,10 @@
             else if (state.statusFilter === 'Quiero ir') btnQuieroIr.className = "flex-1 py-2 px-2 text-center rounded-lg bg-amber-50 text-amber-600 font-bold border border-amber-200";
         }
 
+        // --- DICCIONARIO DE ICONOS DE CATEGORÍAS ---
         function getTagIcon(tag) {
             if (!tag) return 'fa-location-dot';
             const t = tag.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            
             if (t.includes('restaurante') || t.includes('comida') || t.includes('gastronomia') || t.includes('bar') || t.includes('cafe')) return 'fa-utensils';
             if (t.includes('jardin') || t.includes('parque') || t.includes('naturaleza') || t.includes('bosque')) return 'fa-leaf';
             if (t.includes('ruta') || t.includes('senderismo') || t.includes('montaña')) return 'fa-route';
@@ -584,7 +600,6 @@
             if (t.includes('ciudad') || t.includes('pueblo') || t.includes('urbano')) return 'fa-city';
             if (t.includes('alojamiento') || t.includes('hotel') || t.includes('camping')) return 'fa-bed';
             if (t.includes('compras') || t.includes('tienda') || t.includes('mercado')) return 'fa-basket-shopping';
-            
             return 'fa-location-dot';
         }
 
@@ -616,14 +631,13 @@
             }, 100);
         }
 
-        // CORRECCIÓN: El pulso durará solo 3 segundos (3 iteraciones de 1s de CSS)
         function highlightPinOnMap(id) {
             document.querySelectorAll('.highlight-pin').forEach(el => el.classList.remove('highlight-pin'));
             setTimeout(() => {
                 const pin = document.getElementById('pin-' + id);
                 if (pin) {
                     pin.classList.add('highlight-pin');
-                    setTimeout(() => { pin.classList.remove('highlight-pin'); }, 3000);
+                    setTimeout(() => { pin.classList.remove('highlight-pin'); }, 3000); // 3 segundos exactos
                 }
             }, 800); 
         }
@@ -640,7 +654,6 @@
             } else {
                 regionPlaces = viajesData.filter(i => i.categoria === state.country && i.estado === state.region);
             }
-            
             regionPlaces.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
 
             const allTags = new Set();
@@ -669,11 +682,9 @@
             }
 
             const coordsArray = [];
-
             filtered.forEach(p => {
                 const globalIndex = viajesData.findIndex(item => item.id === p.id);
                 const isVisited = p.visitado === 'Visitado';
-
                 let finalLat = parseFloat(p.latitud);
                 let finalLng = parseFloat(p.longitud);
 
@@ -698,7 +709,7 @@
                             </span>
                             <button class="text-slate-400 hover:text-sky-600 bg-slate-100 p-2 rounded-lg" onclick="event.stopPropagation(); openPlaceModal(true, ${globalIndex})"><i class="fa-solid fa-pen"></i></button>
                         </div>
-                        <div class="flex flex-wrap gap-1.5 mt-1">${getTagsHTMLForCard(p.etiquetas || 'General')}</div>
+                        <div class="flex flex-wrap gap-1.5 mt-1рам">${getTagsHTMLForCard(p.etiquetas || 'General')}</div>
                     </div>
                     <h4 class="text-base md:text-sm font-bold text-slate-800 mb-1">${p.nombre}</h4>
                     <p class="text-slate-600 text-sm md:text-xs p-3 bg-slate-50 border rounded-xl mb-3 font-medium">${p.descripcion || '<span class="italic text-slate-400">Sin descripción.</span>'}</p>
@@ -715,10 +726,8 @@
                 if (map && !isNaN(finalLat) && !isNaN(finalLng) && finalLat !== 0) {
                     coordsArray.push([finalLat, finalLng]);
                     const listaEtiquetas = (p.etiquetas || "General").split(',').map(t => t.trim());
-                    
-                    const primeraEtiqueta = listaEtiquetas[0];
-                    const pinStyle = getTagStyle(primeraEtiqueta);
-                    const pinIcon = getTagIcon(primeraEtiqueta); 
+                    const pinStyle = getTagStyle(listaEtiquetas[0]);
+                    const pinIcon = getTagIcon(listaEtiquetas[0]);
 
                     const markerIcon = L.divIcon({
                         className: 'custom-marker-wrapper',
@@ -727,7 +736,6 @@
                     });
                     
                     let badgeEstado = isVisited ? '<span style="background-color:#ecfdf5; color:#059669;" class="px-2 py-0.5 rounded text-[9px] font-extrabold mr-2">🟢 VISITADO</span>' : '<span style="background-color:#fffbeb; color:#d97706;" class="px-2 py-0.5 rounded text-[9px] font-extrabold mr-2">🧡 QUIERO IR</span>';
-                    
                     let badgesEtiquetasHTML = listaEtiquetas.slice(0, 2).map(tag => {
                         const s = getTagStyle(tag);
                         const i = getTagIcon(tag);
@@ -807,7 +815,7 @@
                 let lat = parseFloat(p.latitud); let lng = parseFloat(p.longitud);
                 coordInput.value = (!isNaN(lat) && !isNaN(lng) && lat !== 0) ? `${lat}, ${lng}` : "";
             } else {
-                document.getElementById('placeModalTitle').textContent = "Añadir Nuevo";
+                document.getElementById('placeModalTitle').textContent = "Añadir Nuevo Lugar";
                 document.getElementById('deletePlaceBtn').classList.replace('block', 'hidden');
                 document.getElementById('editIndex').value = "";
                 document.getElementById('formPais').value = state.country || "";
@@ -819,7 +827,7 @@
 
         async function savePlaceForm(e) {
             e.preventDefault();
-            showToast("Guardando...", "Enviando datos a Supabase...");
+            showToast("Guardando", "Sincronizando con la base de datos...");
 
             const rowId = document.getElementById('editIndex').value;
             const nombre = document.getElementById('formLugar').value.trim();
@@ -828,7 +836,6 @@
             const coordInput = document.getElementById('formCoordenadasManual').value.trim();
             
             let finalLat = null; let finalLng = null;
-
             if (coordInput) {
                 const parts = coordInput.replace(/\s+/g, '').split(',');
                 if (parts.length >= 2) { finalLat = parseFloat(parts[0]); finalLng = parseFloat(parts[1]); }
@@ -838,10 +845,6 @@
                 try {
                     let res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(`${nombre}, ${region}, ${pais}`)}&limit=1`);
                     let data = await res.json();
-                    if (!data || data.length === 0) {
-                        res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(nombre)}&limit=1`);
-                        data = await res.json();
-                    }
                     if (data && data.length > 0) { finalLat = parseFloat(data[0].lat); finalLng = parseFloat(data[0].lon); }
                 } catch(err) { console.error(err); }
             }
@@ -856,20 +859,19 @@
             if (rowId) await supabaseClient.from('sitios').update(payload).eq('id', parseInt(rowId));
             else await supabaseClient.from('sitios').insert([payload]);
             
-            closeModal('placeModal'); loadCloudData(); showToast("Completado", "Lugar guardado.");
+            closeModal('placeModal'); loadCloudData(); showToast("Éxito", "Lugar almacenado correctamente.");
         }
 
         async function deletePlace() {
             const id = document.getElementById('editIndex').value;
-            if (id && confirm("¿Borrar este lugar?")) {
+            if (id && confirm("¿Estás seguro de borrar este lugar de tu diario?")) {
                 await supabaseClient.from('sitios').delete().eq('id', id);
-                closeModal('placeModal'); loadCloudData();
+                closeModal('placeModal'); loadCloudData(); showToast("Eliminado", "Lugar borrado de la nube.");
             }
         }
 
         function switchMobileView(tab, preventFitBounds = false) {
             state.mobileTab = tab;
-            
             const sidebar = document.getElementById('placesSidebarRoot');
             const listContainer = document.getElementById('placesList');
             const mapContainer = document.getElementById('mapContainerRoot');
@@ -902,12 +904,12 @@
         }
 
         function exportToCSV() {
-            let csvContent = "Nombre,Categoria,Estado,Latitud,Longitud,Notas,Nivel,Visitado,Etiquetas,Link\\n";
+            let csvContent = "Nombre,Categoria,Estado,Latitud,Longitud,Notas,Nivel,Visitado,Etiquetas,Link\n";
             if (viajesData.length > 0) {
                 viajesData.forEach(v => {
                     let eLat = (v.latitud !== null && v.latitud !== undefined) ? v.latitud : '';
                     let eLng = (v.longitud !== null && v.longitud !== undefined) ? v.longitud : '';
-                    csvContent += `"${v.nombre}","${v.categoria}","${v.estado}",${eLat},${eLng},"${(v.descripcion || '').replace(/"/g, '""')}","${v.nivel || ''}","${v.visitado || 'Por visitar'}","${v.etiquetas || ''}","${v.link || ''}"\\n`;
+                    csvContent += `"${v.nombre}","${v.categoria}","${v.estado}",${eLat},${eLng},"${(v.descripcion || '').replace(/"/g, '""')}","${v.nivel || ''}","${v.visitado || 'Por visitar'}","${v.etiquetas || ''}","${v.link || ''}"\n`;
                 });
             }
             const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -919,12 +921,15 @@
             document.body.appendChild(link); 
             link.click(); 
             document.body.removeChild(link);
-            showToast("Exportación Exitosa", `Copia de seguridad descargada.`);
+            showToast("Backup Descargado", `Copia descargada con éxito.`);
         }
 
-        function handleCSVFile(event) { }
+        function handleCSVFile(event) {
+            // Lógica de carga masiva si la requieres en el futuro
+        }
+
         async function clearAllData() {
-            if (confirm("⚠️ ¿Estás seguro de que quieres VACIAR toda la base de datos?")) {
+            if (confirm("⚠️ ¿Estás seguro de borrar todos los sitios de forma permanente?")) {
                 await supabaseClient.from('sitios').delete().neq('id', 0);
                 loadCloudData(); navigateTo('home');
             }
