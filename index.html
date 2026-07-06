@@ -33,7 +33,7 @@
         .ambient-glow-2 { position: absolute; width: 450px; height: 450px; border-radius: 50%; background: radial-gradient(circle, rgba(244, 63, 94, 0.1) 0%, rgba(255, 255, 255, 0) 70%); bottom: -100px; left: -100px; z-index: 1; pointer-events: none; }
         #cloud-login-screen { position: fixed; inset: 0; background-color: #f8fafc; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         
-        navbar { height: 75px; background-color: rgba(255, 255, 255, 0.85); border-bottom: 1px solid rgba(226, 232, 240, 0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; backdrop-filter: blur(20px); z-index: 100; box-shadow: 0 4px 20px -10px rgba(15, 23, 42, 0.05); }
+        navbar { height: 75px; background-color: rgba(255, 255, 255, 0.85); border-bottom: 1px solid rgba(226, 232, 240, 0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; backdrop-filter: blur(20px); z-index: 100; box-shadow: 0 4px 20px -10px rgba(15, 23, 42, 0.05); flex-shrink: 0; }
         @media (min-width: 768px) { navbar { padding: 0 32px; } }
         .nav-left, .nav-right { display: flex; align-items: center; gap: 8px; z-index: 5; }
         @media (min-width: 768px) { .nav-left, .nav-right { gap: 12px; } }
@@ -43,19 +43,22 @@
         .logo h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(to right, #0ea5e9, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: none; }
         @media (min-width: 768px) { .logo h1 { display: block; } }
         
-        .breadcrumbs { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #475569; font-weight: 500; margin-left: 4px; }
-        @media (min-width: 768px) { .breadcrumbs { gap: 8px; font-size: 13px; margin-left: 12px; } }
-        .breadcrumbs span { cursor: pointer; transition: all 0.3s ease; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
-        @media (min-width: 768px) { .breadcrumbs span { max-width: 120px; } }
+        /* CORRECCIÓN: Breadcrumbs flexibles para que nunca desaparezcan */
+        .breadcrumbs { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #475569; font-weight: 600; margin-left: 4px; flex-wrap: wrap; }
+        @media (min-width: 768px) { .breadcrumbs { gap: 6px; font-size: 13px; margin-left: 12px; } }
+        .breadcrumbs span { cursor: pointer; transition: all 0.3s ease; }
         .breadcrumbs span:hover { color: #0284c7; }
         .breadcrumbs i { font-size: 9px; color: #94a3b8; }
-        .breadcrumbs .active { color: #0f172a; font-weight: 700; cursor: default; }
+        .breadcrumbs .active { color: #0f172a; font-weight: 800; cursor: default; }
 
         .main-viewport { flex-grow: 1; position: relative; height: calc(100vh - 75px); z-index: 10; display: none; }
         .view-panel { display: none; width: 100%; height: 100%; overflow-y: auto; padding: 20px; }
         @media (min-width: 768px) { .view-panel { padding: 40px; } }
         .view-panel.active-view { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Contenedor principal de la vista de Lugares (Cero padding y sin scroll propio) */
+        .view-panel#view-places { padding: 0 !important; overflow: hidden !important; }
 
         .banner-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1400px; margin: 0 auto; }
         @media (min-width: 768px) { .banner-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 28px; } }
@@ -77,19 +80,31 @@
         .banner-settings-btn { position: absolute; top: 16px; right: 16px; z-index: 10; background: rgba(15, 23, 42, 0.7); color: white; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.25); }
         .banner-settings-btn:hover { background: #0284c7; transform: rotate(45deg); }
 
-        /* -------------- REDISEÑO ESTRUCTURAL PARA MÓVIL Y PC -------------- */
+        /* -------------- REDISEÑO ESTRUCTURAL (MÓVIL Y PC) -------------- */
         .split-viewport { display: flex; flex-direction: column; width: 100%; height: 100%; position: relative; }
         @media (min-width: 768px) { .split-viewport { flex-direction: row; } }
 
-        .places-sidebar { width: 100%; display: flex; flex-direction: column; z-index: 20; background: rgba(255, 255, 255, 0.95); transition: all 0.3s ease; }
-        @media (min-width: 768px) { .places-sidebar { width: 440px; min-width: 440px; height: 100%; border-right: 1px solid rgba(226,232,240,0.8); } }
+        /* Sidebar: en móvil ocupa el 100% (hasta que se active el mapa) */
+        .places-sidebar { width: 100%; display: flex; flex-direction: column; z-index: 20; background: #ffffff; transition: all 0.3s ease; height: 100%; }
+        @media (min-width: 768px) { .places-sidebar { width: 440px; min-width: 440px; border-right: 1px solid rgba(226,232,240,0.8); } }
         
-        .places-header-area { padding: 16px; flex-shrink: 0; }
-        @media (min-width: 768px) { .places-header-area { padding: 24px; border-bottom: 1px solid rgba(226,232,240,0.5); } }
+        /* CABECERA FIJA Y VISIBLE */
+        .places-header-area { padding: 16px; flex-shrink: 0; border-bottom: 1px solid rgba(226,232,240,0.8); background: rgba(255, 255, 255, 0.98); z-index: 30; }
+        @media (min-width: 768px) { .places-header-area { padding: 24px; } }
         
+        /* LISTA CON SCROLL INDEPENDIENTE */
         .places-list-container { flex-grow: 1; overflow-y: auto; padding: 16px; background-color: rgba(248, 250, 252, 0.5); }
+        
+        /* MAPA FLUIDO */
+        .map-container { display: none; flex-grow: 1; height: 100%; position: relative; z-index: 10; }
+        @media (min-width: 768px) { .map-container { display: block !important; } }
+
+        /* CONTROL DE VISTAS MÓVILES */
         @media (max-width: 767px) {
-            .mobile-list-hidden { display: none !important; } /* Oculta solo la lista, mantiene la cabecera visible */
+            /* Cuando el mapa está activo, el sidebar encoge a su cabecera y el mapa ocupa el resto */
+            .sidebar-map-active { height: auto !important; flex-shrink: 0; }
+            .mobile-list-hidden { display: none !important; } 
+            .map-container.active-mobile-map { display: block !important; }
         }
 
         .btn { background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; border: none; padding: 8px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease; box-shadow: 0 4px 15px -4px rgba(2, 132, 199, 0.3); }
@@ -98,7 +113,7 @@
         
         .tag-filter-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
         
-        /* TABS MÓVILES INTEGRADOS EN LA CABECERA */
+        /* TABS MÓVILES INTEGRADOS EN LA CABECERA FIJA */
         .mobile-view-tabs { display: none; }
         @media (max-width: 767px) { 
             .mobile-view-tabs { display: flex; background: #f1f5f9; border-radius: 12px; margin-top: 16px; padding: 4px; gap: 4px; border: 1px solid rgba(226,232,240,0.8); }
@@ -106,19 +121,11 @@
             .mobile-view-tabs button.active { color: #0284c7; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         }
 
-        /* MAPA FLUIDO */
-        .map-container { display: none; flex-grow: 1; height: 100%; position: relative; }
-        @media (min-width: 768px) { .map-container { display: block !important; } }
-        @media (max-width: 767px) { 
-            .map-container.active-mobile-map { display: block !important; flex-grow: 1; min-height: 0; } 
-        }
-
         #map { position: absolute; inset: 0; background-color: #cbd5e1; height: 100%; width: 100%; }
         .custom-pin-marker { display: flex; align-items: center; justify-content: center; width: 36px !important; height: 36px !important; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: -2px 2px 4px rgba(0,0,0,0.3); border: 2px solid #ffffff; cursor: pointer; transition: transform 0.2s; }
         .custom-pin-marker:hover { transform: rotate(-45deg) scale(1.1); z-index: 1000 !important; }
         .custom-pin-marker i { transform: rotate(45deg); color: white; font-size: 13px; }
         
-        /* TOOLTIPS REDISEÑADOS */
         .leaflet-tooltip.custom-tooltip { background: #ffffff; border: none; border-radius: 16px; padding: 0; box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.2); font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; min-width: 280px; max-width: 340px; overflow: hidden; white-space: normal; cursor: pointer; }
         .leaflet-tooltip-top:before { border-top-color: #ffffff; }
 
@@ -197,14 +204,24 @@
         </div>
 
         <div class="view-panel" id="view-regions">
-            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="regions-title">Regiones</h2>
-            <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una provincia o comarca específica de tu catálogo.</p>
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="regions-title">Regiones</h2>
+                    <p class="text-xs md:text-sm text-slate-500 font-medium">Selecciona una provincia o comarca específica de tu catálogo.</p>
+                </div>
+                <div class="relative w-full md:w-72 shrink-0">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="regionSearchInput" oninput="drawRegionsGrid()" placeholder="Buscar región..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl font-medium outline-none shadow-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500 text-sm transition-all">
+                </div>
+            </div>
+            
             <div class="banner-grid" id="regions-grid"></div>
         </div>
 
-        <div class="view-panel" id="view-places" style="padding: 0;">
+        <div class="view-panel" id="view-places">
             <div class="split-viewport">
                 <div class="places-sidebar" id="placesSidebarRoot">
+                    
                     <div class="places-header-area">
                         <div class="flex justify-between items-center mb-2">
                             <h3 id="places-sidebar-title" class="text-lg font-extrabold text-slate-800 tracking-tight">Lugares</h3>
@@ -369,7 +386,6 @@
         async function editBannerImage(event, key) {
             event.preventDefault(); event.stopPropagation();
             const currentImg = customBanners[key] || DEFAULT_IMAGES[key] || DEFAULT_IMAGES['pais_default'];
-            
             setTimeout(async () => {
                 const newUrl = prompt("Introduce la URL de la nueva imagen de portada:", currentImg);
                 if (newUrl !== null && newUrl.trim() !== "") {
@@ -408,19 +424,19 @@
             
             const trail = document.getElementById('breadcrumbsTrail');
             trail.innerHTML = `<span onclick="navigateTo('home')">Inicio</span>`;
-            if (['countries', 'regions', 'places'].includes(viewId)) trail.innerHTML += ` <i class="fa-solid fa-chevron-right mx-1 text-[9px] text-slate-400"></i> <span onclick="selectContinent('${state.continent}')">${state.continent}</span>`;
-            if (['regions', 'places'].includes(viewId)) trail.innerHTML += ` <i class="fa-solid fa-chevron-right mx-1 text-[9px] text-slate-400"></i> <span onclick="selectCountry('${state.country}')">${state.country}</span>`;
+            if (['countries', 'regions', 'places'].includes(viewId)) trail.innerHTML += ` <i class="fa-solid fa-chevron-right"></i> <span onclick="selectContinent('${state.continent}')">${state.continent}</span>`;
+            if (['regions', 'places'].includes(viewId)) trail.innerHTML += ` <i class="fa-solid fa-chevron-right"></i> <span onclick="selectCountry('${state.country}')">${state.country}</span>`;
             if (viewId === 'places') {
                 if (state.isGlobalCountryMode) {
-                    trail.innerHTML += ` <i class="fa-solid fa-chevron-right mx-1 text-[9px] text-slate-400"></i> <span class="active font-bold">Vista Global</span>`;
+                    trail.innerHTML += ` <i class="fa-solid fa-chevron-right"></i> <span class="active">Vista Global</span>`;
                 } else {
-                    trail.innerHTML += ` <i class="fa-solid fa-chevron-right mx-1 text-[9px] text-slate-400"></i> <span class="active font-bold">${state.region}</span>`;
+                    trail.innerHTML += ` <i class="fa-solid fa-chevron-right"></i> <span class="active">${state.region}</span>`;
                 }
             }
 
-            // Al salir de Places, aseguramos resetear la vista móvil a Lista para evitar cruces
+            // Al salir de Places, aseguramos resetear la vista móvil a Lista para evitar cruces extraños
             if(viewId !== 'places' && window.innerWidth < 768) {
-                switchMobileView('list');
+                switchMobileView('list', true); // Reset visual
             }
 
             renderViewByCurrentState();
@@ -451,7 +467,10 @@
             `;
         }
 
-        function selectContinent(continent) { state.continent = continent; navigateTo('countries'); }
+        function selectContinent(continent) { 
+            state.continent = continent; 
+            navigateTo('countries'); 
+        }
 
         function drawCountriesGrid() {
             let countries = [...new Set(viajesData.filter(i => getContinent(i.categoria) === state.continent && i.categoria).map(i => i.categoria))];
@@ -477,25 +496,42 @@
             document.getElementById('countries-title').textContent = state.continent;
         }
 
-        function selectCountry(country) { state.country = country; navigateTo('regions'); }
+        function selectCountry(country) { 
+            state.country = country; 
+            const searchInput = document.getElementById('regionSearchInput');
+            if (searchInput) searchInput.value = ''; // Limpiamos buscador anterior
+            navigateTo('regions'); 
+        }
 
         function drawRegionsGrid() {
             let regions = [...new Set(viajesData.filter(i => i.categoria === state.country && i.estado).map(i => i.estado))];
             regions.sort((a, b) => a.localeCompare(b, 'es'));
-            const grid = document.getElementById('regions-grid'); grid.innerHTML = '';
+            
+            const searchInput = document.getElementById('regionSearchInput');
+            const searchVal = searchInput ? searchInput.value.toLowerCase() : '';
+            
+            if (searchVal) {
+                regions = regions.filter(r => r.toLowerCase().includes(searchVal));
+            }
 
-            const totalPaisCount = viajesData.filter(i => i.categoria === state.country).length;
-            const globalKey = `global_${state.country}`;
-            grid.innerHTML += `
-                <div class="banner-card border-2 border-sky-500/30" onclick="selectGlobalCountryMode()">
-                    <button class="banner-settings-btn" onclick="editBannerImage(event, '${globalKey}')"><i class="fa-solid fa-pen text-xs"></i></button>
-                    <img src="${customBanners[globalKey] || DEFAULT_IMAGES['global_default']}" class="banner-img brightness-[0.85]">
-                    <div class="banner-content">
-                        <span class="banner-category text-amber-400 font-extrabold"><i class="fa-solid fa-star"></i> EXPLORACIÓN TOTAL</span>
-                        <div class="banner-name text-sky-200">Ver todo ${state.country}</div>
-                        <div class="banner-count text-white"><i class="fa-solid fa-map-location-dot text-sky-400"></i> ${totalPaisCount} destinos unificados</div>
-                    </div>
-                </div>`;
+            const grid = document.getElementById('regions-grid'); 
+            grid.innerHTML = '';
+
+            // Mostrar la tarjeta global si coincide con la búsqueda o si no hay búsqueda
+            if (!searchVal || "exploración total".includes(searchVal) || state.country.toLowerCase().includes(searchVal)) {
+                const totalPaisCount = viajesData.filter(i => i.categoria === state.country).length;
+                const globalKey = `global_${state.country}`;
+                grid.innerHTML += `
+                    <div class="banner-card border-2 border-sky-500/30" onclick="selectGlobalCountryMode()">
+                        <button class="banner-settings-btn" onclick="editBannerImage(event, '${globalKey}')"><i class="fa-solid fa-pen text-xs"></i></button>
+                        <img src="${customBanners[globalKey] || DEFAULT_IMAGES['global_default']}" class="banner-img brightness-[0.85]">
+                        <div class="banner-content">
+                            <span class="banner-category text-amber-400 font-extrabold"><i class="fa-solid fa-star"></i> EXPLORACIÓN TOTAL</span>
+                            <div class="banner-name text-sky-200">Ver todo ${state.country}</div>
+                            <div class="banner-count text-white"><i class="fa-solid fa-map-location-dot text-sky-400"></i> ${totalPaisCount} destinos</div>
+                        </div>
+                    </div>`;
+            }
 
             if (regions.length > 0) {
                 regions.forEach(r => {
@@ -511,6 +547,8 @@
                             </div>
                         </div>`;
                 });
+            } else if (grid.innerHTML === '') {
+                grid.innerHTML = `<p class="col-span-full text-center text-slate-400 py-10 font-semibold">No se encontraron resultados.</p>`;
             }
             document.getElementById('regions-title').textContent = state.country;
         }
@@ -560,13 +598,14 @@
         }
 
         function scrollAndHighlightCard(id) {
+            // Si estamos en móvil, cambiamos a la vista Lista automáticamente
             if(window.innerWidth < 768) { switchMobileView('list'); }
             
             setTimeout(() => {
                 const targetCard = document.getElementById('card-' + id);
                 if (targetCard) {
                     targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    // Animación de resaltado
+                    // Efecto visual temporal para destacar la tarjeta
                     targetCard.classList.add('ring-4', 'ring-sky-400', 'scale-[1.02]');
                     setTimeout(() => { targetCard.classList.remove('ring-4', 'ring-sky-400', 'scale-[1.02]'); }, 1500);
                 }
@@ -627,8 +666,9 @@
                 card.className = `p-4 mb-3 bg-white border border-slate-200 rounded-2xl shadow-sm active:bg-slate-50 transition-all duration-500 relative cursor-pointer`;
                 card.onclick = () => { 
                     if (!isNaN(finalLat) && !isNaN(finalLng)) { 
-                        map.flyTo([finalLat, finalLng], 15, { animate: true, duration: 1.5 });
-                        if(window.innerWidth < 768) switchMobileView('map'); 
+                        // El parámetro TRUE evita que switchMobileView reinicie el zoom general
+                        if(window.innerWidth < 768) switchMobileView('map', true); 
+                        setTimeout(() => { map.flyTo([finalLat, finalLng], 15, { animate: true, duration: 1.5 }); }, 200);
                     } 
                 };
                 
@@ -681,7 +721,7 @@
                                 </div>
                                 <h5 class="text-sm font-bold text-slate-800 leading-tight mb-1">${p.nombre}</h5>
                                 ${p.descripcion ? `<p class="text-xs text-slate-500 font-medium line-clamp-2 mt-1 border-t pt-1 border-slate-100">${p.descripcion}</p>` : ''}
-                                <div class="mt-2 text-center w-full"><span class="text-[9px] font-bold text-sky-600 bg-sky-50 px-2 py-1 rounded"><i class="fa-solid fa-magnifying-glass"></i> Ver detalles</span></div>
+                                <div class="mt-2 text-center w-full"><span class="text-[9px] font-bold text-sky-600 bg-sky-50 px-2 py-1 rounded"><i class="fa-solid fa-list-ul"></i> Ver tarjeta</span></div>
                             </div>
                         </div>
                     `;
@@ -690,7 +730,7 @@
                         .addTo(markersGroup)
                         .bindTooltip(tooltipContent, { direction: 'top', offset: [0, -15], opacity: 1, className: 'custom-tooltip' });
                         
-                    // AÑADIDO: Interacción Mapa -> Lista
+                    // Navegar a la lista al hacer clic en el Pin
                     m.on('click', () => { scrollAndHighlightCard(p.id); });
                 }
             });
@@ -805,21 +845,24 @@
             }
         }
 
-        // ------------- COMPORTAMIENTO MÓVIL OPTIMIZADO -------------
-        function switchMobileView(tab) {
+        // ------------- CONTROL ROBUSTO DE PESTAÑAS MÓVILES -------------
+        function switchMobileView(tab, preventFitBounds = false) {
             state.mobileTab = tab;
             
+            const sidebar = document.getElementById('placesSidebarRoot');
             const listContainer = document.getElementById('placesList');
             const mapContainer = document.getElementById('mapContainerRoot');
             const btnList = document.getElementById('tab-btn-list');
             const btnMap = document.getElementById('tab-btn-map');
 
             if (tab === 'list') {
+                sidebar.classList.remove('sidebar-map-active');
                 listContainer.classList.remove('mobile-list-hidden');
                 mapContainer.classList.remove('active-mobile-map');
                 btnList.classList.add('active');
                 btnMap.classList.remove('active');
             } else {
+                sidebar.classList.add('sidebar-map-active');
                 listContainer.classList.add('mobile-list-hidden');
                 mapContainer.classList.add('active-mobile-map');
                 btnList.classList.remove('active');
@@ -828,17 +871,41 @@
                 setTimeout(() => {
                     if (map) {
                         map.invalidateSize();
-                        let bounds = markersGroup.getBounds();
-                        if (bounds && bounds.isValid()) {
-                            map.fitBounds(bounds, { padding: [30, 30] });
+                        // Solo ajustar vista global si no venimos de hacer clic en una tarjeta específica
+                        if (!preventFitBounds) {
+                            let bounds = markersGroup.getBounds();
+                            if (bounds && bounds.isValid()) {
+                                map.fitBounds(bounds, { padding: [30, 30] });
+                            }
                         }
                     }
                 }, 150);
             }
         }
 
-        function exportToCSV() { /* Mantenido */ }
-        function handleCSVFile(event) { /* Mantenido */ }
+        function exportToCSV() {
+            let csvContent = "Nombre,Categoria,Estado,Latitud,Longitud,Notas,Nivel,Visitado,Etiquetas,Link\\n";
+            if (viajesData.length > 0) {
+                viajesData.forEach(v => {
+                    let eLat = (v.latitud !== null && v.latitud !== undefined) ? v.latitud : '';
+                    let eLng = (v.longitud !== null && v.longitud !== undefined) ? v.longitud : '';
+                    csvContent += `"${v.nombre}","${v.categoria}","${v.estado}",${eLat},${eLng},"${(v.descripcion || '').replace(/"/g, '""')}","${v.nivel || ''}","${v.visitado || 'Por visitar'}","${v.etiquetas || ''}","${v.link || ''}"\\n`;
+                });
+            }
+            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob); 
+            const link = document.createElement("a");
+            const timestamp = new Date().toISOString().slice(0, 10);
+            link.setAttribute("href", url); 
+            link.setAttribute("download", `VoyageVault_Backup_${timestamp}.csv`);
+            document.body.appendChild(link); 
+            link.click(); 
+            document.body.removeChild(link);
+            showToast("Exportación Exitosa", `Copia de seguridad descargada.`);
+        }
+
+        function handleCSVFile(event) { /* Mantenido internamente en versiones anteriores si lo necesitas */ }
+        
         async function clearAllData() {
             if (confirm("⚠️ ¿Estás seguro de que quieres VACIAR toda la base de datos?")) {
                 await supabaseClient.from('sitios').delete().neq('id', 0);
