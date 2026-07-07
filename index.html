@@ -5,18 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VoyageVault — Visor de Viajes</title>
     
+    <!-- ICONO DE LA APP (Favicon SVG) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
     
+    <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
+    <!-- Leaflet CSS y JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
+    <!-- Fuentes y Estilos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -47,7 +52,7 @@
             width: 100%;
             margin: 0;
             padding: 0;
-            padding-top: 75px; /* LA CLAVE: Reserva el hueco físico exacto para la barra fija */
+            padding-top: 75px; /* Reserva el hueco físico exacto para la barra fija */
             background-color: #f8fafc; 
             color: #0f172a; 
             position: relative; 
@@ -73,15 +78,8 @@
         @media (min-width: 768px) { nav#top-navbar { padding: 0 32px; } }
         
         /* Controles de ancho máximo para que no desaparezca en móvil */
-        .nav-left { 
-            display: flex; align-items: center; gap: 8px; z-index: 5;
-            flex: 1; 
-            min-width: 0; /* Permite que el texto se encoja sin reventar el ancho */
-        }
-        .nav-right { 
-            display: flex; align-items: center; gap: 8px; z-index: 5;
-            flex-shrink: 0; /* Evita que los botones se aplasten o desaparezcan */
-        }
+        .nav-left { display: flex; align-items: center; gap: 8px; z-index: 5; flex: 1; min-width: 0; }
+        .nav-right { display: flex; align-items: center; gap: 8px; z-index: 5; flex-shrink: 0; }
         
         .logo { display: flex; align-items: center; gap: 8px; cursor: pointer; flex-shrink: 0; }
         .logo i { font-size: 24px; background: linear-gradient(135deg, #06b6d4, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -89,14 +87,7 @@
         @media (min-width: 768px) { .logo h1 { display: block; } }
         
         /* Breadcrumbs con scroll horizontal invisible */
-        .breadcrumbs { 
-            display: flex; align-items: center; gap: 4px; font-size: 11px; 
-            color: #475569; font-weight: 600; margin-left: 4px; 
-            flex-wrap: nowrap; 
-            overflow-x: auto; 
-            scrollbar-width: none; 
-            -webkit-overflow-scrolling: touch;
-        }
+        .breadcrumbs { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #475569; font-weight: 600; margin-left: 4px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .breadcrumbs::-webkit-scrollbar { display: none; }
         @media (min-width: 768px) { .breadcrumbs { gap: 8px; font-size: 13px; margin-left: 12px; } }
         
@@ -107,21 +98,9 @@
         .breadcrumbs .active { color: #0f172a; font-weight: 800; cursor: default; }
 
         /* VIEWPORT PRINCIPAL */
-        .main-viewport { 
-            height: 100%; /* Ocupa el 100% de lo que sobra gracias al border-box y el padding-top */
-            width: 100%;
-            position: relative; 
-            overflow: hidden; 
-        }
+        .main-viewport { height: 100%; width: 100%; position: relative; overflow: hidden; }
         
-        .view-panel { 
-            display: none; 
-            position: absolute; 
-            inset: 0; 
-            overflow-y: auto; 
-            padding: 20px; 
-            -webkit-overflow-scrolling: touch; 
-        }
+        .view-panel { display: none; position: absolute; inset: 0; overflow-y: auto; padding: 20px; -webkit-overflow-scrolling: touch; }
         @media (min-width: 768px) { .view-panel { padding: 40px; } }
         .view-panel.active-view { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -207,6 +186,7 @@
     <div class="ambient-glow"></div>
     <div class="ambient-glow-2"></div>
 
+    <!-- TOAST NOTIFICACIONES -->
     <div id="toastMessage" class="notification-toast">
         <i id="toastIcon" class="fa-solid fa-circle-check" style="color:#0284c7; font-size: 18px;"></i>
         <div>
@@ -215,6 +195,7 @@
         </div>
     </div>
 
+    <!-- NAVBAR GLOBAL -->
     <nav id="top-navbar">
         <div class="nav-left">
             <div class="logo" onclick="navigateTo('home')">
@@ -226,17 +207,21 @@
             </div>
         </div>
         <div class="nav-right" id="navbar-actions">
-            </div>
+            <!-- Botones inyectados por JS -->
+        </div>
     </nav>
 
+    <!-- VIEWPORT PRINCIPAL -->
     <div class="main-viewport" id="app-viewport">
         
+        <!-- 1. HOME -->
         <div class="view-panel active-view" id="view-home">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1">Explora tus destinos</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una región geográfica para visualizar los lugares guardados.</p>
             <div class="banner-grid home-grid" id="explorer-cards-container"></div>
         </div>
 
+        <!-- 2. PAÍSES -->
         <div class="view-panel" id="view-countries">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                 <div>
@@ -251,6 +236,7 @@
             <div class="banner-grid" id="countries-grid"></div>
         </div>
 
+        <!-- 3. REGIONES -->
         <div class="view-panel" id="view-regions">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                 <div>
@@ -265,6 +251,7 @@
             <div class="banner-grid" id="regions-grid"></div>
         </div>
 
+        <!-- 4. DETALLE DE LUGARES Y MAPA -->
         <div class="view-panel" id="view-places">
             <div class="split-viewport">
                 <div class="places-sidebar" id="placesSidebarRoot">
@@ -297,6 +284,7 @@
         </div>
     </div>
 
+    <!-- MODAL FORM LUGAR -->
     <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden items-center justify-center p-3 sm:p-4" id="placeModal" onclick="closeModal('placeModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[500px] rounded-[24px] shadow-2xl flex flex-col overflow-hidden max-h-[95dvh]" onclick="event.stopPropagation()">
             <div class="p-4 sm:p-5 flex justify-between items-center border-b border-slate-100 bg-slate-50/50 flex-shrink-0">
@@ -358,6 +346,7 @@
         </div>
     </div>
 
+    <!-- MODAL SINCRO CSV -->
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4" id="importModal" onclick="closeModal('importModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[520px] rounded-[24px] p-6 shadow-2xl" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-5">
@@ -657,13 +646,29 @@
             }).join('');
         }
 
+        /* ----- AQUÍ ESTÁ LA NUEVA FUNCIÓN MATEMÁTICA ----- */
         function scrollAndHighlightCard(id) {
             if(window.innerWidth < 768) { switchMobileView('list'); }
+            
             setTimeout(() => {
                 const targetCard = document.getElementById('card-' + id);
-                if (targetCard) { targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); targetCard.classList.add('ring-4', 'ring-sky-400', 'scale-[1.02]'); setTimeout(() => { targetCard.classList.remove('ring-4', 'ring-sky-400', 'scale-[1.02]'); }, 1500); }
-            }, 100);
+                const listContainer = document.getElementById('placesList');
+                
+                if (targetCard && listContainer) { 
+                    // Calculamos matemáticamente la posición para no afectar al resto de la página
+                    const containerRect = listContainer.getBoundingClientRect();
+                    const cardRect = targetCard.getBoundingClientRect();
+                    
+                    const scrollTarget = listContainer.scrollTop + (cardRect.top - containerRect.top) - (containerRect.height / 2) + (cardRect.height / 2);
+                    
+                    listContainer.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+                    
+                    targetCard.classList.add('ring-4', 'ring-sky-400', 'scale-[1.02]'); 
+                    setTimeout(() => { targetCard.classList.remove('ring-4', 'ring-sky-400', 'scale-[1.02]'); }, 1500); 
+                }
+            }, 150); // Le damos un pelín más de tiempo (150ms) para asegurar que la lista se haya dibujado en pantalla
         }
+        /* ------------------------------------------------ */
 
         function highlightPinOnMap(id) {
             document.querySelectorAll('.highlight-pin').forEach(el => el.classList.remove('highlight-pin'));
