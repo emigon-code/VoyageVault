@@ -5,23 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VoyageVault — Visor de Viajes</title>
     
-    <!-- ICONO DE LA APP (Favicon SVG) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
     
-    <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Leaflet CSS y JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- Fuentes y Estilos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -38,7 +33,7 @@
         /* BLINDAJE DE TAMAÑO PARA MÓVIL Y ESCRITORIO */
         *, *::before, *::after { box-sizing: border-box; }
         
-        html, body {
+        html {
             height: 100%;
             width: 100%;
             margin: 0;
@@ -47,9 +42,17 @@
         }
         
         body { 
+            height: 100%; /* Fallback */
+            height: 100dvh; /* Alto dinámico real en móviles */
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            padding-top: 75px; /* LA CLAVE: Reserva el hueco físico exacto para la barra fija */
             background-color: #f8fafc; 
             color: #0f172a; 
             position: relative; 
+            box-sizing: border-box;
+            overflow: hidden;
         }
         
         .ambient-glow { position: absolute; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(255, 255, 255, 0) 70%); top: -100px; right: -100px; z-index: 1; pointer-events: none; }
@@ -85,16 +88,16 @@
         .logo h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(to right, #0ea5e9, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: none; }
         @media (min-width: 768px) { .logo h1 { display: block; } }
         
-        /* Breadcrumbs con scroll horizontal invisible para evitar fallos de ancho */
+        /* Breadcrumbs con scroll horizontal invisible */
         .breadcrumbs { 
             display: flex; align-items: center; gap: 4px; font-size: 11px; 
             color: #475569; font-weight: 600; margin-left: 4px; 
             flex-wrap: nowrap; 
             overflow-x: auto; 
-            scrollbar-width: none; /* Firefox */
+            scrollbar-width: none; 
             -webkit-overflow-scrolling: touch;
         }
-        .breadcrumbs::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
+        .breadcrumbs::-webkit-scrollbar { display: none; }
         @media (min-width: 768px) { .breadcrumbs { gap: 8px; font-size: 13px; margin-left: 12px; } }
         
         .breadcrumbs span { cursor: pointer; transition: all 0.3s ease; white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
@@ -103,11 +106,9 @@
         .breadcrumbs i { font-size: 9px; color: #94a3b8; flex-shrink: 0; }
         .breadcrumbs .active { color: #0f172a; font-weight: 800; cursor: default; }
 
-        /* VIEWPORT PRINCIPAL RESTRINGIDO AL ESPACIO SOBRANTE */
+        /* VIEWPORT PRINCIPAL */
         .main-viewport { 
-            margin-top: 75px; 
-            height: calc(100vh - 75px); /* Fallback */
-            height: calc(100dvh - 75px); /* Alto real móvil */
+            height: 100%; /* Ocupa el 100% de lo que sobra gracias al border-box y el padding-top */
             width: 100%;
             position: relative; 
             overflow: hidden; 
@@ -206,7 +207,6 @@
     <div class="ambient-glow"></div>
     <div class="ambient-glow-2"></div>
 
-    <!-- TOAST NOTIFICACIONES -->
     <div id="toastMessage" class="notification-toast">
         <i id="toastIcon" class="fa-solid fa-circle-check" style="color:#0284c7; font-size: 18px;"></i>
         <div>
@@ -215,7 +215,6 @@
         </div>
     </div>
 
-    <!-- NAVBAR GLOBAL (Etiqueta corregida a <nav>) -->
     <nav id="top-navbar">
         <div class="nav-left">
             <div class="logo" onclick="navigateTo('home')">
@@ -227,21 +226,17 @@
             </div>
         </div>
         <div class="nav-right" id="navbar-actions">
-            <!-- Botones inyectados por JS -->
-        </div>
+            </div>
     </nav>
 
-    <!-- VIEWPORT PRINCIPAL -->
     <div class="main-viewport" id="app-viewport">
         
-        <!-- 1. HOME -->
         <div class="view-panel active-view" id="view-home">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1">Explora tus destinos</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una región geográfica para visualizar los lugares guardados.</p>
             <div class="banner-grid home-grid" id="explorer-cards-container"></div>
         </div>
 
-        <!-- 2. PAÍSES -->
         <div class="view-panel" id="view-countries">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                 <div>
@@ -256,7 +251,6 @@
             <div class="banner-grid" id="countries-grid"></div>
         </div>
 
-        <!-- 3. REGIONES -->
         <div class="view-panel" id="view-regions">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                 <div>
@@ -271,7 +265,6 @@
             <div class="banner-grid" id="regions-grid"></div>
         </div>
 
-        <!-- 4. DETALLE DE LUGARES Y MAPA -->
         <div class="view-panel" id="view-places">
             <div class="split-viewport">
                 <div class="places-sidebar" id="placesSidebarRoot">
@@ -304,7 +297,6 @@
         </div>
     </div>
 
-    <!-- MODAL FORM LUGAR -->
     <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden items-center justify-center p-3 sm:p-4" id="placeModal" onclick="closeModal('placeModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[500px] rounded-[24px] shadow-2xl flex flex-col overflow-hidden max-h-[95dvh]" onclick="event.stopPropagation()">
             <div class="p-4 sm:p-5 flex justify-between items-center border-b border-slate-100 bg-slate-50/50 flex-shrink-0">
@@ -366,7 +358,6 @@
         </div>
     </div>
 
-    <!-- MODAL SINCRO CSV -->
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4" id="importModal" onclick="closeModal('importModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[520px] rounded-[24px] p-6 shadow-2xl" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-5">
