@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VoyageVault — Mi Visor de Viajes Personalizado</title>
+    <title>VoyageVault — Visor de Viajes</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
     
@@ -30,16 +30,14 @@
     </script>
     
     <style>
-        /* RESETEO TOTAL PARA EVITAR CORTES Y FRANJAS BLANCAS */
         *, *::before, *::after { box-sizing: border-box; }
         
         body { background-color: #f8fafc; color: #0f172a; display: flex; flex-direction: column; margin: 0; padding: 0; height: 100vh; height: 100dvh; overflow: hidden; position: relative; }
         
         .ambient-glow { position: absolute; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(255, 255, 255, 0) 70%); top: -100px; right: -100px; z-index: 1; pointer-events: none; }
         .ambient-glow-2 { position: absolute; width: 450px; height: 450px; border-radius: 50%; background: radial-gradient(circle, rgba(244, 63, 94, 0.1) 0%, rgba(255, 255, 255, 0) 70%); bottom: -100px; left: -100px; z-index: 1; pointer-events: none; }
-        #cloud-login-screen { position: fixed; inset: 0; background-color: #f8fafc; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         
-        /* NAVBAR INTEGRADA EN FLEXBOX */
+        /* NAVBAR FIJA */
         navbar { flex: 0 0 75px; background-color: rgba(255, 255, 255, 0.95); border-bottom: 1px solid rgba(226, 232, 240, 0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 100; box-shadow: 0 4px 20px -10px rgba(15, 23, 42, 0.05); }
         @media (min-width: 768px) { navbar { padding: 0 32px; } }
         .nav-left, .nav-right { display: flex; align-items: center; gap: 8px; z-index: 5; }
@@ -58,9 +56,8 @@
         .breadcrumbs i { font-size: 9px; color: #94a3b8; }
         .breadcrumbs .active { color: #0f172a; font-weight: 800; cursor: default; }
 
-        /* VIEWPORT PRINCIPAL FLEXIBLE (Sin padding-tops extraños) */
-        .main-viewport { flex: 1 1 auto; position: relative; overflow: hidden; display: none; background: transparent; }
-        
+        /* VIEWPORT PRINCIPAL */
+        .main-viewport { flex: 1 1 auto; position: relative; overflow: hidden; display: block; background: transparent; }
         .view-panel { display: none; width: 100%; height: 100%; overflow-y: auto; padding: 20px; }
         @media (min-width: 768px) { .view-panel { padding: 40px; } }
         .view-panel.active-view { display: block; animation: fadeIn 0.4s ease; }
@@ -119,7 +116,9 @@
             .mobile-view-tabs button.active { color: #0284c7; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         }
         
-        /* ANIMACIONES Y PINES DEL MAPA */
+        .modal-body-scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }
+        
+        /* ANIMACIONES MAPA */
         .custom-pin-marker { display: flex; align-items: center; justify-content: center; width: 36px !important; height: 36px !important; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: -2px 2px 4px rgba(0,0,0,0.3); border: 2px solid #ffffff; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .custom-pin-marker:hover { transform: rotate(-45deg) scale(1.15); z-index: 1000 !important; }
         .custom-pin-marker i { transform: rotate(45deg); color: white; font-size: 14px; }
@@ -144,20 +143,6 @@
     <div class="ambient-glow"></div>
     <div class="ambient-glow-2"></div>
 
-    <div id="cloud-login-screen">
-        <div class="bg-white p-10 rounded-[24px] border border-slate-200/80 shadow-2xl text-center max-w-[420px] w-[90%] z-50">
-            <div class="flex items-center justify-center gap-2 mb-4 text-sky-600">
-                <i class="fa-solid fa-compass text-4xl"></i>
-                <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent">VoyageVault</h1>
-            </div>
-            <h2 class="text-xl font-bold text-slate-800 mb-2">Tu diario de viajes online</h2>
-            <p class="text-slate-500 text-sm mb-8">Sincroniza tus destinos favoritos directamente en la nube.</p>
-            <button onclick="signInWithGoogle()" class="w-full bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl shadow-sm inline-flex items-center justify-center gap-3 transition">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width="20"> Conectar con Google
-            </button>
-        </div>
-    </div>
-
     <div id="toastMessage" class="notification-toast">
         <i id="toastIcon" class="fa-solid fa-circle-check" style="color:#0284c7; font-size: 18px;"></i>
         <div>
@@ -176,27 +161,15 @@
                 <span class="active">Inicio</span>
             </div>
         </div>
-        <div class="nav-right">
-            <button class="btn btn-secondary" onclick="exportToCSV()" title="Exportar CSV">
-                <i class="fa-solid fa-cloud-arrow-down"></i> <span class="hidden md:inline ml-1">Exportar</span>
-            </button>
-            <button class="btn btn-secondary" onclick="openModal('importModal')" title="Sincronizar Datos">
-                <i class="fa-solid fa-cloud-arrow-up"></i> <span class="hidden md:inline ml-1">Sincronizar</span>
-            </button>
-            <button class="btn btn-secondary text-red-500" onclick="clearAllData()" title="Vaciar Base de Datos">
-                <i class="fa-solid fa-trash"></i> <span class="hidden md:inline ml-1">Resetear</span>
-            </button>
-            <button class="btn btn-secondary text-slate-700" onclick="signOut()" title="Cerrar Sesión">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i>
-            </button>
-        </div>
+        <div class="nav-right" id="navbar-actions">
+            </div>
     </navbar>
 
     <div class="main-viewport" id="app-viewport">
         
         <div class="view-panel active-view" id="view-home">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1">Explora tus destinos</h2>
-            <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una región geográfica para organizar y planificar tus escapadas.</p>
+            <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una región geográfica para visualizar los lugares guardados.</p>
             <div class="banner-grid home-grid" id="explorer-cards-container"></div>
         </div>
 
@@ -204,7 +177,7 @@
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                 <div>
                     <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="countries-title">Países</h2>
-                    <p class="text-xs md:text-sm text-slate-500 font-medium">Naciones con destinos registrados en tu colección.</p>
+                    <p class="text-xs md:text-sm text-slate-500 font-medium">Naciones registradas en la colección.</p>
                 </div>
                 <div class="relative w-full md:w-72 shrink-0">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
@@ -218,7 +191,7 @@
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                 <div>
                     <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1" id="regions-title">Regiones</h2>
-                    <p class="text-xs md:text-sm text-slate-500 font-medium">Selecciona una provincia o comarca específica de tu catálogo.</p>
+                    <p class="text-xs md:text-sm text-slate-500 font-medium">Provincia o comarca específica.</p>
                 </div>
                 <div class="relative w-full md:w-72 shrink-0">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
@@ -232,10 +205,8 @@
             <div class="split-viewport">
                 <div class="places-sidebar" id="placesSidebarRoot">
                     <div class="places-header-area">
-                        <div class="flex justify-between items-center mb-2">
-                            <h3 id="places-sidebar-title" class="text-lg font-extrabold text-slate-800 tracking-tight">Lugares</h3>
-                            <button class="btn px-3 py-1.5 text-xs shadow-md" onclick="openPlaceModal(false)"><i class="fa-solid fa-plus"></i> Añadir Sitio</button>
-                        </div>
+                        <div class="flex justify-between items-center mb-2" id="places-header-controls">
+                            </div>
                         <p id="places-sidebar-subtitle" class="text-xs text-slate-500 font-semibold mb-3">Ubicación</p>
                         
                         <input type="text" id="sidebarSearch" oninput="renderPlacesView()" placeholder="🔍 Buscar por nombre o notas..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl mb-3 text-sm font-medium outline-none shadow-sm">
@@ -265,91 +236,62 @@
 
     <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden items-center justify-center p-3 sm:p-4" id="placeModal" onclick="closeModal('placeModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[500px] rounded-[24px] shadow-2xl flex flex-col overflow-hidden" onclick="event.stopPropagation()">
-            
             <div class="p-4 sm:p-5 flex justify-between items-center border-b border-slate-100 bg-slate-50/50">
                 <h3 id="placeModalTitle" class="text-lg font-extrabold text-slate-800">Añadir Nuevo Lugar</h3>
-                <button type="button" class="text-slate-400 hover:text-red-500 transition-colors p-1" onclick="closeModal('placeModal')">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
+                <button type="button" class="text-slate-400 hover:text-red-500 transition-colors p-1" onclick="closeModal('placeModal')"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            
-            <div class="p-4 sm:p-5">
+            <div class="p-4 sm:p-5 overflow-y-auto modal-body-scroll">
                 <form id="placeForm" onsubmit="savePlaceForm(event)" class="space-y-3">
                     <input type="hidden" id="editIndex">
-                    
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Nombre *</label>
-                            <input type="text" id="formLugar" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
+                            <input type="text" id="formLugar" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
                         </div>
                         <div>
                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Categorías *</label>
-                            <input type="text" id="formTipo" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors" placeholder="Ej: Restaurante, Museo">
+                            <input type="text" id="formTipo" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
                         </div>
                     </div>
-                    
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">País *</label>
-                            <input type="text" id="formPais" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
+                            <input type="text" id="formPais" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
                         </div>
                         <div>
                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Provincia *</label>
-                            <input type="text" id="formRegion" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
+                            <input type="text" id="formRegion" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
                         </div>
                     </div>
-
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div class="p-2 bg-sky-50 rounded-lg border border-sky-100">
                             <label class="block text-[10px] font-extrabold text-sky-700 uppercase tracking-wider mb-1"><i class="fa-solid fa-map-location-dot"></i> Coordenadas</label>
-                            <input type="text" id="formCoordenadasManual" placeholder="Ej: 39.469, -0.376" class="w-full px-3 py-1.5 bg-white border border-sky-200 rounded-md text-sm font-medium outline-none focus:border-sky-500">
+                            <input type="text" id="formCoordenadasManual" placeholder="Ej: 39.469, -0.376" class="w-full px-3 py-1.5 bg-white border border-sky-200 rounded-md text-sm font-medium outline-none">
                         </div>
                         <div>
                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Estado</label>
-                            <select id="formEstado" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
+                            <select id="formEstado" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
                                 <option value="Quiero ir">Quiero ir 🧡</option>
                                 <option value="Visitado">Visitado 🟢</option>
                             </select>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Notas breves</label>
-                            <input type="text" id="formNotas" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
+                            <input type="text" id="formNotas" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
                         </div>
                         <div>
                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Enlace Web</label>
-                            <input type="url" id="formLink" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
+                            <input type="url" id="formLink" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
                         </div>
                     </div>
                 </form>
             </div>
-
             <div class="p-4 sm:p-5 border-t border-slate-100 flex gap-3 bg-slate-50/50">
-                <button type="button" class="btn bg-red-50 text-red-500 border border-red-200 shadow-none hidden py-2.5 px-4 rounded-xl font-bold" id="deletePlaceBtn" onclick="deletePlace()">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-                <button type="submit" form="placeForm" class="flex-grow py-2.5 px-6 text-white font-extrabold text-sm rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 shadow-md transition-transform active:scale-95">
-                    Guardar Destino
-                </button>
+                <button type="button" class="btn bg-red-50 text-red-500 border border-red-200 hidden py-2.5 px-4 rounded-xl font-bold" id="deletePlaceBtn" onclick="deletePlace()"><i class="fa-solid fa-trash"></i></button>
+                <button type="submit" form="placeForm" class="flex-grow py-2.5 px-6 text-white font-extrabold text-sm rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 shadow-md">Guardar Destino</button>
             </div>
-            
-        </div>
-    </div>
-
-    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4" id="importModal" onclick="closeModal('importModal')">
-        <div class="bg-white border border-slate-200/80 w-full max-w-[520px] rounded-[24px] p-6 shadow-2xl" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-5">
-                <h3 class="text-xl font-extrabold text-slate-800">Sincronizar CSV</h3>
-                <button class="text-slate-400 p-2" onclick="closeModal('importModal')"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="border-2 border-dashed border-slate-300 hover:border-sky-500 rounded-2xl p-8 text-center cursor-pointer bg-slate-50 transition mb-4" onclick="document.getElementById('csvFileInput').click()">
-                <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-400 mb-2"></i>
-                <p class="font-bold text-slate-600">Buscar archivo .csv</p>
-                <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCSVFile(event)">
-            </div>
-            <div class="flex justify-end"><button class="py-2 px-4 rounded-xl border font-bold text-sm bg-white text-slate-700" onclick="closeModal('importModal')">Cerrar</button></div>
         </div>
     </div>
 
@@ -359,7 +301,7 @@
 
         let viajesData = [];
         let customBanners = {};
-        let userSessionId = null;
+        let userSessionId = null; // null = Invitado (Lectura), String = Propietario (Edición)
         let supabaseClient = null;
         let map, markersGroup;
 
@@ -377,31 +319,61 @@
 
         try { if (SUPABASE_ANON_KEY.trim() !== '') { supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } } catch (e) { console.error(e); }
 
+        // --- SISTEMA DE AUTENTICACIÓN DINÁMICO ---
         if (supabaseClient) {
+            // Comprobar estado inicial sin bloquear la app
+            supabaseClient.auth.getSession().then(({ data: { session } }) => {
+                userSessionId = session ? session.user.id : null;
+                updateUIPermissions();
+                loadCloudData(); // Se cargan los datos públicos
+            });
+
             supabaseClient.auth.onAuthStateChange((event, session) => {
-                if (session) {
-                    userSessionId = session.user.id;
-                    document.getElementById('cloud-login-screen').style.display = 'none';
-                    document.getElementById('app-viewport').style.display = 'block';
-                    loadCloudData();
-                } else {
-                    userSessionId = null;
-                    document.getElementById('cloud-login-screen').style.display = 'flex';
-                    document.getElementById('app-viewport').style.display = 'none';
-                }
+                userSessionId = session ? session.user.id : null;
+                updateUIPermissions();
+                if(event === 'SIGNED_IN') loadCloudData();
             });
         }
 
         async function signInWithGoogle() { await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); }
         async function signOut() { await supabaseClient.auth.signOut(); window.location.reload(); }
 
+        // --- ACTUALIZA LOS BOTONES SEGÚN LOS PERMISOS ---
+        function updateUIPermissions() {
+            const navActions = document.getElementById('navbar-actions');
+            const placesHeader = document.getElementById('places-header-controls');
+            
+            if (userSessionId) {
+                // Modo Administrador
+                navActions.innerHTML = `
+                    <button class="btn btn-secondary" onclick="exportToCSV()" title="Exportar CSV"><i class="fa-solid fa-cloud-arrow-down"></i> <span class="hidden md:inline ml-1">Exportar</span></button>
+                    <button class="btn btn-secondary text-red-500" onclick="clearAllData()" title="Vaciar BD"><i class="fa-solid fa-trash"></i></button>
+                    <button class="btn btn-secondary text-slate-700" onclick="signOut()" title="Cerrar Sesión"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+                `;
+                placesHeader.innerHTML = `
+                    <h3 id="places-sidebar-title" class="text-lg font-extrabold text-slate-800 tracking-tight">Lugares</h3>
+                    <button class="btn px-3 py-1.5 text-xs shadow-md" onclick="openPlaceModal(false)"><i class="fa-solid fa-plus"></i> Añadir Sitio</button>
+                `;
+            } else {
+                // Modo Invitado Público
+                navActions.innerHTML = `
+                    <button class="btn btn-secondary text-sky-600 font-bold" onclick="signInWithGoogle()"><i class="fa-brands fa-google"></i> <span class="hidden md:inline ml-1">Soy el propietario</span></button>
+                `;
+                placesHeader.innerHTML = `<h3 id="places-sidebar-title" class="text-lg font-extrabold text-slate-800 tracking-tight">Lugares</h3>`;
+            }
+            
+            // Volver a renderizar vistas actuales para ocultar lapiceros si estabamos viendolas
+            renderViewByCurrentState();
+        }
+
         async function loadCloudData() {
             if (!supabaseClient) return;
+            // Para que esto funcione anónimamente, DEBES configurar RLS (SELECT usando true) en Supabase
             const { data: sitios, error: errorSitios } = await supabaseClient.from('sitios').select('*');
-            if (errorSitios) { showToast("Error", errorSitios.message, true); return; }
+            if (errorSitios) { showToast("Aviso", "No se pudieron cargar los datos. Verifica la RLS en Supabase.", true); return; }
             viajesData = sitios || [];
 
-            const { data: bannersData } = await supabaseClient.from('banners').select('*').eq('user_id', userSessionId);
+            const { data: bannersData } = await supabaseClient.from('banners').select('*');
             customBanners = {};
             if (bannersData) { bannersData.forEach(b => { customBanners[b.clave] = b.url; }); }
             renderViewByCurrentState();
@@ -409,6 +381,8 @@
 
         async function editBannerImage(event, key) {
             event.preventDefault(); event.stopPropagation();
+            if(!userSessionId) return; // Protección extra
+            
             const currentImg = customBanners[key] || DEFAULT_IMAGES[key] || DEFAULT_IMAGES['pais_default'];
             setTimeout(async () => {
                 const newUrl = prompt("Introduce la URL de la nueva imagen de portada:", currentImg);
@@ -438,7 +412,6 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // --- SISTEMA DE NAVEGACIÓN Y BOTONES DEL NAVEGADOR MEJORADO ---
         function navigateTo(viewId, pushToHistory = true) {
             state.view = viewId;
             document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active-view'));
@@ -463,31 +436,25 @@
             if(viewId !== 'places' && window.innerWidth < 768) { switchMobileView('list', true); }
             
             renderViewByCurrentState();
-            
-            if (viewId === 'places') { 
-                setTimeout(() => { if (map) { map.invalidateSize(); } }, 350); 
-            }
+            if (viewId === 'places') { setTimeout(() => { if (map) { map.invalidateSize(); } }, 350); }
 
-            // GUARDA EL ESTADO EN EL NAVEGADOR
             if (pushToHistory) {
                 const historyState = { view: state.view, continent: state.continent, country: state.country, region: state.region, isGlobalCountryMode: state.isGlobalCountryMode };
                 window.history.pushState(historyState, "", `#${viewId}`);
             }
         }
 
-        // DETECTA SI EL USUARIO PULSA "ATRÁS" O "ADELANTE" EN EL NAVEGADOR
         window.addEventListener('popstate', (event) => {
             if (event.state) {
-                state.view = event.state.view;
-                state.continent = event.state.continent;
-                state.country = event.state.country;
-                state.region = event.state.region;
-                state.isGlobalCountryMode = event.state.isGlobalCountryMode;
-                navigateTo(state.view, false); // false evita un bucle infinito en el historial
-            } else {
-                navigateTo('home', false);
-            }
+                state.view = event.state.view; state.continent = event.state.continent; state.country = event.state.country; state.region = event.state.region; state.isGlobalCountryMode = event.state.isGlobalCountryMode;
+                navigateTo(state.view, false); 
+            } else { navigateTo('home', false); }
         });
+
+        // --- FUNCIONES DE RENDERIZADO CONDICIONAL (BOTONES DE EDICIÓN SOLO SI ES ADMIN) ---
+        function getBannerEditHtml(key) {
+            return userSessionId ? `<button class="banner-settings-btn" onclick="editBannerImage(event, '${key}')"><i class="fa-solid fa-pen text-xs"></i></button>` : '';
+        }
 
         function renderHomeView() {
             const europeCount = viajesData.filter(i => getContinent(i.categoria) === 'Europa').length;
@@ -495,7 +462,7 @@
             
             document.getElementById('explorer-cards-container').innerHTML = `
                 <div class="banner-card" onclick="selectContinent('Europa')">
-                    <button class="banner-settings-btn" onclick="editBannerImage(event, 'Europa')"><i class="fa-solid fa-pen text-xs"></i></button>
+                    ${getBannerEditHtml('Europa')}
                     <img src="${customBanners['Europa'] || DEFAULT_IMAGES['Europa']}" class="banner-img">
                     <div class="banner-content">
                         <span class="banner-category">Continente</span><div class="banner-name">Europa</div>
@@ -503,7 +470,7 @@
                     </div>
                 </div>
                 <div class="banner-card" onclick="selectContinent('Resto del Mundo')">
-                    <button class="banner-settings-btn" onclick="editBannerImage(event, 'Resto del Mundo')"><i class="fa-solid fa-pen text-xs"></i></button>
+                    ${getBannerEditHtml('Resto del Mundo')}
                     <img src="${customBanners['Resto del Mundo'] || DEFAULT_IMAGES['Resto del Mundo']}" class="banner-img">
                     <div class="banner-content">
                         <span class="banner-category">Continente</span><div class="banner-name">Resto del Mundo</div>
@@ -540,7 +507,7 @@
                     const count = viajesData.filter(i => i.categoria === c).length;
                     grid.innerHTML += `
                         <div class="banner-card" onclick="selectCountry('${c}')">
-                            <button class="banner-settings-btn" onclick="editBannerImage(event, '${c}')"><i class="fa-solid fa-pen text-xs"></i></button>
+                            ${getBannerEditHtml(c)}
                             <img src="${customBanners[c] || DEFAULT_IMAGES['pais_default']}" class="banner-img">
                             <div class="banner-content">
                                 <span class="banner-category">País</span><div class="banner-name">${c}</div>
@@ -574,7 +541,7 @@
                 const globalKey = `global_${state.country}`;
                 grid.innerHTML += `
                     <div class="banner-card border-2 border-sky-500/30" onclick="selectGlobalCountryMode()">
-                        <button class="banner-settings-btn" onclick="editBannerImage(event, '${globalKey}')"><i class="fa-solid fa-pen text-xs"></i></button>
+                        ${getBannerEditHtml(globalKey)}
                         <img src="${customBanners[globalKey] || DEFAULT_IMAGES['global_default']}" class="banner-img brightness-[0.85]">
                         <div class="banner-content">
                             <span class="banner-category text-amber-400 font-extrabold"><i class="fa-solid fa-star"></i> EXPLORACIÓN TOTAL</span>
@@ -590,7 +557,7 @@
                     const bannerKey = `${state.country}_${r}`;
                     grid.innerHTML += `
                         <div class="banner-card" onclick="selectRegion('${r}')">
-                            <button class="banner-settings-btn" onclick="editBannerImage(event, '${bannerKey}')"><i class="fa-solid fa-pen text-xs"></i></button>
+                            ${getBannerEditHtml(bannerKey)}
                             <img src="${customBanners[bannerKey] || DEFAULT_IMAGES['region_default']}" class="banner-img">
                             <div class="banner-content">
                                 <span class="banner-category">Región / Provincia</span><div class="banner-name">${r}</div>
@@ -598,25 +565,19 @@
                             </div>
                         </div>`;
                 });
-            } else if (grid.innerHTML === '') {
-                grid.innerHTML = `<p class="col-span-full text-center text-slate-400 py-10 font-semibold">No se encontraron resultados.</p>`;
-            }
+            } else if (grid.innerHTML === '') { grid.innerHTML = `<p class="col-span-full text-center text-slate-400 py-10 font-semibold">No se encontraron resultados.</p>`; }
             document.getElementById('regions-title').textContent = state.country;
         }
 
         function selectGlobalCountryMode() {
             state.isGlobalCountryMode = true; state.region = null; state.selectedTags = []; state.statusFilter = 'todos';
-            updateStatusFilterBarUI();
-            document.getElementById('places-sidebar-title').textContent = `Todo ${state.country}`;
-            document.getElementById('places-sidebar-subtitle').textContent = `🗺️ Visor Completo Nacional`;
+            updateStatusFilterBarUI(); document.getElementById('places-sidebar-title').textContent = `Todo ${state.country}`;
             navigateTo('places');
         }
 
         function selectRegion(region) {
             state.isGlobalCountryMode = false; state.region = region; state.selectedTags = []; state.statusFilter = 'todos'; 
-            updateStatusFilterBarUI();
-            document.getElementById('places-sidebar-title').textContent = region;
-            document.getElementById('places-sidebar-subtitle').textContent = `📍 ${state.country}`;
+            updateStatusFilterBarUI(); document.getElementById('places-sidebar-title').textContent = region;
             navigateTo('places');
         }
 
@@ -681,10 +642,7 @@
             document.querySelectorAll('.highlight-pin').forEach(el => el.classList.remove('highlight-pin'));
             setTimeout(() => {
                 const pin = document.getElementById('pin-' + id);
-                if (pin) {
-                    pin.classList.add('highlight-pin');
-                    setTimeout(() => { pin.classList.remove('highlight-pin'); }, 3000); 
-                }
+                if (pin) { pin.classList.add('highlight-pin'); setTimeout(() => { pin.classList.remove('highlight-pin'); }, 3000); }
             }, 800); 
         }
 
@@ -740,12 +698,15 @@
                 card.onclick = () => { 
                     if (!isNaN(finalLat) && !isNaN(finalLng)) { 
                         if(window.innerWidth < 768) switchMobileView('map', true); 
-                        setTimeout(() => { 
-                            map.flyTo([finalLat, finalLng], 15, { animate: true, duration: 1.5 }); 
-                            highlightPinOnMap(p.id); 
-                        }, 200);
+                        setTimeout(() => { map.flyTo([finalLat, finalLng], 15, { animate: true, duration: 1.5 }); highlightPinOnMap(p.id); }, 200);
                     } 
                 };
+                
+                // CONDICIONAL PARA BOTONES DE EDICIÓN EN LA TARJETA
+                const btnEdit = userSessionId ? `<button class="text-slate-400 hover:text-sky-600 bg-slate-100 p-2 rounded-lg" onclick="event.stopPropagation(); openPlaceModal(true, ${globalIndex})"><i class="fa-solid fa-pen"></i></button>` : '';
+                
+                const toggleVisite = userSessionId ? `<button onclick="event.stopPropagation(); togglePlaceStatus('${p.id}', 'Visitado')" class="px-3 py-2 rounded-lg text-xs font-bold border ${isVisited ? 'bg-emerald-500 text-white' : 'bg-white text-slate-500'}">Visité</button>` : '';
+                const toggleQuiero = userSessionId ? `<button onclick="event.stopPropagation(); togglePlaceStatus('${p.id}', 'Quiero ir')" class="px-3 py-2 rounded-lg text-xs font-bold border ${!isVisited ? 'bg-amber-500 text-white' : 'bg-white text-slate-500'}">Quiero ir</button>` : '';
                 
                 card.innerHTML = `
                     <div class="flex flex-col gap-2 mb-3">
@@ -753,7 +714,7 @@
                             <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-extrabold border ${isVisited ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200'}">
                                 ${isVisited ? '🟢 Visitado' : '🧡 Quiero ir'} ${state.isGlobalCountryMode ? `• ${p.estado}` : ''}
                             </span>
-                            <button class="text-slate-400 hover:text-sky-600 bg-slate-100 p-2 rounded-lg" onclick="event.stopPropagation(); openPlaceModal(true, ${globalIndex})"><i class="fa-solid fa-pen"></i></button>
+                            ${btnEdit}
                         </div>
                         <div class="flex flex-wrap gap-1.5 mt-1">${getTagsHTMLForCard(p.etiquetas || 'General')}</div>
                     </div>
@@ -761,8 +722,7 @@
                     <p class="text-slate-600 text-sm md:text-xs p-3 bg-slate-50 border rounded-xl mb-3 font-medium">${p.descripcion || '<span class="italic text-slate-400">Sin notas cortas.</span>'}</p>
                     <div class="flex justify-between items-center pt-3 border-t">
                         <div class="flex gap-2">
-                            <button onclick="event.stopPropagation(); togglePlaceStatus('${p.id}', 'Visitado')" class="px-3 py-2 rounded-lg text-xs font-bold border ${isVisited ? 'bg-emerald-500 text-white' : 'bg-white text-slate-500'}">Visité</button>
-                            <button onclick="event.stopPropagation(); togglePlaceStatus('${p.id}', 'Quiero ir')" class="px-3 py-2 rounded-lg text-xs font-bold border ${!isVisited ? 'bg-amber-500 text-white' : 'bg-white text-slate-500'}">Quiero ir</button>
+                            ${toggleVisite} ${toggleQuiero}
                         </div>
                         ${p.link ? `<a href="${p.link}" target="_blank" onclick="event.stopPropagation();" class="text-sm font-bold text-sky-600 p-2 bg-sky-50 rounded-lg"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ''}
                     </div>
@@ -783,8 +743,7 @@
                     
                     let badgeEstado = isVisited ? '<span style="background-color:#ecfdf5; color:#059669;" class="px-2 py-0.5 rounded text-[9px] font-extrabold mr-2">🟢 VISITADO</span>' : '<span style="background-color:#fffbeb; color:#d97706;" class="px-2 py-0.5 rounded text-[9px] font-extrabold mr-2">🧡 QUIERO IR</span>';
                     let badgesEtiquetasHTML = listaEtiquetas.slice(0, 2).map(tag => {
-                        const s = getTagStyle(tag);
-                        const i = getTagIcon(tag);
+                        const s = getTagStyle(tag); const i = getTagIcon(tag);
                         return `<span style="background-color:${s.bg}; color:#fff;" class="flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold"><i class="fa-solid ${i} text-[7px]"></i> ${tag}</span>`;
                     }).join(' ');
 
@@ -803,19 +762,13 @@
                         </div>
                     `;
 
-                    let m = L.marker([finalLat, finalLng], { icon: markerIcon })
-                        .addTo(markersGroup)
-                        .bindTooltip(tooltipContent, { direction: 'top', offset: [0, -15], opacity: 1, className: 'custom-tooltip' });
-                        
+                    let m = L.marker([finalLat, finalLng], { icon: markerIcon }).addTo(markersGroup).bindTooltip(tooltipContent, { direction: 'top', offset: [0, -15], opacity: 1, className: 'custom-tooltip' });
                     m.on('click', () => { scrollAndHighlightCard(p.id); });
                 }
             });
 
             if (coordsArray.length > 0 && map) {
-                setTimeout(() => {
-                    map.invalidateSize();
-                    map.fitBounds(coordsArray, { padding: [40, 40], maxZoom: 14 });
-                }, 100);
+                setTimeout(() => { map.invalidateSize(); map.fitBounds(coordsArray, { padding: [40, 40], maxZoom: 14 }); }, 100);
             }
         }
 
@@ -829,6 +782,7 @@
         }
 
         async function togglePlaceStatus(id, newStatus) {
+            if(!userSessionId) return;
             const { error } = await supabaseClient.from('sitios').update({ visitado: newStatus }).eq('id', id);
             if (!error) {
                 const idx = viajesData.findIndex(item => String(item.id) === String(id));
@@ -837,10 +791,11 @@
             }
         }
 
-        function openModal(id) { document.getElementById(id).classList.replace('hidden', 'flex'); }
+        function openModal(id) { if(userSessionId) document.getElementById(id).classList.replace('hidden', 'flex'); }
         function closeModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); }
 
         function openPlaceModal(isEdit, globalIndex = null) {
+            if(!userSessionId) return;
             document.getElementById('placeForm').reset();
             const coordInput = document.getElementById('formCoordenadasManual');
 
@@ -849,37 +804,22 @@
                 document.getElementById('deletePlaceBtn').classList.replace('hidden', 'block');
                 const p = viajesData[globalIndex];
                 
-                document.getElementById('editIndex').value = p.id;
-                document.getElementById('formLugar').value = p.nombre || "";
-                document.getElementById('formTipo').value = p.etiquetas || "";
-                document.getElementById('formPais').value = p.categoria || "";
-                document.getElementById('formRegion').value = p.estado || "";
-                document.getElementById('formNotas').value = p.descripcion || "";
-                document.getElementById('formLink').value = p.link || "";
-                document.getElementById('formEstado').value = p.visitado || 'Quiero ir';
+                document.getElementById('editIndex').value = p.id; document.getElementById('formLugar').value = p.nombre || ""; document.getElementById('formTipo').value = p.etiquetas || ""; document.getElementById('formPais').value = p.categoria || ""; document.getElementById('formRegion').value = p.estado || ""; document.getElementById('formNotas').value = p.descripcion || ""; document.getElementById('formLink').value = p.link || ""; document.getElementById('formEstado').value = p.visitado || 'Quiero ir';
 
                 let lat = parseFloat(p.latitud); let lng = parseFloat(p.longitud);
                 coordInput.value = (!isNaN(lat) && !isNaN(lng) && lat !== 0) ? `${lat}, ${lng}` : "";
             } else {
-                document.getElementById('placeModalTitle').textContent = "Añadir Nuevo Lugar";
-                document.getElementById('deletePlaceBtn').classList.replace('block', 'hidden');
-                document.getElementById('editIndex').value = "";
-                document.getElementById('formPais').value = state.country || "";
-                document.getElementById('formRegion').value = state.region || "";
-                coordInput.value = "";
+                document.getElementById('placeModalTitle').textContent = "Añadir Nuevo Lugar"; document.getElementById('deletePlaceBtn').classList.replace('block', 'hidden'); document.getElementById('editIndex').value = ""; document.getElementById('formPais').value = state.country || ""; document.getElementById('formRegion').value = state.region || ""; coordInput.value = "";
             }
             openModal('placeModal');
         }
 
         async function savePlaceForm(e) {
             e.preventDefault();
+            if(!userSessionId) return;
             showToast("Guardando", "Sincronizando con la base de datos...");
 
-            const rowId = document.getElementById('editIndex').value;
-            const nombre = document.getElementById('formLugar').value.trim();
-            const region = document.getElementById('formRegion').value.trim();
-            const pais = document.getElementById('formPais').value.trim();
-            const coordInput = document.getElementById('formCoordenadasManual').value.trim();
+            const rowId = document.getElementById('editIndex').value; const nombre = document.getElementById('formLugar').value.trim(); const region = document.getElementById('formRegion').value.trim(); const pais = document.getElementById('formPais').value.trim(); const coordInput = document.getElementById('formCoordenadasManual').value.trim();
             
             let finalLat = null; let finalLng = null;
             if (coordInput) {
@@ -892,14 +832,11 @@
                     let res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(`${nombre}, ${region}, ${pais}`)}&limit=1`);
                     let data = await res.json();
                     if (data && data.length > 0) { finalLat = parseFloat(data[0].lat); finalLng = parseFloat(data[0].lon); }
-                } catch(err) { console.error(err); }
+                } catch(err) {}
             }
 
             const payload = {
-                user_id: userSessionId, nombre: nombre, etiquetas: document.getElementById('formTipo').value.trim(),
-                categoria: pais, estado: region, latitud: (isNaN(finalLat) || finalLat === 0) ? null : finalLat, longitud: (isNaN(finalLng) || finalLng === 0) ? null : finalLng,
-                descripcion: document.getElementById('formNotas').value.trim(), link: document.getElementById('formLink').value.trim(),
-                visitado: document.getElementById('formEstado').value, nivel: getContinent(pais)
+                user_id: userSessionId, nombre: nombre, etiquetas: document.getElementById('formTipo').value.trim(), categoria: pais, estado: region, latitud: (isNaN(finalLat) || finalLat === 0) ? null : finalLat, longitud: (isNaN(finalLng) || finalLng === 0) ? null : finalLng, descripcion: document.getElementById('formNotas').value.trim(), link: document.getElementById('formLink').value.trim(), visitado: document.getElementById('formEstado').value, nivel: getContinent(pais)
             };
 
             if (rowId) await supabaseClient.from('sitios').update(payload).eq('id', parseInt(rowId));
@@ -909,6 +846,7 @@
         }
 
         async function deletePlace() {
+            if(!userSessionId) return;
             const id = document.getElementById('editIndex').value;
             if (id && confirm("¿Estás seguro de borrar este lugar de tu diario?")) {
                 await supabaseClient.from('sitios').delete().eq('id', id);
@@ -918,31 +856,17 @@
 
         function switchMobileView(tab, preventFitBounds = false) {
             state.mobileTab = tab;
-            const sidebar = document.getElementById('placesSidebarRoot');
-            const listContainer = document.getElementById('placesList');
-            const mapContainer = document.getElementById('mapContainerRoot');
-            const btnList = document.getElementById('tab-btn-list');
-            const btnMap = document.getElementById('tab-btn-map');
+            const sidebar = document.getElementById('placesSidebarRoot'); const listContainer = document.getElementById('placesList'); const mapContainer = document.getElementById('mapContainerRoot'); const btnList = document.getElementById('tab-btn-list'); const btnMap = document.getElementById('tab-btn-map');
 
             if (tab === 'list') {
-                sidebar.classList.remove('sidebar-map-active');
-                listContainer.classList.remove('mobile-list-hidden');
-                mapContainer.classList.remove('active-mobile-map');
-                btnList.classList.add('active');
-                btnMap.classList.remove('active');
+                sidebar.classList.remove('sidebar-map-active'); listContainer.classList.remove('mobile-list-hidden'); mapContainer.classList.remove('active-mobile-map'); btnList.classList.add('active'); btnMap.classList.remove('active');
             } else {
-                sidebar.classList.add('sidebar-map-active');
-                listContainer.classList.add('mobile-list-hidden');
-                mapContainer.classList.add('active-mobile-map');
-                btnList.classList.remove('active');
-                btnMap.classList.add('active');
-                
+                sidebar.classList.add('sidebar-map-active'); listContainer.classList.add('mobile-list-hidden'); mapContainer.classList.add('active-mobile-map'); btnList.classList.remove('active'); btnMap.classList.add('active');
                 setTimeout(() => {
                     if (map) {
                         map.invalidateSize();
                         if (!preventFitBounds) {
-                            let bounds = markersGroup.getBounds();
-                            if (bounds && bounds.isValid()) { map.fitBounds(bounds, { padding: [30, 30] }); }
+                            let bounds = markersGroup.getBounds(); if (bounds && bounds.isValid()) { map.fitBounds(bounds, { padding: [30, 30] }); }
                         }
                     }
                 }, 150);
@@ -950,32 +874,25 @@
         }
 
         function exportToCSV() {
+            if(!userSessionId) return;
             let csvContent = "Nombre,Categoria,Estado,Latitud,Longitud,Notas,Nivel,Visitado,Etiquetas,Link\n";
             if (viajesData.length > 0) {
                 viajesData.forEach(v => {
-                    let eLat = (v.latitud !== null && v.latitud !== undefined) ? v.latitud : '';
-                    let eLng = (v.longitud !== null && v.longitud !== undefined) ? v.longitud : '';
+                    let eLat = (v.latitud !== null && v.latitud !== undefined) ? v.latitud : ''; let eLng = (v.longitud !== null && v.longitud !== undefined) ? v.longitud : '';
                     csvContent += `"${v.nombre}","${v.categoria}","${v.estado}",${eLat},${eLng},"${(v.descripcion || '').replace(/"/g, '""')}","${v.nivel || ''}","${v.visitado || 'Por visitar'}","${v.etiquetas || ''}","${v.link || ''}"\n`;
                 });
             }
             const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob); 
-            const link = document.createElement("a");
-            const timestamp = new Date().toISOString().slice(0, 10);
-            link.setAttribute("href", url); 
-            link.setAttribute("download", `VoyageVault_Backup_${timestamp}.csv`);
-            document.body.appendChild(link); 
-            link.click(); 
-            document.body.removeChild(link);
+            const url = URL.createObjectURL(blob); const link = document.createElement("a"); const timestamp = new Date().toISOString().slice(0, 10);
+            link.setAttribute("href", url); link.setAttribute("download", `VoyageVault_Backup_${timestamp}.csv`);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
             showToast("Backup Descargado", `Copia descargada con éxito.`);
         }
 
-        function handleCSVFile(event) {}
-
         async function clearAllData() {
+            if(!userSessionId) return;
             if (confirm("⚠️ ¿Estás seguro de borrar todos los sitios de forma permanente?")) {
-                await supabaseClient.from('sitios').delete().neq('id', 0);
-                loadCloudData(); navigateTo('home');
+                await supabaseClient.from('sitios').delete().neq('id', 0); loadCloudData(); navigateTo('home');
             }
         }
 
@@ -984,8 +901,6 @@
             L.control.zoom({ position: 'bottomright' }).addTo(map);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
             markersGroup = L.featureGroup().addTo(map);
-            
-            // Establecer el estado inicial en el historial al cargar la web por primera vez
             history.replaceState({ view: 'home', continent: null, country: null, region: null, isGlobalCountryMode: false }, "", "");
         }
 
