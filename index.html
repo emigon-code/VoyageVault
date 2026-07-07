@@ -5,18 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VoyageVault — Visor de Viajes</title>
     
+    <!-- ICONO DE LA APP (Favicon SVG) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
     
+    <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
+    <!-- Leaflet CSS y JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
+    <!-- Fuentes y Estilos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -143,6 +148,7 @@
     <div class="ambient-glow"></div>
     <div class="ambient-glow-2"></div>
 
+    <!-- TOAST NOTIFICACIONES -->
     <div id="toastMessage" class="notification-toast">
         <i id="toastIcon" class="fa-solid fa-circle-check" style="color:#0284c7; font-size: 18px;"></i>
         <div>
@@ -151,6 +157,7 @@
         </div>
     </div>
 
+    <!-- NAVBAR GLOBAL INTELIGENTE -->
     <navbar>
         <div class="nav-left">
             <div class="logo" onclick="navigateTo('home')">
@@ -162,17 +169,21 @@
             </div>
         </div>
         <div class="nav-right" id="navbar-actions">
-            </div>
+            <!-- Botones inyectados por JS -->
+        </div>
     </navbar>
 
+    <!-- VIEWPORT PRINCIPAL -->
     <div class="main-viewport" id="app-viewport">
         
+        <!-- 1. HOME -->
         <div class="view-panel active-view" id="view-home">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1">Explora tus destinos</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una región geográfica para visualizar los lugares guardados.</p>
             <div class="banner-grid home-grid" id="explorer-cards-container"></div>
         </div>
 
+        <!-- 2. PAÍSES -->
         <div class="view-panel" id="view-countries">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                 <div>
@@ -187,6 +198,7 @@
             <div class="banner-grid" id="countries-grid"></div>
         </div>
 
+        <!-- 3. REGIONES -->
         <div class="view-panel" id="view-regions">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                 <div>
@@ -201,6 +213,7 @@
             <div class="banner-grid" id="regions-grid"></div>
         </div>
 
+        <!-- 4. DETALLE DE LUGARES Y MAPA -->
         <div class="view-panel" id="view-places">
             <div class="split-viewport">
                 <div class="places-sidebar" id="placesSidebarRoot">
@@ -233,6 +246,7 @@
         </div>
     </div>
 
+    <!-- MODAL FORM LUGAR -->
     <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden items-center justify-center p-3 sm:p-4" id="placeModal" onclick="closeModal('placeModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[500px] rounded-[24px] shadow-2xl flex flex-col overflow-hidden" onclick="event.stopPropagation()">
             <div class="p-4 sm:p-5 flex justify-between items-center border-b border-slate-100 bg-slate-50/50">
@@ -245,44 +259,45 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Nombre *</label>
-                            <input type="text" id="formLugar" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
+                            <input type="text" id="formLugar" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
                         </div>
                         <div>
                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Categorías *</label>
-                            <input type="text" id="formTipo" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
+                            <input type="text" id="formTipo" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">País *</label>
-                            <input type="text" id="formPais" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
+                            <input type="text" id="formPais" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
                         </div>
                         <div>
                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Provincia *</label>
-                            <input type="text" id="formRegion" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
+                            <input type="text" id="formRegion" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
                         </div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div class="p-2 bg-sky-50 rounded-lg border border-sky-100">
                             <label class="block text-[10px] font-extrabold text-sky-700 uppercase tracking-wider mb-1"><i class="fa-solid fa-map-location-dot"></i> Coordenadas</label>
-                            <input type="text" id="formCoordenadasManual" placeholder="Ej: 39.469, -0.376" class="w-full px-3 py-1.5 bg-white border border-sky-200 rounded-md text-sm font-medium outline-none">
+                            <input type="text" id="formCoordenadasManual" placeholder="Ej: 39.469, -0.376" class="w-full px-3 py-1.5 bg-white border border-sky-200 rounded-md text-sm font-medium outline-none focus:border-sky-500">
                         </div>
-                        <div>
+                        <div class="flex flex-col justify-end">
                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Estado</label>
-                            <select id="formEstado" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
+                            <select id="formEstado" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
                                 <option value="Quiero ir">Quiero ir 🧡</option>
                                 <option value="Visitado">Visitado 🟢</option>
                             </select>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Notas breves</label>
-                            <input type="text" id="formNotas" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
-                        </div>
+                    <!-- Fila ampliada para Enlace y Notas -->
+                    <div class="grid grid-cols-1 gap-3">
                         <div>
                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Enlace Web</label>
-                            <input type="url" id="formLink" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
+                            <input type="url" id="formLink" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Notas breves</label>
+                            <textarea id="formNotas" rows="3" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors resize-y max-h-32"></textarea>
                         </div>
                     </div>
                 </form>
@@ -294,6 +309,7 @@
         </div>
     </div>
 
+    <!-- MODAL SINCRO CSV -->
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4" id="importModal" onclick="closeModal('importModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[520px] rounded-[24px] p-6 shadow-2xl" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-5">
@@ -350,13 +366,11 @@
         async function signInWithGoogle() { await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); }
         async function signOut() { await supabaseClient.auth.signOut(); window.location.reload(); }
 
-        // --- INTERFAZ ADMINISTRADOR VS INVITADO (AQUÍ VUELVE EL BOTÓN DE SINCRONIZAR) ---
         function updateUIPermissions() {
             const navActions = document.getElementById('navbar-actions');
             const placesHeader = document.getElementById('places-header-controls');
             
             if (userSessionId) {
-                // MODO ADMIN
                 navActions.innerHTML = `
                     <button class="btn btn-secondary" onclick="exportToCSV()" title="Exportar CSV"><i class="fa-solid fa-cloud-arrow-down"></i> <span class="hidden md:inline ml-1">Exportar</span></button>
                     <button class="btn btn-secondary" onclick="openModal('importModal')" title="Sincronizar CSV"><i class="fa-solid fa-cloud-arrow-up"></i> <span class="hidden md:inline ml-1">Sincronizar</span></button>
@@ -368,7 +382,6 @@
                     <button class="btn px-3 py-1.5 text-xs shadow-md" onclick="openPlaceModal(false)"><i class="fa-solid fa-plus"></i> Añadir Sitio</button>
                 `;
             } else {
-                // MODO INVITADO
                 navActions.innerHTML = `
                     <button class="btn btn-secondary text-sky-600 font-bold" onclick="signInWithGoogle()"><i class="fa-brands fa-google"></i> <span class="hidden md:inline ml-1">Soy el propietario</span></button>
                 `;
@@ -643,7 +656,7 @@
                 card.onclick = () => { if (!isNaN(finalLat) && !isNaN(finalLng)) { if(window.innerWidth < 768) switchMobileView('map', true); setTimeout(() => { map.flyTo([finalLat, finalLng], 15, { animate: true, duration: 1.5 }); highlightPinOnMap(p.id); }, 200); } };
                 
                 const btnEdit = userSessionId ? `<button class="text-slate-400 hover:text-sky-600 bg-slate-100 p-2 rounded-lg" onclick="event.stopPropagation(); openPlaceModal(true, ${globalIndex})"><i class="fa-solid fa-pen"></i></button>` : '';
-                const toggleVisite = userSessionId ? `<button onclick="event.stopPropagation(); togglePlaceStatus('${p.id}', 'Visitado')" class="px-3 py-2 rounded-lg text-xs font-bold border ${isVisited ? 'bg-emerald-500 text-white' : 'bg-white text-slate-500'}">Visité</button>` : '';
+                const toggleVisite = userSessionId ? `<button onclick="event.stopPropagation(); togglePlaceStatus('${p.id}', 'Visitado')" class="px-3 py-2 rounded-lg text-xs font-bold border ${isVisited ? 'bg-emerald-500 text-white' : 'bg-white text-slate-500'}">Visitado</button>` : '';
                 const toggleQuiero = userSessionId ? `<button onclick="event.stopPropagation(); togglePlaceStatus('${p.id}', 'Quiero ir')" class="px-3 py-2 rounded-lg text-xs font-bold border ${!isVisited ? 'bg-amber-500 text-white' : 'bg-white text-slate-500'}">Quiero ir</button>` : '';
                 
                 card.innerHTML = `
@@ -781,82 +794,50 @@
             showToast("Backup Descargado", `Copia descargada con éxito.`);
         }
 
-        // --- NUEVA LÓGICA DE SINCRONIZACIÓN CSV ANTI-DUPLICADOS ---
         function parseCSVLine(text) {
             let ret = [], col = "", inQuote = false;
             for (let i = 0; i < text.length; i++) {
                 let c = text[i];
-                if (inQuote) {
-                    if (c === '"') { if (text[i+1] === '"') { col += '"'; i++; } else inQuote = false; } 
-                    else col += c;
-                } else {
-                    if (c === '"') inQuote = true; else if (c === ',') { ret.push(col); col = ""; } else col += c;
-                }
+                if (inQuote) { if (c === '"') { if (text[i+1] === '"') { col += '"'; i++; } else inQuote = false; } else col += c; } 
+                else { if (c === '"') inQuote = true; else if (c === ',') { ret.push(col); col = ""; } else col += c; }
             }
-            ret.push(col);
-            return ret;
+            ret.push(col); return ret;
         }
 
         function handleCSVFile(event) {
             if(!userSessionId) return;
-            const file = event.target.files[0];
-            if (!file) return;
+            const file = event.target.files[0]; if (!file) return;
 
             const reader = new FileReader();
             reader.onload = async function(e) {
-                const text = e.target.result;
-                const rows = text.split('\n');
-                let nuevosSitios = [];
-                let duplicados = 0;
+                const text = e.target.result; const rows = text.split('\n'); let nuevosSitios = []; let duplicados = 0;
 
                 for(let i = 1; i < rows.length; i++) {
                     if(!rows[i].trim()) continue;
                     const cols = parseCSVLine(rows[i].trim());
-                    
                     if(cols.length >= 3) {
-                        let nombre = cols[0].trim();
-                        let pais = cols[1].trim();
-                        let estado = cols[2].trim();
-                        let lat = parseFloat(cols[3]);
-                        let lng = parseFloat(cols[4]);
-                        let desc = cols[5] ? cols[5].trim() : '';
-                        let nivel = cols[6] ? cols[6].trim() : getContinent(pais);
-                        let visitado = cols[7] ? cols[7].trim() : 'Por visitar';
-                        let etiquetas = cols[8] ? cols[8].trim() : '';
-                        let link = cols[9] ? cols[9].trim() : '';
-
-                        // CONTROL DE DUPLICADOS
+                        let nombre = cols[0].trim(); let pais = cols[1].trim(); let estado = cols[2].trim(); let lat = parseFloat(cols[3]); let lng = parseFloat(cols[4]); let desc = cols[5] ? cols[5].trim() : ''; let nivel = cols[6] ? cols[6].trim() : getContinent(pais); let visitado = cols[7] ? cols[7].trim() : 'Por visitar'; let etiquetas = cols[8] ? cols[8].trim() : ''; let link = cols[9] ? cols[9].trim() : '';
                         let existe = viajesData.some(v => v.nombre.toLowerCase() === nombre.toLowerCase() && v.categoria.toLowerCase() === pais.toLowerCase());
                         
-                        if(!existe && nombre !== "") {
-                            nuevosSitios.push({ user_id: userSessionId, nombre: nombre, categoria: pais, estado: estado, latitud: isNaN(lat) ? null : lat, longitud: isNaN(lng) ? null : lng, descripcion: desc, nivel: nivel, visitado: visitado, etiquetas: etiquetas, link: link });
-                        } else if (existe) {
-                            duplicados++;
-                        }
+                        if(!existe && nombre !== "") { nuevosSitios.push({ user_id: userSessionId, nombre: nombre, categoria: pais, estado: estado, latitud: isNaN(lat) ? null : lat, longitud: isNaN(lng) ? null : lng, descripcion: desc, nivel: nivel, visitado: visitado, etiquetas: etiquetas, link: link }); } 
+                        else if (existe) { duplicados++; }
                     }
                 }
 
                 if(nuevosSitios.length > 0) {
                     showToast("Sincronizando...", `Subiendo ${nuevosSitios.length} lugares nuevos...`);
                     const { error } = await supabaseClient.from('sitios').insert(nuevosSitios);
-                    if(!error) {
-                        loadCloudData();
-                        showToast("Completado", `Se añadieron ${nuevosSitios.length} sitios nuevos. Se omitieron ${duplicados} duplicados.`);
-                    } else { showToast("Error", "Fallo al subir a la nube.", true); }
-                } else {
-                    showToast("Sin cambios", `No se encontraron sitios nuevos. Se omitieron ${duplicados} duplicados.`);
-                }
-                closeModal('importModal');
-                event.target.value = ''; // Resetea el input para poder subir el mismo archivo después
+                    if(!error) { loadCloudData(); showToast("Completado", `Se añadieron ${nuevosSitios.length} sitios nuevos. Se omitieron ${duplicados} duplicados.`); } 
+                    else { showToast("Error", "Fallo al subir a la nube.", true); }
+                } else { showToast("Sin cambios", `No se encontraron sitios nuevos. Se omitieron ${duplicados} duplicados.`); }
+                closeModal('importModal'); event.target.value = '';
             };
             reader.readAsText(file);
         }
 
         async function clearAllData() {
             if(!userSessionId) return;
-            if (confirm("⚠️ ¿Estás seguro de borrar todos los sitios de forma permanente?")) {
-                await supabaseClient.from('sitios').delete().neq('id', 0); loadCloudData(); navigateTo('home');
-            }
+            if (confirm("⚠️ ¿Estás seguro de borrar todos los sitios de forma permanente?")) { await supabaseClient.from('sitios').delete().neq('id', 0); loadCloudData(); navigateTo('home'); }
         }
 
         function initMap() {
