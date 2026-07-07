@@ -35,15 +35,37 @@
     </script>
     
     <style>
+        /* BLINDAJE DEL TAMAÑO DE PANTALLA */
         *, *::before, *::after { box-sizing: border-box; }
         
-        body { background-color: #f8fafc; color: #0f172a; display: flex; flex-direction: column; margin: 0; padding: 0; height: 100vh; height: 100dvh; overflow: hidden; position: relative; }
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prohíbe el scroll general del navegador */
+        }
+        
+        body { 
+            background-color: #f8fafc; 
+            color: #0f172a; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100dvh; /* dynamic viewport height para evitar barras blancas en móvil */
+            position: relative; 
+        }
         
         .ambient-glow { position: absolute; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(255, 255, 255, 0) 70%); top: -100px; right: -100px; z-index: 1; pointer-events: none; }
         .ambient-glow-2 { position: absolute; width: 450px; height: 450px; border-radius: 50%; background: radial-gradient(circle, rgba(244, 63, 94, 0.1) 0%, rgba(255, 255, 255, 0) 70%); bottom: -100px; left: -100px; z-index: 1; pointer-events: none; }
         
-        /* NAVBAR FIJA */
-        navbar { flex: 0 0 75px; background-color: rgba(255, 255, 255, 0.95); border-bottom: 1px solid rgba(226, 232, 240, 0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 100; box-shadow: 0 4px 20px -10px rgba(15, 23, 42, 0.05); }
+        /* NAVBAR FIJA E INAMOVIBLE */
+        navbar { 
+            flex: 0 0 75px; /* Altura estricta de 75px */
+            background-color: rgba(255, 255, 255, 0.95); 
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8); 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 0 16px; z-index: 100; box-shadow: 0 4px 20px -10px rgba(15, 23, 42, 0.05); 
+        }
         @media (min-width: 768px) { navbar { padding: 0 32px; } }
         .nav-left, .nav-right { display: flex; align-items: center; gap: 8px; z-index: 5; }
         @media (min-width: 768px) { .nav-left, .nav-right { gap: 12px; } }
@@ -61,9 +83,24 @@
         .breadcrumbs i { font-size: 9px; color: #94a3b8; }
         .breadcrumbs .active { color: #0f172a; font-weight: 800; cursor: default; }
 
-        /* VIEWPORT PRINCIPAL */
-        .main-viewport { flex: 1 1 auto; position: relative; overflow: hidden; display: block; background: transparent; }
-        .view-panel { display: none; width: 100%; height: 100%; overflow-y: auto; padding: 20px; }
+        /* CONTENEDOR PRINCIPAL SELLADO */
+        .main-viewport { 
+            flex: 1 1 auto; 
+            min-height: 0; /* Evita que crezca de más y empuje el menú superior */
+            width: 100%;
+            position: relative; 
+            overflow: hidden; 
+        }
+        
+        /* PANELES DE VISTA ABSOLUTOS */
+        .view-panel { 
+            display: none; 
+            position: absolute; 
+            inset: 0; /* top:0, left:0, bottom:0, right:0 */
+            overflow-y: auto; 
+            padding: 20px; 
+            -webkit-overflow-scrolling: touch; /* Scroll fluido en dispositivos Apple */
+        }
         @media (min-width: 768px) { .view-panel { padding: 40px; } }
         .view-panel.active-view { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -73,13 +110,13 @@
         .split-viewport { display: flex; flex-direction: column; width: 100%; height: 100%; position: relative; }
         @media (min-width: 768px) { .split-viewport { flex-direction: row; } }
 
-        .places-sidebar { width: 100%; display: flex; flex-direction: column; z-index: 20; background: #ffffff; transition: all 0.3s ease; height: 100%; }
+        .places-sidebar { width: 100%; display: flex; flex-direction: column; z-index: 20; background: #ffffff; transition: all 0.3s ease; height: 100%; min-height: 0; }
         @media (min-width: 768px) { .places-sidebar { width: 440px; min-width: 440px; border-right: 1px solid rgba(226,232,240,0.8); } }
         
         .places-header-area { padding: 16px; flex-shrink: 0; border-bottom: 1px solid rgba(226,232,240,0.8); background: rgba(255, 255, 255, 0.98); z-index: 30; }
         @media (min-width: 768px) { .places-header-area { padding: 24px; } }
         
-        .places-list-container { flex-grow: 1; overflow-y: auto; padding: 16px; background-color: rgba(248, 250, 252, 0.5); }
+        .places-list-container { flex-grow: 1; overflow-y: auto; padding: 16px; background-color: rgba(248, 250, 252, 0.5); -webkit-overflow-scrolling: touch; }
         
         .map-container { display: none; flex-grow: 1; height: 100%; width: 100%; position: relative; z-index: 10; }
         @media (min-width: 768px) { .map-container { display: block !important; } }
@@ -90,6 +127,7 @@
         }
         #map { position: absolute; inset: 0; background-color: #cbd5e1; height: 100%; width: 100%; }
 
+        /* TARJETAS Y GRID */
         .banner-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1400px; margin: 0 auto; }
         @media (min-width: 768px) { .banner-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 28px; } }
         .home-grid { grid-template-columns: 1fr; max-width: 1100px; }
@@ -121,7 +159,7 @@
             .mobile-view-tabs button.active { color: #0284c7; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         }
         
-        .modal-body-scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }
+        .modal-body-scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
         
         /* ANIMACIONES MAPA */
         .custom-pin-marker { display: flex; align-items: center; justify-content: center; width: 36px !important; height: 36px !important; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: -2px 2px 4px rgba(0,0,0,0.3); border: 2px solid #ffffff; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -248,12 +286,12 @@
 
     <!-- MODAL FORM LUGAR -->
     <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden items-center justify-center p-3 sm:p-4" id="placeModal" onclick="closeModal('placeModal')">
-        <div class="bg-white border border-slate-200/80 w-full max-w-[500px] rounded-[24px] shadow-2xl flex flex-col overflow-hidden" onclick="event.stopPropagation()">
-            <div class="p-4 sm:p-5 flex justify-between items-center border-b border-slate-100 bg-slate-50/50">
+        <div class="bg-white border border-slate-200/80 w-full max-w-[500px] rounded-[24px] shadow-2xl flex flex-col overflow-hidden max-h-[95dvh]" onclick="event.stopPropagation()">
+            <div class="p-4 sm:p-5 flex justify-between items-center border-b border-slate-100 bg-slate-50/50 flex-shrink-0">
                 <h3 id="placeModalTitle" class="text-lg font-extrabold text-slate-800">Añadir Nuevo Lugar</h3>
                 <button type="button" class="text-slate-400 hover:text-red-500 transition-colors p-1" onclick="closeModal('placeModal')"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <div class="p-4 sm:p-5 overflow-y-auto modal-body-scroll">
+            <div class="p-4 sm:p-5 overflow-y-auto modal-body-scroll flex-grow">
                 <form id="placeForm" onsubmit="savePlaceForm(event)" class="space-y-3">
                     <input type="hidden" id="editIndex">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -289,7 +327,6 @@
                             </select>
                         </div>
                     </div>
-                    <!-- Fila ampliada para Enlace y Notas -->
                     <div class="grid grid-cols-1 gap-3">
                         <div>
                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Enlace Web</label>
@@ -302,7 +339,7 @@
                     </div>
                 </form>
             </div>
-            <div class="p-4 sm:p-5 border-t border-slate-100 flex gap-3 bg-slate-50/50">
+            <div class="p-4 sm:p-5 border-t border-slate-100 flex gap-3 bg-slate-50/50 flex-shrink-0">
                 <button type="button" class="btn bg-red-50 text-red-500 border border-red-200 hidden py-2.5 px-4 rounded-xl font-bold" id="deletePlaceBtn" onclick="deletePlace()"><i class="fa-solid fa-trash"></i></button>
                 <button type="submit" form="placeForm" class="flex-grow py-2.5 px-6 text-white font-extrabold text-sm rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 shadow-md">Guardar Destino</button>
             </div>
