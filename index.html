@@ -5,23 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VoyageVault — Visor de Viajes</title>
     
-    <!-- ICONO DE LA APP (Favicon SVG) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
     
-    <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Leaflet CSS y JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- Fuentes y Estilos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -186,7 +181,6 @@
     <div class="ambient-glow"></div>
     <div class="ambient-glow-2"></div>
 
-    <!-- TOAST NOTIFICACIONES -->
     <div id="toastMessage" class="notification-toast">
         <i id="toastIcon" class="fa-solid fa-circle-check" style="color:#0284c7; font-size: 18px;"></i>
         <div>
@@ -195,7 +189,6 @@
         </div>
     </div>
 
-    <!-- NAVBAR GLOBAL -->
     <nav id="top-navbar">
         <div class="nav-left">
             <div class="logo" onclick="navigateTo('home')">
@@ -207,21 +200,17 @@
             </div>
         </div>
         <div class="nav-right" id="navbar-actions">
-            <!-- Botones inyectados por JS -->
-        </div>
+            </div>
     </nav>
 
-    <!-- VIEWPORT PRINCIPAL -->
     <div class="main-viewport" id="app-viewport">
         
-        <!-- 1. HOME -->
         <div class="view-panel active-view" id="view-home">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1">Explora tus destinos</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una región geográfica para visualizar los lugares guardados.</p>
             <div class="banner-grid home-grid" id="explorer-cards-container"></div>
         </div>
 
-        <!-- 2. PAÍSES -->
         <div class="view-panel" id="view-countries">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                 <div>
@@ -236,7 +225,6 @@
             <div class="banner-grid" id="countries-grid"></div>
         </div>
 
-        <!-- 3. REGIONES -->
         <div class="view-panel" id="view-regions">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                 <div>
@@ -251,7 +239,6 @@
             <div class="banner-grid" id="regions-grid"></div>
         </div>
 
-        <!-- 4. DETALLE DE LUGARES Y MAPA -->
         <div class="view-panel" id="view-places">
             <div class="split-viewport">
                 <div class="places-sidebar" id="placesSidebarRoot">
@@ -284,7 +271,6 @@
         </div>
     </div>
 
-    <!-- MODAL FORM LUGAR -->
     <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden items-center justify-center p-3 sm:p-4" id="placeModal" onclick="closeModal('placeModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[500px] rounded-[24px] shadow-2xl flex flex-col overflow-hidden max-h-[95dvh]" onclick="event.stopPropagation()">
             <div class="p-4 sm:p-5 flex justify-between items-center border-b border-slate-100 bg-slate-50/50 flex-shrink-0">
@@ -310,32 +296,30 @@
                             <input type="text" id="formPais" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Provincia *</label>
-                            <input type="text" id="formRegion" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
+                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Región</label>
+                            <input type="text" id="formRegion" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
                         </div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="p-2 bg-sky-50 rounded-lg border border-sky-100">
-                            <label class="block text-[10px] font-extrabold text-sky-700 uppercase tracking-wider mb-1"><i class="fa-solid fa-map-location-dot"></i> Coordenadas</label>
-                            <input type="text" id="formCoordenadasManual" placeholder="Ej: 39.469, -0.376" class="w-full px-3 py-1.5 bg-white border border-sky-200 rounded-md text-sm font-medium outline-none focus:border-sky-500">
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Coordenadas (Lat, Lng) *</label>
+                            <input type="text" id="formCoordenadasManual" placeholder="Ej: 40.41, -3.70" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors font-mono">
                         </div>
-                        <div class="flex flex-col justify-end">
-                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Estado</label>
-                            <select id="formEstado" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
-                                <option value="Quiero ir">Quiero ir 🧡</option>
-                                <option value="Visitado">Visitado 🟢</option>
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Estado *</label>
+                            <select id="formEstado" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors appearance-none">
+                                <option value="Quiero ir">🧡 Quiero ir</option>
+                                <option value="Visitado">🟢 Visitado</option>
                             </select>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 gap-3">
-                        <div>
-                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Enlace Web</label>
-                            <input type="url" id="formLink" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Notas breves</label>
-                            <textarea id="formNotas" rows="3" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors resize-y max-h-32"></textarea>
-                        </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Enlace útil (Opcional)</label>
+                        <input type="url" id="formLink" placeholder="https://..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Notas breves</label>
+                        <textarea id="formNotas" rows="3" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors resize-y max-h-32"></textarea>
                     </div>
                 </form>
             </div>
@@ -346,7 +330,6 @@
         </div>
     </div>
 
-    <!-- MODAL SINCRO CSV -->
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4" id="importModal" onclick="closeModal('importModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[520px] rounded-[24px] p-6 shadow-2xl" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-5">
@@ -354,62 +337,70 @@
                 <button class="text-slate-400 p-2" onclick="closeModal('importModal')"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="border-2 border-dashed border-slate-300 hover:border-sky-500 rounded-2xl p-8 text-center cursor-pointer bg-slate-50 transition mb-4" onclick="document.getElementById('csvFileInput').click()">
-                <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-400 mb-2"></i>
-                <p class="font-bold text-slate-600">Buscar archivo .csv</p>
-                <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCSVFile(event)">
+                <i class="fa-solid fa-file-csv text-4xl text-slate-400 mb-3 block"></i>
+                <p class="text-sm font-bold text-slate-700">Seleccionar archivo .csv</p>
+                <p class="text-xs text-slate-500 mt-1">Importación masiva</p>
+                <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleFileSelect(event)">
             </div>
-            <div class="flex justify-end"><button class="py-2 px-4 rounded-xl border font-bold text-sm bg-white text-slate-700" onclick="closeModal('importModal')">Cerrar</button></div>
+            <p class="text-[11px] text-slate-500 font-medium"><strong>Nota:</strong> Los sitios existentes con mismo Nombre + País se omitirán para evitar duplicados.</p>
         </div>
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://fmueravcnwkoswvwbvnc.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtdWVyYXZjbndrb3N3dndidm5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMjIxMzIsImV4cCI6MjA5Nzg5ODEzMn0._k2oBg5XwMmPzPZ3zm43EOp-gn1VyM6JDqpCx2BoYvQ';
-
-        let viajesData = [];
-        let customBanners = {};
-        let userSessionId = null; 
-        let supabaseClient = null;
-        let map, markersGroup;
-
-        let state = { view: 'home', continent: null, country: null, region: null, selectedTags: [], statusFilter: 'todos', mobileTab: 'list', isGlobalCountryMode: false };
-        
-        const EUROPEAN_COUNTRIES = ["alemania", "andorra", "austria", "españa", "espana", "francia", "italia", "portugal", "suiza", "reino unido", "grecia", "bélgica", "belgica", "paises bajos", "países bajos", "holanda", "eslovenia", "república checa", "republica checa", "rumanía", "rumania", "suecia", "noruega", "dinamarca", "finlandia", "polonia", "hungría", "hungria", "irlanda"];
+        // CONFIGURACIÓN SUPABASE (Oculta por seguridad o insertada desde el backend)
+        const supabaseUrl = 'URL_AQUI'; 
+        const supabaseKey = 'KEY_AQUI'; 
+        const supabaseClient = window.supabase ? supabase.createClient(supabaseUrl, supabaseKey) : null;
 
         const DEFAULT_IMAGES = {
-            'Europa': 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=1000',
-            'Resto del Mundo': 'https://images.unsplash.com/photo-1507608869274-d3177c8bb4c7?w=1000',
-            'pais_default': 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=600',
-            'region_default': 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600',
-            'global_default': 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=600'
+            'Europa': 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80',
+            'Asia': 'https://images.unsplash.com/photo-1464817739973-0128fe77aaa1?w=800&q=80',
+            'América': 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800&q=80',
+            'África': 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=800&q=80',
+            'Oceanía': 'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=800&q=80',
+            'pais_default': 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80',
+            'global_default': 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&q=80'
         };
 
-        try { if (SUPABASE_ANON_KEY.trim() !== '') { supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } } catch (e) { console.error(e); }
+        let userSessionId = null;
+        let viajesData = [];
+        let customBanners = {};
+        let map;
+        let markersGroup;
+        
+        let state = { view: 'home', continent: null, country: null, region: null, isGlobalCountryMode: false, searchPlace: '', statusFilter: 'todos', selectedTags: [] };
 
-        if (supabaseClient) {
-            supabaseClient.auth.getSession().then(({ data: { session } }) => {
-                userSessionId = session ? session.user.id : null;
-                updateUIPermissions();
-                loadCloudData();
-            });
-
+        async function initAuth() {
+            if (!supabaseClient) return checkAuthStatus();
+            const { data } = await supabaseClient.auth.getSession();
+            userSessionId = data.session?.user?.id || null;
             supabaseClient.auth.onAuthStateChange((event, session) => {
-                userSessionId = session ? session.user.id : null;
-                updateUIPermissions();
-                if(event === 'SIGNED_IN') loadCloudData();
+                userSessionId = session?.user?.id || null;
+                checkAuthStatus();
             });
+            checkAuthStatus();
         }
 
-        async function signInWithGoogle() { await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); }
-        async function signOut() { await supabaseClient.auth.signOut(); window.location.reload(); }
+        async function signInWithGoogle() {
+            if (!supabaseClient) { alert("Supabase no configurado"); return; }
+            const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
+            if (error) alert("Error al iniciar sesión: " + error.message);
+        }
 
-        function updateUIPermissions() {
+        async function signOut() {
+            if (!supabaseClient) return;
+            const { error } = await supabaseClient.auth.signOut();
+            if (error) alert("Error al cerrar sesión: " + error.message);
+            else { userSessionId = null; customBanners = {}; checkAuthStatus(); }
+        }
+
+        function checkAuthStatus() {
             const navActions = document.getElementById('navbar-actions');
             const placesHeader = document.getElementById('places-header-controls');
-            
             if (userSessionId) {
+                loadCloudData();
                 navActions.innerHTML = `
-                    <button class="btn btn-secondary" onclick="exportToCSV()" title="Exportar CSV"><i class="fa-solid fa-cloud-arrow-down"></i> <span class="hidden md:inline ml-1">Exportar</span></button>
+                    <button class="btn btn-secondary" onclick="exportToCSV()" title="Descargar CSV"><i class="fa-solid fa-cloud-arrow-down"></i> <span class="hidden md:inline ml-1">Exportar</span></button>
                     <button class="btn btn-secondary" onclick="openModal('importModal')" title="Sincronizar CSV"><i class="fa-solid fa-cloud-arrow-up"></i> <span class="hidden md:inline ml-1">Sincronizar</span></button>
                     <button class="btn btn-secondary text-red-500" onclick="clearAllData()" title="Vaciar BD"><i class="fa-solid fa-trash"></i></button>
                     <button class="btn btn-secondary text-slate-700" onclick="signOut()" title="Cerrar Sesión"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
@@ -432,364 +423,513 @@
             const { data: sitios, error: errorSitios } = await supabaseClient.from('sitios').select('*');
             if (errorSitios) { showToast("Aviso", "No se pudieron cargar los datos.", true); return; }
             viajesData = sitios || [];
-
+            
             const { data: bannersData } = await supabaseClient.from('banners').select('*');
             customBanners = {};
-            if (bannersData) { bannersData.forEach(b => { customBanners[b.clave] = b.url; }); }
+            if (bannersData) {
+                bannersData.forEach(b => { customBanners[b.clave] = b.url; });
+            }
+            
             renderViewByCurrentState();
         }
-
-        async function editBannerImage(event, key) {
-            event.preventDefault(); event.stopPropagation();
-            if(!userSessionId) return; 
-            const currentImg = customBanners[key] || DEFAULT_IMAGES[key] || DEFAULT_IMAGES['pais_default'];
-            setTimeout(async () => {
-                const newUrl = prompt("Introduce la URL de la nueva imagen de portada:", currentImg);
-                if (newUrl !== null && newUrl.trim() !== "") {
-                    customBanners[key] = newUrl.trim();
-                    const { error } = await supabaseClient.from('banners').upsert({ user_id: userSessionId, clave: key, url: newUrl.trim() }, { onConflict: 'user_id, clave' });
-                    if(error) { showToast("Error", "No se guardó en la nube.", true); } else { showToast("Portada Actualizada", "Sincronizada con éxito."); renderViewByCurrentState(); }
-                }
-            }, 50);
-        }
-
-        function renderViewByCurrentState() {
-            if (state.view === 'home') renderHomeView();
-            else if (state.view === 'countries') drawCountriesGrid();
-            else if (state.view === 'regions') drawRegionsGrid();
-            else if (state.view === 'places') renderPlacesView();
-        }
-
-        function normalizeString(str) { return str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : ""; }
-        function getContinent(country) { return EUROPEAN_COUNTRIES.some(c => normalizeString(country).includes(c)) ? 'Europa' : 'Resto del Mundo'; }
 
         function showToast(title, text, isError = false) {
             const toast = document.getElementById('toastMessage');
-            toast.className = `notification-toast ${isError ? 'bg-red-50 border-red-500' : 'bg-white border-sky-500'} show`;
-            document.getElementById('toastText').innerHTML = `<strong>${title}</strong>: ${text}`;
-            setTimeout(() => toast.classList.remove('show'), 3000);
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastText').textContent = text;
+            const icon = document.getElementById('toastIcon');
+            if(isError) {
+                icon.className = 'fa-solid fa-circle-exclamation';
+                icon.style.color = '#ef4444';
+                toast.style.borderLeftColor = '#ef4444';
+            } else {
+                icon.className = 'fa-solid fa-circle-check';
+                icon.style.color = '#0284c7';
+                toast.style.borderLeftColor = '#0284c7';
+            }
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
 
         function navigateTo(viewId, pushToHistory = true) {
-            state.view = viewId;
-            document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active-view'));
+            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active-view'));
             document.getElementById(`view-${viewId}`).classList.add('active-view');
-            
+            state.view = viewId;
+
             const trail = document.getElementById('breadcrumbsTrail');
             let trailHtml = `<span onclick="navigateTo('home')">Inicio</span>`;
-            if (['countries', 'regions', 'places'].includes(viewId) && state.continent) { trailHtml += ` <i class="fa-solid fa-chevron-right"></i> <span onclick="selectContinent('${state.continent}')">${state.continent}</span>`; }
-            if (['regions', 'places'].includes(viewId) && state.country) { trailHtml += ` <i class="fa-solid fa-chevron-right"></i> <span onclick="selectCountry('${state.country}')">${state.country}</span>`; }
+            if (['countries', 'regions', 'places'].includes(viewId) && state.continent) {
+                trailHtml += ` <i class="fa-solid fa-chevron-right"></i> <span onclick="selectContinent('${state.continent}')">${state.continent}</span>`;
+            }
+            if (['regions', 'places'].includes(viewId) && state.country) {
+                trailHtml += ` <i class="fa-solid fa-chevron-right"></i> <span onclick="selectCountry('${state.country}')">${state.country}</span>`;
+            }
             if (viewId === 'places') {
-                if (state.isGlobalCountryMode) { trailHtml += ` <i class="fa-solid fa-chevron-right"></i> <span class="active">Vista Global</span>`; } 
-                else if (state.region) { trailHtml += ` <i class="fa-solid fa-chevron-right"></i> <span class="active">${state.region}</span>`; }
+                if (state.isGlobalCountryMode) {
+                    trailHtml += ` <i class="fa-solid fa-chevron-right"></i> <span class="active">Vista Global</span>`;
+                } else if (state.region) {
+                    trailHtml += ` <i class="fa-solid fa-chevron-right"></i> <span class="active">${state.region}</span>`;
+                }
             }
             trail.innerHTML = trailHtml;
 
-            if(viewId !== 'places' && window.innerWidth < 768) { switchMobileView('list', true); }
+            if(viewId !== 'places' && window.innerWidth < 768) {
+                switchMobileView('list', true);
+            }
             
             renderViewByCurrentState();
-            if (viewId === 'places') { setTimeout(() => { if (map) { map.invalidateSize(); } }, 350); }
+            
+            if (viewId === 'places') {
+                setTimeout(() => { if (map) { map.invalidateSize(); } }, 350);
+            }
 
-            if (pushToHistory) { window.history.pushState({ view: state.view, continent: state.continent, country: state.country, region: state.region, isGlobalCountryMode: state.isGlobalCountryMode }, "", `#${viewId}`); }
+            if (pushToHistory) {
+                window.history.pushState({ view: state.view, continent: state.continent, country: state.country, region: state.region, isGlobalCountryMode: state.isGlobalCountryMode }, "", `#${viewId}`);
+            }
         }
 
         window.addEventListener('popstate', (event) => {
-            if (event.state) { state.view = event.state.view; state.continent = event.state.continent; state.country = event.state.country; state.region = event.state.region; state.isGlobalCountryMode = event.state.isGlobalCountryMode; navigateTo(state.view, false); } 
-            else { navigateTo('home', false); }
+            if (event.state) {
+                state.view = event.state.view;
+                state.continent = event.state.continent;
+                state.country = event.state.country;
+                state.region = event.state.region;
+                state.isGlobalCountryMode = event.state.isGlobalCountryMode;
+                navigateTo(state.view, false);
+            } else {
+                navigateTo('home', false);
+            }
         });
 
-        function getBannerEditHtml(key) { return userSessionId ? `<button class="banner-settings-btn" onclick="editBannerImage(event, '${key}')"><i class="fa-solid fa-pen text-xs"></i></button>` : ''; }
+        function getBannerEditHtml(key) {
+            return userSessionId ? `<button class="banner-settings-btn" onclick="editBannerImage(event, '${key}')"><i class="fa-solid fa-pen text-xs"></i></button>` : '';
+        }
 
         function renderHomeView() {
             const europeCount = viajesData.filter(i => getContinent(i.categoria) === 'Europa').length;
             const rowCount = viajesData.length - europeCount;
-            
+
             document.getElementById('explorer-cards-container').innerHTML = `
                 <div class="banner-card" onclick="selectContinent('Europa')">
                     ${getBannerEditHtml('Europa')}
                     <img src="${customBanners['Europa'] || DEFAULT_IMAGES['Europa']}" class="banner-img">
                     <div class="banner-content">
-                        <span class="banner-category">Continente</span><div class="banner-name">Europa</div>
-                        <div class="banner-count"><i class="fa-solid fa-location-dot"></i> ${europeCount} sitios</div>
+                        <span class="banner-category">Continente</span>
+                        <div class="banner-name">Europa</div>
+                        <div class="banner-count"><i class="fa-solid pointer-events-none fa-map-pin"></i> ${europeCount} destinos</div>
                     </div>
                 </div>
                 <div class="banner-card" onclick="selectContinent('Resto del Mundo')">
                     ${getBannerEditHtml('Resto del Mundo')}
-                    <img src="${customBanners['Resto del Mundo'] || DEFAULT_IMAGES['Resto del Mundo']}" class="banner-img">
+                    <img src="${customBanners['Resto del Mundo'] || DEFAULT_IMAGES['Asia']}" class="banner-img">
                     <div class="banner-content">
-                        <span class="banner-category">Continente</span><div class="banner-name">Resto del Mundo</div>
-                        <div class="banner-count"><i class="fa-solid fa-globe"></i> ${rowCount} sitios</div>
+                        <span class="banner-category">Global</span>
+                        <div class="banner-name">Resto del Mundo</div>
+                        <div class="banner-count"><i class="fa-solid pointer-events-none fa-map-pin"></i> ${rowCount} destinos</div>
                     </div>
                 </div>
             `;
         }
 
-        function selectContinent(continent) { state.continent = continent; state.country = null; state.region = null; navigateTo('countries'); }
+        function getContinent(country) {
+            const europeCountries = ['España', 'Francia', 'Italia', 'Portugal', 'Alemania', 'Reino Unido', 'Irlanda', 'Suiza', 'Austria', 'Bélgica', 'Países Bajos', 'Grecia', 'Andorra', 'Polonia', 'Croacia', 'Suecia', 'Noruega', 'Finlandia', 'Dinamarca', 'República Checa', 'Hungría', 'Islandia', 'Rumanía', 'Bulgaria', 'Eslovenia', 'Eslovaquia', 'Mónaco'];
+            if (europeCountries.includes(country)) return 'Europa';
+            return 'Resto del Mundo';
+        }
+
+        function selectContinent(continent) {
+            state.continent = continent;
+            state.country = null; state.region = null; state.isGlobalCountryMode = false;
+            if (document.getElementById('countrySearchInput')) document.getElementById('countrySearchInput').value = '';
+            navigateTo('countries');
+        }
 
         function drawCountriesGrid() {
-            let countries = [...new Set(viajesData.filter(i => getContinent(i.categoria) === state.continent && i.categoria).map(i => i.categoria))];
-            countries.sort((a, b) => {
-                const normA = normalizeString(a); const normB = normalizeString(b);
-                const esA = (normA === 'espana' || normA === 'espana'); const esB = (normB === 'espana' || normB === 'espana');
-                if (esA && !esB) return -1; if (!esA && esB) return 1; return a.localeCompare(b, 'es');
-            });
+            let countries = [...new Set(viajesData.filter(i => getContinent(i.categoria) === state.continent).map(i => i.categoria))];
+            countries.sort((a, b) => a.localeCompare(b, 'es'));
+            
             const searchVal = (document.getElementById('countrySearchInput') || {}).value?.toLowerCase() || '';
             if (searchVal) countries = countries.filter(c => c.toLowerCase().includes(searchVal));
 
-            const grid = document.getElementById('countries-grid'); grid.innerHTML = '';
-            if (countries.length === 0) { grid.innerHTML = `<p class="col-span-full text-center text-slate-400 py-10 font-semibold">No se encontraron países.</p>`; } 
-            else {
-                countries.forEach(c => {
-                    const count = viajesData.filter(i => i.categoria === c).length;
-                    grid.innerHTML += `
-                        <div class="banner-card" onclick="selectCountry('${c}')">
-                            ${getBannerEditHtml(c)}
-                            <img src="${customBanners[c] || DEFAULT_IMAGES['pais_default']}" class="banner-img">
-                            <div class="banner-content">
-                                <span class="banner-category">País</span><div class="banner-name">${c}</div>
-                                <div class="banner-count"><i class="fa-solid pointer-events-none fa-map-pin"></i> ${count} lugares</div>
-                            </div>
-                        </div>`;
-                });
-            }
+            const grid = document.getElementById('countries-grid');
+            grid.innerHTML = '';
+            countries.forEach(c => {
+                const count = viajesData.filter(i => i.categoria === c).length;
+                const bannerKey = `pais_${c}`;
+                grid.innerHTML += `
+                <div class="banner-card" onclick="selectCountry('${c}')">
+                    ${getBannerEditHtml(bannerKey)}
+                    <img src="${customBanners[bannerKey] || DEFAULT_IMAGES['pais_default']}" class="banner-img">
+                    <div class="banner-content">
+                        <span class="banner-category">País</span><div class="banner-name">${c}</div>
+                        <div class="banner-count"><i class="fa-solid pointer-events-none fa-map-pin"></i> ${count} lugares</div>
+                    </div>
+                </div>`;
+            });
             document.getElementById('countries-title').textContent = state.continent;
         }
 
-        function selectCountry(country) { 
-            state.country = country; state.region = null;
+        function selectCountry(country) {
+            state.country = country;
+            state.region = null;
             if (document.getElementById('regionSearchInput')) document.getElementById('regionSearchInput').value = '';
-            navigateTo('regions'); 
+            navigateTo('regions');
         }
 
         function drawRegionsGrid() {
             let regions = [...new Set(viajesData.filter(i => i.categoria === state.country && i.estado).map(i => i.estado))];
             regions.sort((a, b) => a.localeCompare(b, 'es'));
+            
             const searchVal = (document.getElementById('regionSearchInput') || {}).value?.toLowerCase() || '';
             if (searchVal) regions = regions.filter(r => r.toLowerCase().includes(searchVal));
 
-            const grid = document.getElementById('regions-grid'); grid.innerHTML = '';
-
+            const grid = document.getElementById('regions-grid');
+            grid.innerHTML = '';
+            
             if (!searchVal || "exploracion total".includes(searchVal) || state.country.toLowerCase().includes(searchVal)) {
                 const totalPaisCount = viajesData.filter(i => i.categoria === state.country).length;
                 const globalKey = `global_${state.country}`;
                 grid.innerHTML += `
-                    <div class="banner-card border-2 border-sky-500/30" onclick="selectGlobalCountryMode()">
-                        ${getBannerEditHtml(globalKey)}
-                        <img src="${customBanners[globalKey] || DEFAULT_IMAGES['global_default']}" class="banner-img brightness-[0.85]">
-                        <div class="banner-content">
-                            <span class="banner-category text-amber-400 font-extrabold"><i class="fa-solid fa-star"></i> EXPLORACIÓN TOTAL</span>
-                            <div class="banner-name text-sky-200">Ver todo ${state.country}</div>
-                            <div class="banner-count text-white"><i class="fa-solid fa-map-location-dot text-sky-400"></i> ${totalPaisCount} destinos</div>
-                        </div>
-                    </div>`;
+                <div class="banner-card border-2 border-sky-500/30" onclick="selectGlobalCountryMode()">
+                    ${getBannerEditHtml(globalKey)}
+                    <img src="${customBanners[globalKey] || DEFAULT_IMAGES['global_default']}" class="banner-img brightness-[0.85]">
+                    <div class="banner-content">
+                        <span class="banner-category text-amber-400 font-extrabold"><i class="fa-solid fa-star"></i> EXPLORACIÓN TOTAL</span>
+                        <div class="banner-name text-sky-200">Ver todo ${state.country}</div>
+                        <div class="banner-count text-white"><i class="fa-solid fa-map-location-dot text-sky-400"></i> ${totalPaisCount} destinos</div>
+                    </div>
+                </div>`;
             }
 
             if (regions.length > 0) {
                 regions.forEach(r => {
                     const count = viajesData.filter(i => i.categoria === state.country && i.estado === r).length;
-                    const bannerKey = `${state.country}_${r}`;
+                    const bannerKey = `region_${r}`;
                     grid.innerHTML += `
-                        <div class="banner-card" onclick="selectRegion('${r}')">
-                            ${getBannerEditHtml(bannerKey)}
-                            <img src="${customBanners[bannerKey] || DEFAULT_IMAGES['region_default']}" class="banner-img">
-                            <div class="banner-content">
-                                <span class="banner-category">Región / Provincia</span><div class="banner-name">${r}</div>
-                                <div class="banner-count"><i class="fa-solid fa-images"></i> ${count} destinos</div>
-                            </div>
-                        </div>`;
+                    <div class="banner-card" onclick="selectRegion('${r}')">
+                        ${getBannerEditHtml(bannerKey)}
+                        <img src="${customBanners[bannerKey] || DEFAULT_IMAGES['pais_default']}" class="banner-img">
+                        <div class="banner-content">
+                            <span class="banner-category">Región</span><div class="banner-name">${r}</div>
+                            <div class="banner-count"><i class="fa-solid pointer-events-none fa-map-pin"></i> ${count} lugares</div>
+                        </div>
+                    </div>`;
                 });
-            } else if (grid.innerHTML === '') { grid.innerHTML = `<p class="col-span-full text-center text-slate-400 py-10 font-semibold">No se encontraron resultados.</p>`; }
+            }
             document.getElementById('regions-title').textContent = state.country;
         }
 
-        function selectGlobalCountryMode() { state.isGlobalCountryMode = true; state.region = null; state.selectedTags = []; state.statusFilter = 'todos'; updateStatusFilterBarUI(); document.getElementById('places-sidebar-title').textContent = `Todo ${state.country}`; navigateTo('places'); }
-        function selectRegion(region) { state.isGlobalCountryMode = false; state.region = region; state.selectedTags = []; state.statusFilter = 'todos'; updateStatusFilterBarUI(); document.getElementById('places-sidebar-title').textContent = region; navigateTo('places'); }
-
-        function setStatusFilter(filter) { state.statusFilter = filter; updateStatusFilterBarUI(); renderPlacesView(); }
-
-        function updateStatusFilterBarUI() {
-            const btnTodos = document.getElementById('filter-status-todos'); const btnVisitado = document.getElementById('filter-status-visitado'); const btnQuieroIr = document.getElementById('filter-status-quieroir');
-            [btnTodos, btnVisitado, btnQuieroIr].forEach(btn => btn.className = "flex-1 py-1.5 px-2 text-center rounded-lg text-slate-600");
-            if (state.statusFilter === 'todos') btnTodos.className = "flex-1 py-1.5 px-2 text-center rounded-lg bg-white text-[#0284c7] shadow-sm font-bold";
-            else if (state.statusFilter === 'Visitado') btnVisitado.className = "flex-1 py-1.5 px-2 text-center rounded-lg bg-emerald-50 text-emerald-600 font-bold border border-emerald-200";
-            else if (state.statusFilter === 'Quiero ir') btnQuieroIr.className = "flex-1 py-1.5 px-2 text-center rounded-lg bg-amber-50 text-amber-600 font-bold border border-amber-200";
+        function selectRegion(region) {
+            state.region = region;
+            state.isGlobalCountryMode = false;
+            state.searchPlace = ''; state.statusFilter = 'todos'; state.selectedTags = [];
+            document.getElementById('sidebarSearch').value = '';
+            navigateTo('places');
         }
 
-        function getTagIcon(tag) {
-            if (!tag) return 'fa-location-dot';
-            const t = tag.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            if (t.includes('restaurante') || t.includes('comida') || t.includes('gastronomia') || t.includes('bar') || t.includes('cafe')) return 'fa-utensils';
-            if (t.includes('jardin') || t.includes('parque') || t.includes('naturaleza') || t.includes('bosque')) return 'fa-leaf';
-            if (t.includes('ruta') || t.includes('senderismo') || t.includes('montaña')) return 'fa-route';
-            if (t.includes('museo') || t.includes('arte') || t.includes('cultura')) return 'fa-building-columns';
-            if (t.includes('playa') || t.includes('mar') || t.includes('costa') || t.includes('cala')) return 'fa-umbrella-beach';
-            if (t.includes('mirador') || t.includes('vistas') || t.includes('panorama')) return 'fa-binoculars';
-            if (t.includes('monumento') || t.includes('historia') || t.includes('castillo') || t.includes('ruinas') || t.includes('iglesia') || t.includes('catedral')) return 'fa-landmark';
-            if (t.includes('ciudad') || t.includes('pueblo') || t.includes('urbano')) return 'fa-city';
-            if (t.includes('alojamiento') || t.includes('hotel') || t.includes('camping')) return 'fa-bed';
-            if (t.includes('compras') || t.includes('tienda') || t.includes('mercado')) return 'fa-basket-shopping';
-            return 'fa-location-dot';
+        function selectGlobalCountryMode() {
+            state.isGlobalCountryMode = true;
+            state.region = null;
+            state.searchPlace = ''; state.statusFilter = 'todos'; state.selectedTags = [];
+            document.getElementById('sidebarSearch').value = '';
+            navigateTo('places');
+        }
+
+        /* --- NUEVO SISTEMA DE ICONOS OPTIMIZADO --- */
+        function getTagIcon(t) {
+            // Limpiamos la etiqueta: minúsculas, sin acentos y sin espacios extra
+            const cleanTag = t.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            
+            // Diccionario de categorías y sus iconos
+            const iconMap = {
+                'fa-utensils': ['restaurante', 'comida', 'gastronomia', 'bar', 'cafe', 'cafeteria', 'marisco', 'tapas'],
+                'fa-leaf': ['jardin', 'parque', 'naturaleza', 'bosque', 'selva'],
+                'fa-route': ['ruta', 'senderismo', 'montana', 'trekking', 'sendero'],
+                'fa-building-columns': ['museo', 'arte', 'cultura', 'galeria', 'exposicion'],
+                'fa-umbrella-beach': ['playa', 'mar', 'costa', 'cala', 'oceano'],
+                'fa-binoculars': ['mirador', 'vistas', 'panorama', 'observatorio'],
+                'fa-landmark': ['monumento', 'historia', 'castillo', 'ruinas', 'iglesia', 'catedral', 'templo', 'palacio'],
+                'fa-city': ['ciudad', 'pueblo', 'urbano', 'plaza', 'barrio'],
+                'fa-bed': ['alojamiento', 'hotel', 'camping', 'hostal', 'resort', 'apartamento'],
+                'fa-basket-shopping': ['compras', 'tienda', 'mercado', 'centro comercial', 'souvenirs'],
+                'fa-plane': ['aeropuerto', 'vuelo', 'avion'],
+                'fa-train': ['tren', 'estacion', 'transporte', 'metro'],
+                'fa-water': ['lago', 'rio', 'cascada', 'embalse'],
+                'fa-champagne-glasses': ['pub', 'discoteca', 'fiesta', 'club']
+            };
+
+            // Buscamos coincidencia exacta por palabra completa (\b)
+            for (const [icon, keywords] of Object.entries(iconMap)) {
+                for (const keyword of keywords) {
+                    const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+                    if (regex.test(cleanTag)) {
+                        return icon;
+                    }
+                }
+            }
+            return 'fa-location-dot'; // Icono por defecto
         }
 
         function getTagStyle(tag) {
             if (!tag) tag = 'General';
-            let hash = 0; for(let i = 0; i < tag.length; i++) hash = tag.charCodeAt(i) + ((hash << 5) - hash);
-            const colors = ['#3b82f6', '#22c55e', '#a855f7', '#ec4899', '#f59e0b', '#6366f1', '#ef4444', '#14b8a6'];
-            return { bg: colors[Math.abs(hash) % 8], text: '#ffffff' };
+            // Normalizar para que la capitalización o acentos no cambien el color
+            const cleanTag = tag.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            let hash = 0;
+            for(let i = 0; i < cleanTag.length; i++) {
+                hash = cleanTag.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const colors = ['#3b82f6', '#22c55e', '#a855f7', '#ec4899', '#f59e0b', '#06b6d4', '#6366f1', '#ef4444', '#14b8a6', '#8b5cf6'];
+            const bg = colors[Math.abs(hash) % colors.length];
+            return { bg, text: '#ffffff' };
         }
 
-        function getTagsHTMLForCard(tagString) {
-            if (!tagString) return '';
-            return tagString.split(',').map(t => t.trim()).filter(t => t !== "").map(tag => {
-                const style = getTagStyle(tag); const icon = getTagIcon(tag);
-                return `<span style="background-color:${style.bg}; color:${style.text}; border-color:${style.bg};" class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold border shadow-sm"><i class="fa-solid ${icon} text-[9px]"></i> ${tag}</span>`;
+        function getTagsHTMLForCard(tagsStr) {
+            if (!tagsStr) return '';
+            return tagsStr.split(',').map(t => {
+                const tr = t.trim();
+                const style = getTagStyle(tr);
+                const icon = getTagIcon(tr);
+                return `<span style="background-color: ${style.bg}15; color: ${style.bg}; border: 1px solid ${style.bg}40;" class="px-2 py-0.5 rounded-md text-[10px] font-bold"><i class="fa-solid ${icon} mr-1"></i>${tr}</span>`;
             }).join('');
         }
 
-        /* ----- AQUÍ ESTÁ LA NUEVA FUNCIÓN MATEMÁTICA ----- */
-        function scrollAndHighlightCard(id) {
-            if(window.innerWidth < 768) { switchMobileView('list'); }
-            
-            setTimeout(() => {
-                const targetCard = document.getElementById('card-' + id);
-                const listContainer = document.getElementById('placesList');
-                
-                if (targetCard && listContainer) { 
-                    // Calculamos matemáticamente la posición para no afectar al resto de la página
-                    const containerRect = listContainer.getBoundingClientRect();
-                    const cardRect = targetCard.getBoundingClientRect();
-                    
-                    const scrollTarget = listContainer.scrollTop + (cardRect.top - containerRect.top) - (containerRect.height / 2) + (cardRect.height / 2);
-                    
-                    listContainer.scrollTo({ top: scrollTarget, behavior: 'smooth' });
-                    
-                    targetCard.classList.add('ring-4', 'ring-sky-400', 'scale-[1.02]'); 
-                    setTimeout(() => { targetCard.classList.remove('ring-4', 'ring-sky-400', 'scale-[1.02]'); }, 1500); 
+        function setStatusFilter(status) {
+            state.statusFilter = status;
+            document.querySelectorAll('#statusFilterBar button').forEach(b => {
+                b.classList.remove('bg-white', 'text-[#0284c7]', 'shadow-sm', 'text-slate-600');
+                if (b.id === `filter-status-${status.toLowerCase().replace(' ', '')}`) {
+                    b.classList.add('bg-white', 'text-[#0284c7]', 'shadow-sm');
+                } else {
+                    b.classList.add('text-slate-600');
                 }
-            }, 150); // Le damos un pelín más de tiempo (150ms) para asegurar que la lista se haya dibujado en pantalla
-        }
-        /* ------------------------------------------------ */
-
-        function highlightPinOnMap(id) {
-            document.querySelectorAll('.highlight-pin').forEach(el => el.classList.remove('highlight-pin'));
-            setTimeout(() => { const pin = document.getElementById('pin-' + id); if (pin) { pin.classList.add('highlight-pin'); setTimeout(() => { pin.classList.remove('highlight-pin'); }, 3000); } }, 800); 
+            });
+            renderPlacesView();
         }
 
-        function renderPlacesView() {
-            const list = document.getElementById('placesList');
-            list.innerHTML = ''; if (markersGroup) markersGroup.clearLayers();
+        function filterTag(tag) {
+            if (tag === 'todas') { state.selectedTags = []; } 
+            else {
+                if (state.selectedTags.includes(tag)) state.selectedTags = state.selectedTags.filter(t => t !== tag);
+                else state.selectedTags.push(tag);
+            }
+            renderPlacesView(false); // No centrar mapa al filtrar tags
+        }
 
+        function renderPlacesView(fitBounds = true) {
+            document.getElementById('places-sidebar-subtitle').textContent = state.isGlobalCountryMode ? state.country : `${state.region}, ${state.country}`;
             const searchVal = document.getElementById('sidebarSearch').value.toLowerCase();
             
-            let regionPlaces = state.isGlobalCountryMode ? viajesData.filter(i => i.categoria === state.country) : viajesData.filter(i => i.categoria === state.country && i.estado === state.region);
+            const list = document.getElementById('placesList');
+            list.innerHTML = '';
+            markersGroup.clearLayers();
+
+            let regionPlaces = state.isGlobalCountryMode ? 
+                viajesData.filter(i => i.categoria === state.country) : 
+                viajesData.filter(i => i.categoria === state.country && i.estado === state.region);
+            
             regionPlaces.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
 
-            const allTags = new Set(); regionPlaces.forEach(p => { (p.etiquetas || "General").split(',').map(t => t.trim()).forEach(t => allTags.add(t)); });
+            const allTags = new Set();
+            regionPlaces.forEach(p => { (p.etiquetas || "General").split(',').map(t => t.trim()).forEach(t => allTags.add(t)); });
+
             const filterBox = document.getElementById('tagFilters');
             filterBox.innerHTML = `<button class="px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${state.selectedTags.length === 0 ? 'bg-slate-800 text-white shadow-md border border-slate-800' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'}" onclick="filterTag('todas')">Todas</button>`;
+            
             allTags.forEach(t => {
-                const style = getTagStyle(t); const isActive = state.selectedTags.includes(t);
+                const style = getTagStyle(t);
+                const isActive = state.selectedTags.includes(t);
                 filterBox.innerHTML += `<button style="background-color: ${isActive ? style.bg : '#fff'}; color: ${isActive ? '#fff' : style.bg}; border: 1px solid ${style.bg};" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold shadow-sm" onclick="filterTag('${t}')"><i class="fa-solid ${getTagIcon(t)}"></i> ${t}</button>`;
             });
 
             let filtered = regionPlaces.filter(f => f.nombre.toLowerCase().includes(searchVal) || (f.descripcion || '').toLowerCase().includes(searchVal));
+            
             if (state.statusFilter === 'Visitado') filtered = filtered.filter(f => f.visitado === 'Visitado');
             else if (state.statusFilter === 'Quiero ir') filtered = filtered.filter(f => f.visitado !== 'Visitado');
 
-            if (state.selectedTags.length > 0) { filtered = filtered.filter(p => (p.etiquetas || "General").split(',').map(t => t.trim()).some(t => state.selectedTags.includes(t))); }
-
-            if (filtered.length === 0) { list.innerHTML = `<p class="text-center text-slate-400 py-10 font-semibold">Ningún punto coincide.</p>`; return; }
+            if (state.selectedTags.length > 0) {
+                filtered = filtered.filter(p => (p.etiquetas || "General").split(',').some(t => state.selectedTags.includes(t.trim())));
+            }
 
             const coordsArray = [];
-            filtered.forEach(p => {
-                const globalIndex = viajesData.findIndex(item => item.id === p.id);
-                const isVisited = p.visitado === 'Visitado';
-                let finalLat = parseFloat(p.latitud); let finalLng = parseFloat(p.longitud);
 
-                const card = document.createElement('div'); card.id = 'card-' + p.id; card.className = `p-4 mb-3 bg-white border border-slate-200 rounded-2xl shadow-sm active:bg-slate-50 transition-all duration-500 relative cursor-pointer hover:border-sky-300`;
-                card.onclick = () => { if (!isNaN(finalLat) && !isNaN(finalLng)) { if(window.innerWidth < 768) switchMobileView('map', true); setTimeout(() => { map.flyTo([finalLat, finalLng], 15, { animate: true, duration: 1.5 }); highlightPinOnMap(p.id); }, 200); } };
-                
-                const btnEdit = userSessionId ? `<button class="text-slate-400 hover:text-sky-600 bg-slate-100 p-2 rounded-lg" onclick="event.stopPropagation(); openPlaceModal(true, ${globalIndex})"><i class="fa-solid fa-pen"></i></button>` : '';
-                const toggleVisite = userSessionId ? `<button onclick="event.stopPropagation(); togglePlaceStatus('${p.id}', 'Visitado')" class="px-3 py-2 rounded-lg text-xs font-bold border ${isVisited ? 'bg-emerald-500 text-white' : 'bg-white text-slate-500'}">Visitado</button>` : '';
-                const toggleQuiero = userSessionId ? `<button onclick="event.stopPropagation(); togglePlaceStatus('${p.id}', 'Quiero ir')" class="px-3 py-2 rounded-lg text-xs font-bold border ${!isVisited ? 'bg-amber-500 text-white' : 'bg-white text-slate-500'}">Quiero ir</button>` : '';
-                
-                card.innerHTML = `
-                    <div class="flex flex-col gap-2 mb-3">
-                        <div class="flex justify-between items-start">
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-extrabold border ${isVisited ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200'}">
-                                ${isVisited ? '🟢 Visitado' : '🧡 Quiero ir'} ${state.isGlobalCountryMode ? `• ${p.estado}` : ''}
-                            </span>
-                            ${btnEdit}
-                        </div>
-                        <div class="flex flex-wrap gap-1.5 mt-1">${getTagsHTMLForCard(p.etiquetas || 'General')}</div>
-                    </div>
-                    <h4 class="text-base md:text-sm font-bold text-slate-800 mb-1">${p.nombre}</h4>
-                    <p class="text-slate-600 text-sm md:text-xs p-3 bg-slate-50 border rounded-xl mb-3 font-medium">${p.descripcion || '<span class="italic text-slate-400">Sin notas cortas.</span>'}</p>
-                    <div class="flex justify-between items-center pt-3 border-t">
-                        <div class="flex gap-2">${toggleVisite} ${toggleQuiero}</div>
-                        ${p.link ? `<a href="${p.link}" target="_blank" onclick="event.stopPropagation();" class="text-sm font-bold text-sky-600 p-2 bg-sky-50 rounded-lg"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ''}
-                    </div>
-                `;
-                list.appendChild(card);
+            if (filtered.length === 0) {
+                list.innerHTML = `<div class="p-8 text-center text-slate-400 font-medium bg-white rounded-2xl border border-slate-200">No hay lugares con los filtros actuales.</div>`;
+            } else {
+                filtered.forEach(p => {
+                    const finalLat = parseFloat(p.latitud);
+                    const finalLng = parseFloat(p.longitud);
+                    const isVisited = p.visitado === 'Visitado';
+                    
+                    const btnEdit = userSessionId ? `<button onclick="openPlaceModal(true, ${viajesData.findIndex(x => x.id === p.id)})" class="text-slate-400 hover:text-sky-600 transition p-1"><i class="fa-solid fa-pen-to-square"></i></button>` : '';
+                    const toggleVisite = userSessionId ? `<button onclick="toggleStatus(${p.id}, 'Visitado')" class="${isVisited ? 'text-emerald-500 bg-emerald-50' : 'text-slate-400 bg-slate-50 hover:bg-slate-100'} px-2 py-1 rounded text-[10px] font-bold transition"><i class="fa-solid fa-check"></i> Visitado</button>` : '';
+                    const toggleQuiero = userSessionId ? `<button onclick="toggleStatus(${p.id}, 'Quiero ir')" class="${!isVisited ? 'text-amber-500 bg-amber-50' : 'text-slate-400 bg-slate-50 hover:bg-slate-100'} px-2 py-1 rounded text-[10px] font-bold transition"><i class="fa-solid fa-heart"></i> Quiero ir</button>` : '';
 
-                if (map && !isNaN(finalLat) && !isNaN(finalLng) && finalLat !== 0) {
-                    coordsArray.push([finalLat, finalLng]);
-                    const listaEtiquetas = (p.etiquetas || "General").split(',').map(t => t.trim()); const pinStyle = getTagStyle(listaEtiquetas[0]); const pinIcon = getTagIcon(listaEtiquetas[0]);
+                    const card = document.createElement('div');
+                    card.className = "bg-white p-4 rounded-2xl mb-3 border border-slate-200 shadow-sm cursor-pointer transition-all hover:border-sky-300 hover:shadow-md relative overflow-hidden group";
+                    card.id = `card-${p.id}`;
+                    if (isVisited) card.innerHTML += `<div class="absolute top-0 right-0 w-8 h-8 bg-emerald-100 rounded-bl-3xl -z-0"></div>`;
 
-                    const markerIcon = L.divIcon({ className: 'custom-marker-wrapper', html: `<div id="pin-${p.id}" class="custom-pin-marker" style="background-color: ${pinStyle.bg}; border-color: #ffffff;"><i class="fa-solid ${pinIcon}"></i></div>`, iconSize: [36, 36], iconAnchor: [18, 36] });
-                    let badgeEstado = isVisited ? '<span style="background-color:#ecfdf5; color:#059669;" class="px-2 py-0.5 rounded text-[9px] font-extrabold mr-2">🟢 VISITADO</span>' : '<span style="background-color:#fffbeb; color:#d97706;" class="px-2 py-0.5 rounded text-[9px] font-extrabold mr-2">🧡 QUIERO IR</span>';
-                    let badgesEtiquetasHTML = listaEtiquetas.slice(0, 2).map(tag => {
-                        const s = getTagStyle(tag); const i = getTagIcon(tag); return `<span style="background-color:${s.bg}; color:#fff;" class="flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold"><i class="fa-solid ${i} text-[7px]"></i> ${tag}</span>`;
-                    }).join(' ');
-
-                    let tooltipContent = `
-                        <div class="flex flex-col w-full font-sans text-left" onclick="scrollAndHighlightCard('${p.id}')">
-                            <div style="background-color: ${pinStyle.bg};" class="h-1 w-full"></div>
-                            <div class="p-3">
-                                <div class="flex items-center justify-between mb-1"><div class="flex items-center">${badgeEstado}</div><div class="flex gap-1">${badgesEtiquetasHTML}</div></div>
-                                <h5 class="text-sm font-bold text-slate-800 leading-tight mb-1">${p.nombre}</h5>
-                                ${p.descripcion ? `<p class="text-xs text-slate-500 font-medium line-clamp-2 mt-1 border-t pt-1 border-slate-100">${p.descripcion}</p>` : ''}
-                                <div class="mt-2 text-center w-full"><span class="text-[9px] font-bold text-sky-600 bg-sky-50 px-2 py-1 rounded"><i class="fa-solid fa-list-ul"></i> Ver tarjeta</span></div>
+                    card.innerHTML += `
+                        <div class="relative z-10 mb-2">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                                    ${isVisited ? '🟢 Visitado' : '🧡 Quiero ir'} ${state.isGlobalCountryMode ? `• ${p.estado}` : ''}
+                                </span>
+                                ${btnEdit}
                             </div>
+                            <div class="flex flex-wrap gap-1.5 mt-1">${getTagsHTMLForCard(p.etiquetas || 'General')}</div>
+                        </div>
+                        <h4 class="text-base md:text-sm font-bold text-slate-800 mb-1">${p.nombre}</h4>
+                        <p class="text-slate-600 text-sm md:text-xs p-3 bg-slate-50 border rounded-xl mb-3 font-medium">${p.descripcion || '<span class="italic text-slate-400">Sin notas cortas.</span>'}</p>
+                        <div class="flex justify-between items-center pt-3 border-t">
+                            <div class="flex gap-2">${toggleVisite} ${toggleQuiero}</div>
+                            ${p.link ? `<a href="${p.link}" target="_blank" onclick="event.stopPropagation();" class="text-sm font-bold text-sky-600 p-2 bg-sky-50 rounded-lg"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ''}
                         </div>
                     `;
+                    list.appendChild(card);
 
-                    let m = L.marker([finalLat, finalLng], { icon: markerIcon }).addTo(markersGroup).bindTooltip(tooltipContent, { direction: 'top', offset: [0, -15], opacity: 1, className: 'custom-tooltip' });
-                    m.on('click', () => { scrollAndHighlightCard(p.id); });
+                    if (map && !isNaN(finalLat) && !isNaN(finalLng) && finalLat !== 0) {
+                        coordsArray.push([finalLat, finalLng]);
+                        const listaEtiquetas = (p.etiquetas || "General").split(',').map(t => t.trim());
+                        const pinStyle = getTagStyle(listaEtiquetas[0]);
+                        const pinIcon = getTagIcon(listaEtiquetas[0]);
+
+                        const markerIcon = L.divIcon({
+                            className: 'custom-marker-wrapper',
+                            html: `<div id="pin-${p.id}" class="custom-pin-marker" style="background-color: ${pinStyle.bg}; border-color: #ffffff;"><i class="fa-solid ${pinIcon}"></i></div>`,
+                            iconSize: [36, 36],
+                            iconAnchor: [18, 36]
+                        });
+
+                        let badgeEstado = isVisited ? '<span style="background-color:#ecfdf5; color:#059669;" class="px-2 py-0.5 rounded text-[9px] font-extrabold mr-2">🟢 Visitado</span>' : '<span style="background-color:#fffbeb; color:#d97706;" class="px-2 py-0.5 rounded text-[9px] font-extrabold mr-2">🧡 Quiero ir</span>';
+
+                        const marker = L.marker([finalLat, finalLng], { icon: markerIcon }).addTo(markersGroup);
+                        
+                        marker.bindTooltip(`
+                            <div class="p-3">
+                                <div class="flex items-center mb-1">${badgeEstado}</div>
+                                <div class="font-extrabold text-sm mb-1">${p.nombre}</div>
+                                <div class="text-[11px] text-slate-500 leading-tight mb-2">${p.descripcion || ''}</div>
+                                <div class="flex flex-wrap gap-1">${getTagsHTMLForCard(p.etiquetas)}</div>
+                            </div>
+                        `, { className: 'custom-tooltip', direction: 'top', offset: [0, -38] });
+
+                        // Scroll matemático a la tarjeta
+                        marker.on('click', () => {
+                            if (window.innerWidth < 768) switchMobileView('list', false);
+                            
+                            // Limpiar highlights previos
+                            document.querySelectorAll('.highlight-pin').forEach(el => el.classList.remove('highlight-pin'));
+                            const pinEl = document.getElementById(`pin-${p.id}`);
+                            if (pinEl) pinEl.classList.add('highlight-pin');
+
+                            document.querySelectorAll('#placesList > div').forEach(c => c.style.borderColor = 'rgba(226, 232, 240, 0.8)');
+                            card.style.borderColor = '#38bdf8';
+                            card.style.borderWidth = '2px';
+                            
+                            // Scroll matemático seguro
+                            const listContainer = document.getElementById('placesList');
+                            const cardRect = card.getBoundingClientRect();
+                            const containerRect = listContainer.getBoundingClientRect();
+                            
+                            const relativeTop = cardRect.top - containerRect.top;
+                            const currentScroll = listContainer.scrollTop;
+                            const targetScroll = currentScroll + relativeTop - 16; 
+                            
+                            listContainer.scrollTo({ top: targetScroll, behavior: 'smooth' });
+                            
+                            setTimeout(() => { card.style.borderWidth = '1px'; card.style.borderColor = 'rgba(226, 232, 240, 0.8)'; }, 2000);
+                        });
+
+                        card.addEventListener('click', () => {
+                            if (window.innerWidth < 768) switchMobileView('map', false);
+                            document.querySelectorAll('.highlight-pin').forEach(el => el.classList.remove('highlight-pin'));
+                            const pinEl = document.getElementById(`pin-${p.id}`);
+                            if (pinEl) pinEl.classList.add('highlight-pin');
+                            map.flyTo([finalLat, finalLng], 16, { duration: 1 });
+                            marker.openTooltip();
+                        });
+                    }
+                });
+            }
+
+            if (map && coordsArray.length > 0 && fitBounds) {
+                map.fitBounds(coordsArray, { padding: [50, 50], maxZoom: 14 });
+            }
+        }
+
+        function renderViewByCurrentState() {
+            if (state.view === 'home') { renderHomeView(); }
+            else if (state.view === 'countries') { drawCountriesGrid(); }
+            else if (state.view === 'regions') { drawRegionsGrid(); }
+            else if (state.view === 'places') { renderPlacesView(); }
+        }
+
+        async function editBannerImage(e, key) {
+            e.stopPropagation();
+            if(!userSessionId) return;
+            const url = prompt(`Introduce la URL de la imagen para ${key}:`, customBanners[key] || "");
+            if (url !== null) {
+                if (url.trim() === "") {
+                    await supabaseClient.from('banners').delete().eq('clave', key);
+                    delete customBanners[key];
+                    showToast("Restablecido", "Imagen por defecto restaurada.");
+                } else {
+                    const { data, error } = await supabaseClient.from('banners').upsert({ clave: key, url: url.trim() }, { onConflict: 'clave' });
+                    if (!error) {
+                        customBanners[key] = url.trim();
+                        showToast("Actualizado", "Fondo cambiado correctamente.");
+                    } else { showToast("Error", "No se pudo guardar la imagen.", true); }
                 }
-            });
-
-            if (coordsArray.length > 0 && map) { setTimeout(() => { map.invalidateSize(); map.fitBounds(coordsArray, { padding: [40, 40], maxZoom: 14 }); }, 100); }
+                renderViewByCurrentState();
+            }
         }
 
-        function filterTag(tag) {
-            if (tag === 'todas') state.selectedTags = [];
-            else { const idx = state.selectedTags.indexOf(tag); if (idx > -1) state.selectedTags.splice(idx, 1); else state.selectedTags.push(tag); }
-            renderPlacesView();
-        }
-
-        async function togglePlaceStatus(id, newStatus) {
+        async function toggleStatus(id, newStatus) {
             if(!userSessionId) return;
             const { error } = await supabaseClient.from('sitios').update({ visitado: newStatus }).eq('id', id);
-            if (!error) { const idx = viajesData.findIndex(item => String(item.id) === String(id)); if (idx !== -1) viajesData[idx].visitado = newStatus; renderPlacesView(); }
+            if (!error) {
+                const idx = viajesData.findIndex(x => x.id === id);
+                if (idx !== -1) viajesData[idx].visitado = newStatus;
+                renderPlacesView();
+            }
         }
 
-        function openModal(id) { if(userSessionId) document.getElementById(id).classList.replace('hidden', 'flex'); }
-        function closeModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); }
+        function openModal(id) {
+            if(userSessionId) document.getElementById(id).classList.replace('hidden', 'flex');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.replace('flex', 'hidden');
+        }
 
         function openPlaceModal(isEdit, globalIndex = null) {
             if(!userSessionId) return;
             document.getElementById('placeForm').reset();
             const coordInput = document.getElementById('formCoordenadasManual');
-
+            
             if (isEdit) {
-                document.getElementById('placeModalTitle').textContent = "Editar Lugar"; document.getElementById('deletePlaceBtn').classList.replace('hidden', 'block');
+                document.getElementById('placeModalTitle').textContent = "Editar Lugar";
+                document.getElementById('deletePlaceBtn').classList.replace('hidden', 'block');
                 const p = viajesData[globalIndex];
-                document.getElementById('editIndex').value = p.id; document.getElementById('formLugar').value = p.nombre || ""; document.getElementById('formTipo').value = p.etiquetas || ""; document.getElementById('formPais').value = p.categoria || ""; document.getElementById('formRegion').value = p.estado || ""; document.getElementById('formNotas').value = p.descripcion || ""; document.getElementById('formLink').value = p.link || ""; document.getElementById('formEstado').value = p.visitado || 'Quiero ir';
-
-                let lat = parseFloat(p.latitud); let lng = parseFloat(p.longitud); coordInput.value = (!isNaN(lat) && !isNaN(lng) && lat !== 0) ? `${lat}, ${lng}` : "";
+                document.getElementById('editIndex').value = p.id;
+                document.getElementById('formLugar').value = p.nombre || "";
+                document.getElementById('formTipo').value = p.etiquetas || "";
+                document.getElementById('formPais').value = p.categoria || "";
+                document.getElementById('formRegion').value = p.estado || "";
+                document.getElementById('formNotas').value = p.descripcion || "";
+                document.getElementById('formLink').value = p.link || "";
+                document.getElementById('formEstado').value = p.visitado || 'Quiero ir';
+                
+                let lat = parseFloat(p.latitud); let lng = parseFloat(p.longitud);
+                coordInput.value = (!isNaN(lat) && !isNaN(lng) && lat !== 0) ? `${lat}, ${lng}` : "";
             } else {
-                document.getElementById('placeModalTitle').textContent = "Añadir Nuevo Lugar"; document.getElementById('deletePlaceBtn').classList.replace('block', 'hidden'); document.getElementById('editIndex').value = ""; document.getElementById('formPais').value = state.country || ""; document.getElementById('formRegion').value = state.region || ""; coordInput.value = "";
+                document.getElementById('placeModalTitle').textContent = "Añadir Nuevo Lugar";
+                document.getElementById('deletePlaceBtn').classList.replace('block', 'hidden');
+                document.getElementById('editIndex').value = "";
+                document.getElementById('formPais').value = state.country || "";
+                document.getElementById('formRegion').value = state.region || "";
+                coordInput.value = "";
             }
             openModal('placeModal');
         }
@@ -798,37 +938,83 @@
             e.preventDefault();
             if(!userSessionId) return;
             showToast("Guardando", "Sincronizando con la base de datos...");
-
-            const rowId = document.getElementById('editIndex').value; const nombre = document.getElementById('formLugar').value.trim(); const region = document.getElementById('formRegion').value.trim(); const pais = document.getElementById('formPais').value.trim(); const coordInput = document.getElementById('formCoordenadasManual').value.trim();
             
-            let finalLat = null; let finalLng = null;
-            if (coordInput) { const parts = coordInput.replace(/\s+/g, '').split(','); if (parts.length >= 2) { finalLat = parseFloat(parts[0]); finalLng = parseFloat(parts[1]); } }
-
-            if (isNaN(finalLat) || isNaN(finalLng) || finalLat === null || finalLat === 0) {
-                try { let res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(`${nombre}, ${region}, ${pais}`)}&limit=1`); let data = await res.json(); if (data && data.length > 0) { finalLat = parseFloat(data[0].lat); finalLng = parseFloat(data[0].lon); } } catch(err) {}
+            const rowId = document.getElementById('editIndex').value;
+            let lat = null, lng = null;
+            const coordVal = document.getElementById('formCoordenadasManual').value.trim();
+            if (coordVal) {
+                const parts = coordVal.split(',');
+                if (parts.length >= 2) {
+                    lat = parseFloat(parts[0].trim());
+                    lng = parseFloat(parts[1].trim());
+                }
             }
 
-            const payload = { user_id: userSessionId, nombre: nombre, etiquetas: document.getElementById('formTipo').value.trim(), categoria: pais, estado: region, latitud: (isNaN(finalLat) || finalLat === 0) ? null : finalLat, longitud: (isNaN(finalLng) || finalLng === 0) ? null : finalLng, descripcion: document.getElementById('formNotas').value.trim(), link: document.getElementById('formLink').value.trim(), visitado: document.getElementById('formEstado').value, nivel: getContinent(pais) };
+            const dataObj = {
+                user_id: userSessionId,
+                nombre: document.getElementById('formLugar').value,
+                etiquetas: document.getElementById('formTipo').value,
+                categoria: document.getElementById('formPais').value,
+                estado: document.getElementById('formRegion').value,
+                descripcion: document.getElementById('formNotas').value,
+                link: document.getElementById('formLink').value,
+                visitado: document.getElementById('formEstado').value,
+                latitud: isNaN(lat) ? null : lat,
+                longitud: isNaN(lng) ? null : lng
+            };
 
-            if (rowId) await supabaseClient.from('sitios').update(payload).eq('id', parseInt(rowId)); else await supabaseClient.from('sitios').insert([payload]);
-            closeModal('placeModal'); loadCloudData(); showToast("Éxito", "Lugar almacenado correctamente.");
+            if (rowId) {
+                const { error } = await supabaseClient.from('sitios').update(dataObj).eq('id', rowId);
+                if (!error) { showToast("Actualizado", "El destino se editó correctamente."); loadCloudData(); } 
+                else { showToast("Error", "No se pudo actualizar.", true); }
+            } else {
+                const { error } = await supabaseClient.from('sitios').insert([dataObj]);
+                if (!error) { showToast("Creado", "Destino añadido a tu bóveda."); loadCloudData(); } 
+                else { showToast("Error", "No se pudo guardar.", true); }
+            }
+            closeModal('placeModal');
         }
 
         async function deletePlace() {
-            if(!userSessionId) return;
-            const id = document.getElementById('editIndex').value;
-            if (id && confirm("¿Estás seguro de borrar este lugar de tu diario?")) { await supabaseClient.from('sitios').delete().eq('id', id); closeModal('placeModal'); loadCloudData(); showToast("Eliminado", "Lugar borrado de la nube."); }
+            const rowId = document.getElementById('editIndex').value;
+            if (rowId && confirm("¿Eliminar este destino definitivamente?")) {
+                const { error } = await supabaseClient.from('sitios').delete().eq('id', rowId);
+                if (!error) { showToast("Eliminado", "Destino borrado."); loadCloudData(); closeModal('placeModal'); } 
+                else { showToast("Error", "No se pudo eliminar.", true); }
+            }
         }
 
         function switchMobileView(tab, preventFitBounds = false) {
-            state.mobileTab = tab;
-            const sidebar = document.getElementById('placesSidebarRoot'); const listContainer = document.getElementById('placesList'); const mapContainer = document.getElementById('mapContainerRoot'); const btnList = document.getElementById('tab-btn-list'); const btnMap = document.getElementById('tab-btn-map');
+            const sidebar = document.getElementById('placesSidebarRoot');
+            const mapContainer = document.getElementById('mapContainerRoot');
+            const listContainer = document.getElementById('placesList');
+            const btnList = document.getElementById('tab-btn-list');
+            const btnMap = document.getElementById('tab-btn-map');
 
             if (tab === 'list') {
-                sidebar.classList.remove('sidebar-map-active'); listContainer.classList.remove('mobile-list-hidden'); mapContainer.classList.remove('active-mobile-map'); btnList.classList.add('active'); btnMap.classList.remove('active');
+                sidebar.classList.remove('sidebar-map-active');
+                listContainer.classList.remove('mobile-list-hidden');
+                mapContainer.classList.remove('active-mobile-map');
+                btnList.classList.add('active');
+                btnMap.classList.remove('active');
             } else {
-                sidebar.classList.add('sidebar-map-active'); listContainer.classList.add('mobile-list-hidden'); mapContainer.classList.add('active-mobile-map'); btnList.classList.remove('active'); btnMap.classList.add('active');
-                setTimeout(() => { if (map) { map.invalidateSize(); if (!preventFitBounds) { let bounds = markersGroup.getBounds(); if (bounds && bounds.isValid()) { map.fitBounds(bounds, { padding: [30, 30] }); } } } }, 150);
+                sidebar.classList.add('sidebar-map-active');
+                listContainer.classList.add('mobile-list-hidden');
+                mapContainer.classList.add('active-mobile-map');
+                btnList.classList.remove('active');
+                btnMap.classList.add('active');
+                
+                setTimeout(() => {
+                    if (map) {
+                        map.invalidateSize();
+                        if (!preventFitBounds) {
+                            let bounds = markersGroup.getBounds();
+                            if (bounds && bounds.isValid()) {
+                                map.fitBounds(bounds, { padding: [30, 30] });
+                            }
+                        }
+                    }
+                }, 150);
             }
         }
 
@@ -837,49 +1023,81 @@
             let csvContent = "Nombre,Categoria,Estado,Latitud,Longitud,Notas,Nivel,Visitado,Etiquetas,Link\n";
             if (viajesData.length > 0) {
                 viajesData.forEach(v => {
-                    let eLat = (v.latitud !== null && v.latitud !== undefined) ? v.latitud : ''; let eLng = (v.longitud !== null && v.longitud !== undefined) ? v.longitud : '';
-                    csvContent += `"${v.nombre}","${v.categoria}","${v.estado}",${eLat},${eLng},"${(v.descripcion || '').replace(/"/g, '""')}","${v.nivel || ''}","${v.visitado || 'Por visitar'}","${v.etiquetas || ''}","${v.link || ''}"\n`;
+                    let eLat = (v.latitud !== null && v.latitud !== undefined) ? v.latitud : '';
+                    let eLng = (v.longitud !== null && v.longitud !== undefined) ? v.longitud : '';
+                    let eDesc = (v.descripcion || '').replace(/"/g, '""');
+                    let eNombre = (v.nombre || '').replace(/"/g, '""');
+                    let ePais = (v.categoria || '').replace(/"/g, '""');
+                    let eReg = (v.estado || '').replace(/"/g, '""');
+                    let eNivel = v.nivel || '';
+                    let eVisitado = v.visitado || '';
+                    let eEtiq = (v.etiquetas || '').replace(/"/g, '""');
+                    let eLink = (v.link || '').replace(/"/g, '""');
+                    
+                    csvContent += `"${eNombre}","${ePais}","${eReg}",${eLat},${eLng},"${eDesc}","${eNivel}","${eVisitado}","${eEtiq}","${eLink}"\n`;
                 });
             }
-            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob); const link = document.createElement("a"); const timestamp = new Date().toISOString().slice(0, 10);
-            link.setAttribute("href", url); link.setAttribute("download", `VoyageVault_Backup_${timestamp}.csv`);
-            document.body.appendChild(link); link.click(); document.body.removeChild(link);
-            showToast("Backup Descargado", `Copia descargada con éxito.`);
+            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `VoyageVault_Backup_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
         }
 
-        function parseCSVLine(text) {
-            let ret = [], col = "", inQuote = false;
-            for (let i = 0; i < text.length; i++) {
-                let c = text[i];
-                if (inQuote) { if (c === '"') { if (text[i+1] === '"') { col += '"'; i++; } else inQuote = false; } else col += c; } 
-                else { if (c === '"') inQuote = true; else if (c === ',') { ret.push(col); col = ""; } else col += c; }
-            }
-            ret.push(col); return ret;
-        }
-
-        function handleCSVFile(event) {
-            if(!userSessionId) return;
-            const file = event.target.files[0]; if (!file) return;
-
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
             const reader = new FileReader();
-            reader.onload = async function(e) {
-                const text = e.target.result; const rows = text.split('\n'); let nuevosSitios = []; let duplicados = 0;
-
-                for(let i = 1; i < rows.length; i++) {
-                    if(!rows[i].trim()) continue;
-                    const cols = parseCSVLine(rows[i].trim());
-                    if(cols.length >= 3) {
-                        let nombre = cols[0].trim(); let pais = cols[1].trim(); let estado = cols[2].trim(); let lat = parseFloat(cols[3]); let lng = parseFloat(cols[4]); let desc = cols[5] ? cols[5].trim() : ''; let nivel = cols[6] ? cols[6].trim() : getContinent(pais); let visitado = cols[7] ? cols[7].trim() : 'Por visitar'; let etiquetas = cols[8] ? cols[8].trim() : ''; let link = cols[9] ? cols[9].trim() : '';
-                        let existe = viajesData.some(v => v.nombre.toLowerCase() === nombre.toLowerCase() && v.categoria.toLowerCase() === pais.toLowerCase());
-                        
-                        if(!existe && nombre !== "") { nuevosSitios.push({ user_id: userSessionId, nombre: nombre, categoria: pais, estado: estado, latitud: isNaN(lat) ? null : lat, longitud: isNaN(lng) ? null : lng, descripcion: desc, nivel: nivel, visitado: visitado, etiquetas: etiquetas, link: link }); } 
-                        else if (existe) { duplicados++; }
+            reader.onload = async (e) => {
+                const text = e.target.result;
+                const rows = text.split('\n').filter(row => row.trim() !== '');
+                if (rows.length <= 1) { showToast("Error", "CSV vacío o formato incorrecto", true); return; }
+                
+                showToast("Importando", "Procesando archivo CSV...");
+                const nuevosSitios = [];
+                let duplicados = 0;
+                
+                for (let i = 1; i < rows.length; i++) {
+                    const line = rows[i];
+                    const regex = /(".*?"|[^",\s]+)(?=\s*,|\s*$)/g;
+                    let matches = line.match(regex);
+                    if (!matches) {
+                        const cols2 = line.split(',');
+                        if(cols2.length < 9) continue;
+                        matches = cols2;
                     }
+                    
+                    const cols = matches.map(m => m.replace(/^"|"$/g, '').replace(/""/g, '"'));
+                    const nombre = cols[0] ? cols[0].trim() : '';
+                    const pais = cols[1] ? cols[1].trim() : '';
+                    const estado = cols[2] ? cols[2].trim() : '';
+                    const lat = cols[3] ? parseFloat(cols[3]) : null;
+                    const lng = cols[4] ? parseFloat(cols[4]) : null;
+                    const desc = cols[5] ? cols[5].trim() : '';
+                    const nivel = cols[6] ? cols[6].trim() : '';
+                    const visitado = cols[7] ? cols[7].trim() : 'Quiero ir';
+                    const etiq = cols[8] ? cols[8].trim() : 'General';
+                    const link = cols[9] ? cols[9].trim() : '';
+                    
+                    let existe = viajesData.some(v => v.nombre.toLowerCase() === nombre.toLowerCase() && v.categoria.toLowerCase() === pais.toLowerCase());
+                    if(!existe && nombre !== "") {
+                        nuevosSitios.push({
+                            user_id: userSessionId,
+                            nombre: nombre,
+                            categoria: pais,
+                            estado: estado,
+                            latitud: isNaN(lat) ? null : lat,
+                            longitud: isNaN(lng) ? null : lng,
+                            descripcion: desc,
+                            nivel: nivel,
+                            visitado: visitado,
+                            etiquetas: etiq,
+                            link: link
+                        });
+                    } else { duplicados++; }
                 }
-
-                if(nuevosSitios.length > 0) {
-                    showToast("Sincronizando...", `Subiendo ${nuevosSitios.length} lugares nuevos...`);
+                
+                if (nuevosSitios.length > 0) {
                     const { error } = await supabaseClient.from('sitios').insert(nuevosSitios);
                     if(!error) { loadCloudData(); showToast("Completado", `Se añadieron ${nuevosSitios.length} sitios nuevos. Se omitieron ${duplicados} duplicados.`); } 
                     else { showToast("Error", "Fallo al subir a la nube.", true); }
@@ -891,7 +1109,10 @@
 
         async function clearAllData() {
             if(!userSessionId) return;
-            if (confirm("⚠️ ¿Estás seguro de borrar todos los sitios de forma permanente?")) { await supabaseClient.from('sitios').delete().neq('id', 0); loadCloudData(); navigateTo('home'); }
+            if (confirm("⚠️ ¿Estás seguro de borrar todos los sitios de forma permanente?")) { 
+                await supabaseClient.from('sitios').delete().neq('id', 0); 
+                loadCloudData(); navigateTo('home'); 
+            }
         }
 
         function initMap() {
@@ -899,10 +1120,12 @@
             L.control.zoom({ position: 'bottomright' }).addTo(map);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
             markersGroup = L.featureGroup().addTo(map);
+            
             history.replaceState({ view: 'home', continent: null, country: null, region: null, isGlobalCountryMode: false }, "", "");
+            initAuth();
         }
 
-        window.onload = function () { initMap(); }
+        window.onload = initMap;
     </script>
 </body>
 </html>
