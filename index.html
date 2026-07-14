@@ -347,10 +347,14 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN SUPABASE (Oculta por seguridad o insertada desde el backend)
-        const supabaseUrl = 'URL_AQUI'; 
-        const supabaseKey = 'KEY_AQUI'; 
-        const supabaseClient = window.supabase ? supabase.createClient(supabaseUrl, supabaseKey) : null;
+        // CONFIGURACIÓN SUPABASE 
+        // 👇 POR FAVOR, SUSTITUYE ESTAS DOS LÍNEAS POR TUS CREDENCIALES REALES 👇
+        const supabaseUrl = 'https://fmueravcnwkoswvwbvnc.supabase.co'; 
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtdWVyYXZjbndrb3N3dndidm5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMjIxMzIsImV4cCI6MjA5Nzg5ODEzMn0._k2oBg5XwMmPzPZ3zm43EOp-gn1VyM6JDqpCx2BoYvQ'; 
+
+        // Validación de seguridad para evitar que la aplicación crashee si la URL no es válida.
+        const isSupabaseValid = supabaseUrl.startsWith('https://');
+        const supabaseClient = (window.supabase && isSupabaseValid) ? supabase.createClient(supabaseUrl, supabaseKey) : null;
 
         const DEFAULT_IMAGES = {
             'Europa': 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80',
@@ -371,7 +375,10 @@
         let state = { view: 'home', continent: null, country: null, region: null, isGlobalCountryMode: false, searchPlace: '', statusFilter: 'todos', selectedTags: [] };
 
         async function initAuth() {
-            if (!supabaseClient) return checkAuthStatus();
+            if (!supabaseClient) {
+                console.warn("Supabase no configurado correctamente. Verifica URL y Key.");
+                return checkAuthStatus();
+            }
             const { data } = await supabaseClient.auth.getSession();
             userSessionId = data.session?.user?.id || null;
             supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -382,7 +389,7 @@
         }
 
         async function signInWithGoogle() {
-            if (!supabaseClient) { alert("Supabase no configurado"); return; }
+            if (!supabaseClient) { alert("Error: Las credenciales de Supabase no son válidas o no están configuradas."); return; }
             const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
             if (error) alert("Error al iniciar sesión: " + error.message);
         }
@@ -635,12 +642,8 @@
             navigateTo('places');
         }
 
-        /* --- NUEVO SISTEMA DE ICONOS OPTIMIZADO --- */
         function getTagIcon(t) {
-            // Limpiamos la etiqueta: minúsculas, sin acentos y sin espacios extra
             const cleanTag = t.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            
-            // Diccionario de categorías y sus iconos
             const iconMap = {
                 'fa-utensils': ['restaurante', 'comida', 'gastronomia', 'bar', 'cafe', 'cafeteria', 'marisco', 'tapas'],
                 'fa-leaf': ['jardin', 'parque', 'naturaleza', 'bosque', 'selva'],
@@ -658,7 +661,6 @@
                 'fa-champagne-glasses': ['pub', 'discoteca', 'fiesta', 'club']
             };
 
-            // Buscamos coincidencia exacta por palabra completa (\b)
             for (const [icon, keywords] of Object.entries(iconMap)) {
                 for (const keyword of keywords) {
                     const regex = new RegExp(`\\b${keyword}\\b`, 'i');
@@ -667,12 +669,11 @@
                     }
                 }
             }
-            return 'fa-location-dot'; // Icono por defecto
+            return 'fa-location-dot'; 
         }
 
         function getTagStyle(tag) {
             if (!tag) tag = 'General';
-            // Normalizar para que la capitalización o acentos no cambien el color
             const cleanTag = tag.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             let hash = 0;
             for(let i = 0; i < cleanTag.length; i++) {
@@ -712,7 +713,7 @@
                 if (state.selectedTags.includes(tag)) state.selectedTags = state.selectedTags.filter(t => t !== tag);
                 else state.selectedTags.push(tag);
             }
-            renderPlacesView(false); // No centrar mapa al filtrar tags
+            renderPlacesView(false);
         }
 
         function renderPlacesView(fitBounds = true) {
@@ -744,7 +745,7 @@
             let filtered = regionPlaces.filter(f => f.nombre.toLowerCase().includes(searchVal) || (f.descripcion || '').toLowerCase().includes(searchVal));
             
             if (state.statusFilter === 'Visitado') filtered = filtered.filter(f => f.visitado === 'Visitado');
-            else if (state.statusFilter === 'Quiero ir') filtered = filtered.filter(f => f.visitado !== 'Visitado');
+            else if (state.statusFilter === 'Quiero ir') filtered = filtered.filter(f => f.visitado !== 'Quiero ir');
 
             if (state.selectedTags.length > 0) {
                 filtered = filtered.filter(p => (p.etiquetas || "General").split(',').some(t => state.selectedTags.includes(t.trim())));
@@ -814,11 +815,9 @@
                             </div>
                         `, { className: 'custom-tooltip', direction: 'top', offset: [0, -38] });
 
-                        // Scroll matemático a la tarjeta
                         marker.on('click', () => {
                             if (window.innerWidth < 768) switchMobileView('list', false);
                             
-                            // Limpiar highlights previos
                             document.querySelectorAll('.highlight-pin').forEach(el => el.classList.remove('highlight-pin'));
                             const pinEl = document.getElementById(`pin-${p.id}`);
                             if (pinEl) pinEl.classList.add('highlight-pin');
@@ -827,7 +826,6 @@
                             card.style.borderColor = '#38bdf8';
                             card.style.borderWidth = '2px';
                             
-                            // Scroll matemático seguro
                             const listContainer = document.getElementById('placesList');
                             const cardRect = card.getBoundingClientRect();
                             const containerRect = listContainer.getBoundingClientRect();
