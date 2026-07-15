@@ -5,23 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VoyageVault — Visor de Viajes</title>
     
-    <!-- ICONO DE LA APP (Favicon SVG) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
     
-    <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Leaflet CSS y JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- Fuentes y Estilos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -186,7 +181,6 @@
     <div class="ambient-glow"></div>
     <div class="ambient-glow-2"></div>
 
-    <!-- TOAST NOTIFICACIONES -->
     <div id="toastMessage" class="notification-toast">
         <i id="toastIcon" class="fa-solid fa-circle-check" style="color:#0284c7; font-size: 18px;"></i>
         <div>
@@ -195,7 +189,6 @@
         </div>
     </div>
 
-    <!-- NAVBAR GLOBAL -->
     <nav id="top-navbar">
         <div class="nav-left">
             <div class="logo" onclick="navigateTo('home')">
@@ -207,21 +200,17 @@
             </div>
         </div>
         <div class="nav-right" id="navbar-actions">
-            <!-- Botones inyectados por JS -->
-        </div>
+            </div>
     </nav>
 
-    <!-- VIEWPORT PRINCIPAL -->
     <div class="main-viewport" id="app-viewport">
         
-        <!-- 1. HOME -->
         <div class="view-panel active-view" id="view-home">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1">Explora tus destinos</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una región geográfica para visualizar los lugares guardados.</p>
             <div class="banner-grid home-grid" id="explorer-cards-container"></div>
         </div>
 
-        <!-- 2. PAÍSES -->
         <div class="view-panel" id="view-countries">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                 <div>
@@ -236,7 +225,6 @@
             <div class="banner-grid" id="countries-grid"></div>
         </div>
 
-        <!-- 3. REGIONES -->
         <div class="view-panel" id="view-regions">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                 <div>
@@ -251,7 +239,6 @@
             <div class="banner-grid" id="regions-grid"></div>
         </div>
 
-        <!-- 4. DETALLE DE LUGARES Y MAPA -->
         <div class="view-panel" id="view-places">
             <div class="split-viewport">
                 <div class="places-sidebar" id="placesSidebarRoot">
@@ -284,7 +271,6 @@
         </div>
     </div>
 
-    <!-- MODAL FORM LUGAR -->
     <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden items-center justify-center p-3 sm:p-4" id="placeModal" onclick="closeModal('placeModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[500px] rounded-[24px] shadow-2xl flex flex-col overflow-hidden max-h-[95dvh]" onclick="event.stopPropagation()">
             <div class="p-4 sm:p-5 flex justify-between items-center border-b border-slate-100 bg-slate-50/50 flex-shrink-0">
@@ -346,7 +332,6 @@
         </div>
     </div>
 
-    <!-- MODAL SINCRO CSV -->
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4" id="importModal" onclick="closeModal('importModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[520px] rounded-[24px] p-6 shadow-2xl" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-5">
@@ -615,28 +600,46 @@
             else if (state.statusFilter === 'Quiero ir') btnQuieroIr.className = "flex-1 py-1.5 px-2 text-center rounded-lg bg-amber-50 text-amber-600 font-bold border border-amber-200";
         }
 
+        /* ----- NUEVAS FUNCIONES DE ETIQUETAS Y COLORES ----- */
         function getTagIcon(tag) {
-            if (!tag) return 'fa-location-dot';
+            if (!tag) return 'fa-map-pin';
             const t = tag.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            if (t.includes('restaurante') || t.includes('comida') || t.includes('gastronomia') || t.includes('bar') || t.includes('cafe')) return 'fa-utensils';
-            if (t.includes('jardin') || t.includes('parque') || t.includes('naturaleza') || t.includes('bosque')) return 'fa-leaf';
-            if (t.includes('ruta') || t.includes('senderismo') || t.includes('montaña')) return 'fa-route';
-            if (t.includes('museo') || t.includes('arte') || t.includes('cultura')) return 'fa-building-columns';
-            if (t.includes('playa') || t.includes('mar') || t.includes('costa') || t.includes('cala')) return 'fa-umbrella-beach';
-            if (t.includes('mirador') || t.includes('vistas') || t.includes('panorama')) return 'fa-binoculars';
-            if (t.includes('monumento') || t.includes('historia') || t.includes('castillo') || t.includes('ruinas') || t.includes('iglesia') || t.includes('catedral')) return 'fa-landmark';
-            if (t.includes('ciudad') || t.includes('pueblo') || t.includes('urbano')) return 'fa-city';
-            if (t.includes('alojamiento') || t.includes('hotel') || t.includes('camping')) return 'fa-bed';
-            if (t.includes('compras') || t.includes('tienda') || t.includes('mercado')) return 'fa-basket-shopping';
+
+            if (/(restaurante|comida|gastronomia|\bbar\b|cafe|tapas)/.test(t)) return 'fa-utensils';
+            if (/(jardin|parque|naturaleza|bosque|montaña|senderismo|ruta)/.test(t)) return 'fa-tree';
+            if (/(playa|\bmar\b|costa|cala|lago|rio|maritimo)/.test(t)) return 'fa-water';
+            if (/(museo|arte|cultura|exposicion|galeria)/.test(t)) return 'fa-palette';
+            if (/(monumento|historia|castillo|ruinas|iglesia|catedral|arquitectura)/.test(t)) return 'fa-landmark';
+            if (/(musica|concierto|festival|jazz|rock|auditorio)/.test(t)) return 'fa-music';
+            if (/(deporte|estadio|futbol|partido|pabellon)/.test(t)) return 'fa-futbol';
+            if (/(lectura|biblioteca|libro|libreria)/.test(t)) return 'fa-book-open';
+            if (/(mirador|vistas|panorama|paisaje)/.test(t)) return 'fa-camera-retro';
+            if (/(ciudad|pueblo|urbano|plaza|centro)/.test(t)) return 'fa-city';
+            if (/(alojamiento|hotel|camping|hostal|apartamento)/.test(t)) return 'fa-bed';
+            if (/(compras|tienda|mercado|comercial)/.test(t)) return 'fa-basket-shopping';
+            if (/(transporte|tren|estacion|aeropuerto|vuelo|autobus)/.test(t)) return 'fa-train-tram';
+
             return 'fa-location-dot';
         }
 
         function getTagStyle(tag) {
-            if (!tag) tag = 'General';
-            let hash = 0; for(let i = 0; i < tag.length; i++) hash = tag.charCodeAt(i) + ((hash << 5) - hash);
-            const colors = ['#3b82f6', '#22c55e', '#a855f7', '#ec4899', '#f59e0b', '#6366f1', '#ef4444', '#14b8a6'];
-            return { bg: colors[Math.abs(hash) % 8], text: '#ffffff' };
+            if (!tag) return { bg: '#64748b', text: '#ffffff' }; 
+            const t = tag.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+            if (/(jardin|parque|naturaleza|bosque|montaña|senderismo|ruta)/.test(t)) return { bg: '#22c55e', text: '#ffffff' }; 
+            if (/(playa|\bmar\b|costa|cala|lago|rio)/.test(t)) return { bg: '#0ea5e9', text: '#ffffff' }; 
+            if (/(restaurante|comida|gastronomia|\bbar\b|cafe|tapas)/.test(t)) return { bg: '#f59e0b', text: '#ffffff' }; 
+            if (/(musica|concierto|festival|jazz|rock|auditorio)/.test(t)) return { bg: '#8b5cf6', text: '#ffffff' }; 
+            if (/(monumento|historia|castillo|ruinas|iglesia|catedral)/.test(t)) return { bg: '#b45309', text: '#ffffff' }; 
+            if (/(deporte|estadio|futbol|partido)/.test(t)) return { bg: '#10b981', text: '#ffffff' }; 
+            if (/(transporte|tren|estacion|aeropuerto|vuelo|autobus)/.test(t)) return { bg: '#475569', text: '#ffffff' }; 
+            
+            let hash = 0; 
+            for(let i = 0; i < tag.length; i++) hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+            const fallbackColors = ['#ef4444', '#ec4899', '#a855f7', '#3b82f6', '#14b8a6', '#eab308'];
+            return { bg: fallbackColors[Math.abs(hash) % fallbackColors.length], text: '#ffffff' };
         }
+        /* -------------------------------------------------- */
 
         function getTagsHTMLForCard(tagString) {
             if (!tagString) return '';
@@ -646,7 +649,6 @@
             }).join('');
         }
 
-        /* ----- AQUÍ ESTÁ LA NUEVA FUNCIÓN MATEMÁTICA ----- */
         function scrollAndHighlightCard(id) {
             if(window.innerWidth < 768) { switchMobileView('list'); }
             
@@ -655,7 +657,6 @@
                 const listContainer = document.getElementById('placesList');
                 
                 if (targetCard && listContainer) { 
-                    // Calculamos matemáticamente la posición para no afectar al resto de la página
                     const containerRect = listContainer.getBoundingClientRect();
                     const cardRect = targetCard.getBoundingClientRect();
                     
@@ -666,9 +667,8 @@
                     targetCard.classList.add('ring-4', 'ring-sky-400', 'scale-[1.02]'); 
                     setTimeout(() => { targetCard.classList.remove('ring-4', 'ring-sky-400', 'scale-[1.02]'); }, 1500); 
                 }
-            }, 150); // Le damos un pelín más de tiempo (150ms) para asegurar que la lista se haya dibujado en pantalla
+            }, 150);
         }
-        /* ------------------------------------------------ */
 
         function highlightPinOnMap(id) {
             document.querySelectorAll('.highlight-pin').forEach(el => el.classList.remove('highlight-pin'));
