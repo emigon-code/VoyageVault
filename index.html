@@ -348,12 +348,9 @@
 
     <script>
         // CONFIGURACIÓN SUPABASE
-        const supabaseUrl = 'https://fmueravcnwkoswvwbvnc.supabase.co'; // <-- ¡PEGA TU URL AQUÍ! (Debe empezar por https://)
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtdWVyYXZjbndrb3N3dndidm5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMjIxMzIsImV4cCI6MjA5Nzg5ODEzMn0._k2oBg5XwMmPzPZ3zm43EOp-gn1VyM6JDqpCx2BoYvQ'; // <-- ¡PEGA TU KEY AQUÍ!
-
-        // Se verifica que la URL sea válida antes de intentar conectarse para evitar bugs que rompan la página
-        const isSupabaseValid = supabaseUrl.startsWith('https://');
-        const supabaseClient = (window.supabase && isSupabaseValid) ? supabase.createClient(supabaseUrl, supabaseKey) : null;
+        const supabaseUrl = 'https://fmueravcnwkoswvwbvnc.supabase.co'; 
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtdWVyYXZjbndrb3N3dndidm5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMjIxMzIsImV4cCI6MjA5Nzg5ODEzMn0._k2oBg5XwMmPzPZ3zm43EOp-gn1VyM6JDqpCx2BoYvQ'; 
+        const supabaseClient = window.supabase ? supabase.createClient(supabaseUrl, supabaseKey) : null;
 
         const DEFAULT_IMAGES = {
             'Europa': 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80',
@@ -385,13 +382,11 @@
         }
 
         async function signInWithGoogle() {
-            if (!supabaseClient) { alert("Error: Las credenciales de Supabase no son válidas o no están configuradas."); return; }
             const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
             if (error) alert("Error al iniciar sesión: " + error.message);
         }
 
         async function signOut() {
-            if (!supabaseClient) return;
             const { error } = await supabaseClient.auth.signOut();
             if (error) alert("Error al cerrar sesión: " + error.message);
             else { userSessionId = null; customBanners = {}; checkAuthStatus(); }
@@ -422,7 +417,6 @@
         }
 
         async function loadCloudData() {
-            if (!supabaseClient) return;
             const { data: sitios, error: errorSitios } = await supabaseClient.from('sitios').select('*');
             if (errorSitios) { showToast("Aviso", "No se pudieron cargar los datos.", true); return; }
             viajesData = sitios || [];
@@ -639,7 +633,6 @@
         }
 
         function getTagIcon(t) {
-            // Limpiamos la etiqueta: minúsculas, sin acentos y sin espacios extra
             const cleanTag = t.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             
             const iconMap = {
@@ -811,11 +804,9 @@
                             </div>
                         `, { className: 'custom-tooltip', direction: 'top', offset: [0, -38] });
 
-                        // Scroll matemático a la tarjeta
                         marker.on('click', () => {
                             if (window.innerWidth < 768) switchMobileView('list', false);
                             
-                            // Limpiar highlights previos
                             document.querySelectorAll('.highlight-pin').forEach(el => el.classList.remove('highlight-pin'));
                             const pinEl = document.getElementById(`pin-${p.id}`);
                             if (pinEl) pinEl.classList.add('highlight-pin');
@@ -824,7 +815,6 @@
                             card.style.borderColor = '#38bdf8';
                             card.style.borderWidth = '2px';
                             
-                            // Scroll matemático seguro
                             const listContainer = document.getElementById('placesList');
                             const cardRect = card.getBoundingClientRect();
                             const containerRect = listContainer.getBoundingClientRect();
