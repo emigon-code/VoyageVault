@@ -5,18 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VoyageVault — Visor de Viajes</title>
     
+    <!-- ICONO DE LA APP (Favicon SVG) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
     
+    <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
+    <!-- Leaflet CSS y JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
+    <!-- Fuentes y Estilos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -174,6 +179,12 @@
         .notification-toast { position: fixed; bottom: 16px; left: 16px; right: 16px; background-color: #ffffff; border-left: 5px solid #0284c7; box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.1); padding: 12px 18px; border-radius: 16px; z-index: 3000; display: flex; align-items: center; gap: 12px; transform: translateY(150%); transition: transform 0.3s ease; border: 1px solid rgba(226, 232, 240, 0.8); }
         @media (min-width: 768px) { .notification-toast { bottom: 32px; left: 32px; right: auto; width: 340px; } }
         .notification-toast.show { transform: translateY(0); }
+
+        /* Scrollbar sutil para las etiquetas */
+        .scrollbar-sutil::-webkit-scrollbar { width: 4px; }
+        .scrollbar-sutil::-webkit-scrollbar-track { background: transparent; }
+        .scrollbar-sutil::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+        .scrollbar-sutil { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
     </style>
 </head>
 <body>
@@ -181,6 +192,7 @@
     <div class="ambient-glow"></div>
     <div class="ambient-glow-2"></div>
 
+    <!-- TOAST NOTIFICACIONES -->
     <div id="toastMessage" class="notification-toast">
         <i id="toastIcon" class="fa-solid fa-circle-check" style="color:#0284c7; font-size: 18px;"></i>
         <div>
@@ -189,6 +201,7 @@
         </div>
     </div>
 
+    <!-- NAVBAR GLOBAL -->
     <nav id="top-navbar">
         <div class="nav-left">
             <div class="logo" onclick="navigateTo('home')">
@@ -200,17 +213,21 @@
             </div>
         </div>
         <div class="nav-right" id="navbar-actions">
-            </div>
+            <!-- Botones inyectados por JS -->
+        </div>
     </nav>
 
+    <!-- VIEWPORT PRINCIPAL -->
     <div class="main-viewport" id="app-viewport">
         
+        <!-- 1. HOME -->
         <div class="view-panel active-view" id="view-home">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1">Explora tus destinos</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una región geográfica para visualizar los lugares guardados.</p>
             <div class="banner-grid home-grid" id="explorer-cards-container"></div>
         </div>
 
+        <!-- 2. PAÍSES -->
         <div class="view-panel" id="view-countries">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                 <div>
@@ -225,6 +242,7 @@
             <div class="banner-grid" id="countries-grid"></div>
         </div>
 
+        <!-- 3. REGIONES -->
         <div class="view-panel" id="view-regions">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                 <div>
@@ -239,6 +257,7 @@
             <div class="banner-grid" id="regions-grid"></div>
         </div>
 
+        <!-- 4. DETALLE DE LUGARES Y MAPA -->
         <div class="view-panel" id="view-places">
             <div class="split-viewport">
                 <div class="places-sidebar" id="placesSidebarRoot">
@@ -254,7 +273,8 @@
                             <button onclick="setStatusFilter('Quiero ir')" id="filter-status-quieroir" class="flex-1 py-1.5 px-2 text-center rounded-lg text-slate-600">🧡 Quiero ir</button>
                         </div>
 
-                        <div class="tag-filter-container flex flex-wrap gap-1.5" id="tagFilters"></div>
+                        <!-- MODIFICADO: Contenedor con altura máxima y barra de scroll -->
+                        <div class="tag-filter-container flex flex-wrap gap-1.5 max-h-[110px] overflow-y-auto pr-1 pb-1 scrollbar-sutil" id="tagFilters"></div>
                         
                         <div class="mobile-view-tabs">
                             <button id="tab-btn-list" class="active" onclick="switchMobileView('list')"><i class="fa-solid fa-list-ul mr-1"></i> Lista</button>
@@ -271,6 +291,7 @@
         </div>
     </div>
 
+    <!-- MODAL FORM LUGAR -->
     <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden items-center justify-center p-3 sm:p-4" id="placeModal" onclick="closeModal('placeModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[500px] rounded-[24px] shadow-2xl flex flex-col overflow-hidden max-h-[95dvh]" onclick="event.stopPropagation()">
             <div class="p-4 sm:p-5 flex justify-between items-center border-b border-slate-100 bg-slate-50/50 flex-shrink-0">
@@ -332,6 +353,7 @@
         </div>
     </div>
 
+    <!-- MODAL SINCRO CSV -->
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4" id="importModal" onclick="closeModal('importModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[520px] rounded-[24px] p-6 shadow-2xl" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-5">
@@ -600,7 +622,6 @@
             else if (state.statusFilter === 'Quiero ir') btnQuieroIr.className = "flex-1 py-1.5 px-2 text-center rounded-lg bg-amber-50 text-amber-600 font-bold border border-amber-200";
         }
 
-        /* ----- NUEVAS FUNCIONES DE ETIQUETAS Y COLORES ----- */
         function getTagIcon(tag) {
             if (!tag) return 'fa-map-pin';
             const t = tag.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -639,7 +660,6 @@
             const fallbackColors = ['#ef4444', '#ec4899', '#a855f7', '#3b82f6', '#14b8a6', '#eab308'];
             return { bg: fallbackColors[Math.abs(hash) % fallbackColors.length], text: '#ffffff' };
         }
-        /* -------------------------------------------------- */
 
         function getTagsHTMLForCard(tagString) {
             if (!tagString) return '';
@@ -675,6 +695,7 @@
             setTimeout(() => { const pin = document.getElementById('pin-' + id); if (pin) { pin.classList.add('highlight-pin'); setTimeout(() => { pin.classList.remove('highlight-pin'); }, 3000); } }, 800); 
         }
 
+        // MODIFICADO: Ordenación alfabética de etiquetas
         function renderPlacesView() {
             const list = document.getElementById('placesList');
             list.innerHTML = ''; if (markersGroup) markersGroup.clearLayers();
@@ -684,10 +705,18 @@
             let regionPlaces = state.isGlobalCountryMode ? viajesData.filter(i => i.categoria === state.country) : viajesData.filter(i => i.categoria === state.country && i.estado === state.region);
             regionPlaces.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
 
-            const allTags = new Set(); regionPlaces.forEach(p => { (p.etiquetas || "General").split(',').map(t => t.trim()).forEach(t => allTags.add(t)); });
+            const allTags = new Set(); 
+            regionPlaces.forEach(p => { 
+                (p.etiquetas || "General").split(',').map(t => t.trim()).filter(t => t !== "").forEach(t => allTags.add(t)); 
+            });
+            
+            // Convertimos a array y ordenamos alfabéticamente (respetando la ñ y tildes)
+            const sortedTags = Array.from(allTags).sort((a, b) => a.localeCompare(b, 'es'));
+
             const filterBox = document.getElementById('tagFilters');
             filterBox.innerHTML = `<button class="px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${state.selectedTags.length === 0 ? 'bg-slate-800 text-white shadow-md border border-slate-800' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'}" onclick="filterTag('todas')">Todas</button>`;
-            allTags.forEach(t => {
+            
+            sortedTags.forEach(t => {
                 const style = getTagStyle(t); const isActive = state.selectedTags.includes(t);
                 filterBox.innerHTML += `<button style="background-color: ${isActive ? style.bg : '#fff'}; color: ${isActive ? '#fff' : style.bg}; border: 1px solid ${style.bg};" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold shadow-sm" onclick="filterTag('${t}')"><i class="fa-solid ${getTagIcon(t)}"></i> ${t}</button>`;
             });
