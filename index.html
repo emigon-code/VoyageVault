@@ -273,7 +273,7 @@
                             <button onclick="setStatusFilter('Quiero ir')" id="filter-status-quieroir" class="flex-1 py-1.5 px-2 text-center rounded-lg text-slate-600">🧡 Quiero ir</button>
                         </div>
 
-                        <!-- MODIFICADO: Contenedor con altura máxima y barra de scroll -->
+                        <!-- Contenedor con altura máxima y barra de scroll para las etiquetas -->
                         <div class="tag-filter-container flex flex-wrap gap-1.5 max-h-[110px] overflow-y-auto pr-1 pb-1 scrollbar-sutil" id="tagFilters"></div>
                         
                         <div class="mobile-view-tabs">
@@ -353,19 +353,35 @@
         </div>
     </div>
 
-    <!-- MODAL SINCRO CSV -->
+    <!-- MODAL SINCRO CSV Y TEXTO -->
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4" id="importModal" onclick="closeModal('importModal')">
         <div class="bg-white border border-slate-200/80 w-full max-w-[520px] rounded-[24px] p-6 shadow-2xl" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-5">
-                <h3 class="text-xl font-extrabold text-slate-800">Sincronizar CSV</h3>
-                <button class="text-slate-400 p-2" onclick="closeModal('importModal')"><i class="fa-solid fa-xmark"></i></button>
+                <h3 class="text-xl font-extrabold text-slate-800">Importar Destinos</h3>
+                <button class="text-slate-400 p-2 hover:text-slate-700 transition" onclick="closeModal('importModal')"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="border-2 border-dashed border-slate-300 hover:border-sky-500 rounded-2xl p-8 text-center cursor-pointer bg-slate-50 transition mb-4" onclick="document.getElementById('csvFileInput').click()">
-                <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-400 mb-2"></i>
-                <p class="font-bold text-slate-600">Buscar archivo .csv</p>
+            
+            <!-- Zona de Texto -->
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pegado rápido (Desde tu Gema AI)</label>
+                <textarea id="csvTextInput" rows="4" placeholder='Pega las líneas aquí...&#10;Ej: "Chelva","España","Valencia",39.74,-0.99,...' class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors resize-y"></textarea>
+                <button onclick="processPastedText()" class="w-full mt-2 py-2.5 px-4 bg-sky-50 text-sky-700 font-bold text-sm rounded-xl hover:bg-sky-100 transition-colors border border-sky-200"><i class="fa-solid fa-paste mr-1"></i> Añadir texto pegado</button>
+            </div>
+
+            <div class="relative flex py-2 items-center">
+                <div class="flex-grow border-t border-slate-200"></div>
+                <span class="flex-shrink-0 mx-4 text-slate-400 text-xs font-bold uppercase">O sube un archivo</span>
+                <div class="flex-grow border-t border-slate-200"></div>
+            </div>
+
+            <!-- Zona de Archivo -->
+            <div class="border-2 border-dashed border-slate-300 hover:border-sky-500 rounded-2xl p-6 text-center cursor-pointer bg-slate-50 transition mt-2 mb-4" onclick="document.getElementById('csvFileInput').click()">
+                <i class="fa-solid fa-file-csv text-3xl text-slate-400 mb-2"></i>
+                <p class="font-bold text-slate-600 text-sm">Subir copia de seguridad (.csv)</p>
                 <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCSVFile(event)">
             </div>
-            <div class="flex justify-end"><button class="py-2 px-4 rounded-xl border font-bold text-sm bg-white text-slate-700" onclick="closeModal('importModal')">Cerrar</button></div>
+            
+            <div class="flex justify-end"><button class="py-2 px-4 rounded-xl border font-bold text-sm bg-white text-slate-700 hover:bg-slate-50 transition" onclick="closeModal('importModal')">Cerrar</button></div>
         </div>
     </div>
 
@@ -695,7 +711,6 @@
             setTimeout(() => { const pin = document.getElementById('pin-' + id); if (pin) { pin.classList.add('highlight-pin'); setTimeout(() => { pin.classList.remove('highlight-pin'); }, 3000); } }, 800); 
         }
 
-        // MODIFICADO: Ordenación alfabética de etiquetas
         function renderPlacesView() {
             const list = document.getElementById('placesList');
             list.innerHTML = ''; if (markersGroup) markersGroup.clearLayers();
@@ -710,7 +725,6 @@
                 (p.etiquetas || "General").split(',').map(t => t.trim()).filter(t => t !== "").forEach(t => allTags.add(t)); 
             });
             
-            // Convertimos a array y ordenamos alfabéticamente (respetando la ñ y tildes)
             const sortedTags = Array.from(allTags).sort((a, b) => a.localeCompare(b, 'es'));
 
             const filterBox = document.getElementById('tagFilters');
@@ -887,33 +901,113 @@
             ret.push(col); return ret;
         }
 
+        /* -----------------------------------------------------------
+           NUEVO MOTOR DE PROCESAMIENTO UNIFICADO (TEXTO Y ARCHIVO)
+        ----------------------------------------------------------- */
+        async function processRawCSV(text, skipFirstRow = false) {
+            if(!userSessionId) return;
+            const rows = text.split('\n'); 
+            let nuevosSitios = []; 
+            let duplicados = 0;
+            let startIdx = skipFirstRow ? 1 : 0;
+
+            for(let i = startIdx; i < rows.length; i++) {
+                if(!rows[i].trim()) continue;
+                const cols = parseCSVLine(rows[i].trim());
+                
+                // Si el usuario pega accidentalmente las cabeceras, las saltamos de forma segura
+                if (cols.length > 0 && cols[0].toLowerCase() === 'nombre') continue;
+
+                if(cols.length >= 3) {
+                    let nombre = cols[0] ? cols[0].trim() : ''; 
+                    let pais = cols[1] ? cols[1].trim() : ''; 
+                    let estado = cols[2] ? cols[2].trim() : ''; 
+                    let lat = parseFloat(cols[3]); 
+                    let lng = parseFloat(cols[4]); 
+                    let desc = cols[5] ? cols[5].trim() : ''; 
+                    let nivel = cols[6] ? cols[6].trim() : getContinent(pais); 
+                    let visitado = cols[7] ? cols[7].trim() : 'Por visitar'; 
+                    let etiquetas = cols[8] ? cols[8].trim() : ''; 
+                    let link = cols[9] ? cols[9].trim() : '';
+                    
+                    let existe = viajesData.some(v => v.nombre.toLowerCase() === nombre.toLowerCase() && v.categoria.toLowerCase() === pais.toLowerCase());
+                    
+                    if(!existe && nombre !== "") { 
+                        nuevosSitios.push({ 
+                            user_id: userSessionId, 
+                            nombre: nombre, 
+                            categoria: pais, 
+                            estado: estado, 
+                            latitud: isNaN(lat) ? null : lat, 
+                            longitud: isNaN(lng) ? null : lng, 
+                            descripcion: desc, 
+                            nivel: nivel, 
+                            visitado: visitado, 
+                            etiquetas: etiquetas, 
+                            link: link 
+                        }); 
+                    } else if (existe) { 
+                        duplicados++; 
+                    }
+                }
+            }
+
+            if(nuevosSitios.length > 0) {
+                showToast("Procesando...", `Verificando coordenadas para ${nuevosSitios.length} lugares...`);
+                closeModal('importModal'); 
+
+                // Autogeolocalización mágica si la Gema dejó las coordenadas vacías (,,,)
+                for (let sitio of nuevosSitios) {
+                    if (sitio.latitud === null || sitio.longitud === null) {
+                        try { 
+                            let res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(`${sitio.nombre}, ${sitio.estado}, ${sitio.categoria}`)}&limit=1`); 
+                            let data = await res.json(); 
+                            if (data && data.length > 0) { 
+                                sitio.latitud = parseFloat(data[0].lat); 
+                                sitio.longitud = parseFloat(data[0].lon); 
+                            } 
+                        } catch(err) {}
+                        // Pequeña pausa de 1 seg para no saturar OpenStreetMap y evitar bloqueos
+                        await new Promise(r => setTimeout(r, 1000));
+                    }
+                }
+
+                const { error } = await supabaseClient.from('sitios').insert(nuevosSitios);
+                if(!error) { 
+                    loadCloudData(); 
+                    showToast("Completado", `Añadidos ${nuevosSitios.length} sitios. (Omitidos ${duplicados} duplicados).`); 
+                } else { 
+                    showToast("Error", "Fallo al subir a la nube.", true); 
+                }
+            } else { 
+                showToast("Aviso", `No se encontraron sitios nuevos válidos. (Omitidos ${duplicados} duplicados).`); 
+                closeModal('importModal');
+            }
+        }
+
+        // Se lanza al pulsar el botón de "Procesar texto"
+        function processPastedText() {
+            const text = document.getElementById('csvTextInput').value;
+            if (!text.trim()) {
+                showToast("Aviso", "No hay texto para procesar.", true);
+                return;
+            }
+            // Como viene directo de la Gema, asumimos que no tiene la fila de cabeceras (skipFirstRow = false)
+            processRawCSV(text, false);
+            document.getElementById('csvTextInput').value = ''; 
+        }
+
+        // Se lanza al subir el archivo físico .csv
         function handleCSVFile(event) {
             if(!userSessionId) return;
             const file = event.target.files[0]; if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = async function(e) {
-                const text = e.target.result; const rows = text.split('\n'); let nuevosSitios = []; let duplicados = 0;
-
-                for(let i = 1; i < rows.length; i++) {
-                    if(!rows[i].trim()) continue;
-                    const cols = parseCSVLine(rows[i].trim());
-                    if(cols.length >= 3) {
-                        let nombre = cols[0].trim(); let pais = cols[1].trim(); let estado = cols[2].trim(); let lat = parseFloat(cols[3]); let lng = parseFloat(cols[4]); let desc = cols[5] ? cols[5].trim() : ''; let nivel = cols[6] ? cols[6].trim() : getContinent(pais); let visitado = cols[7] ? cols[7].trim() : 'Por visitar'; let etiquetas = cols[8] ? cols[8].trim() : ''; let link = cols[9] ? cols[9].trim() : '';
-                        let existe = viajesData.some(v => v.nombre.toLowerCase() === nombre.toLowerCase() && v.categoria.toLowerCase() === pais.toLowerCase());
-                        
-                        if(!existe && nombre !== "") { nuevosSitios.push({ user_id: userSessionId, nombre: nombre, categoria: pais, estado: estado, latitud: isNaN(lat) ? null : lat, longitud: isNaN(lng) ? null : lng, descripcion: desc, nivel: nivel, visitado: visitado, etiquetas: etiquetas, link: link }); } 
-                        else if (existe) { duplicados++; }
-                    }
-                }
-
-                if(nuevosSitios.length > 0) {
-                    showToast("Sincronizando...", `Subiendo ${nuevosSitios.length} lugares nuevos...`);
-                    const { error } = await supabaseClient.from('sitios').insert(nuevosSitios);
-                    if(!error) { loadCloudData(); showToast("Completado", `Se añadieron ${nuevosSitios.length} sitios nuevos. Se omitieron ${duplicados} duplicados.`); } 
-                    else { showToast("Error", "Fallo al subir a la nube.", true); }
-                } else { showToast("Sin cambios", `No se encontraron sitios nuevos. Se omitieron ${duplicados} duplicados.`); }
-                closeModal('importModal'); event.target.value = '';
+            reader.onload = function(e) {
+                const text = e.target.result;
+                // Como es el archivo exportado de la app, sí tiene cabeceras (skipFirstRow = true)
+                processRawCSV(text, true);
+                event.target.value = '';
             };
             reader.readAsText(file);
         }
