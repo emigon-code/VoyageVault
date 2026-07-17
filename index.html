@@ -476,14 +476,9 @@
             }, 50);
         }
 
-        function renderViewByCurrentState() {
-            if (state.view === 'home') renderHomeView();
-            else if (state.view === 'countries') drawCountriesGrid();
-            else if (state.view === 'regions') drawRegionsGrid();
-            else if (state.view === 'places') renderPlacesView();
-        }
-
+        // FUNCIÓN NORMALIZADORA (Quita acentos y pasa a minúsculas)
         function normalizeString(str) { return str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : ""; }
+        
         function getContinent(country) { return EUROPEAN_COUNTRIES.some(c => normalizeString(country).includes(c)) ? 'Europa' : 'Resto del Mundo'; }
 
         function showToast(title, text, isError = false) {
@@ -523,6 +518,13 @@
 
         function getBannerEditHtml(key) { return userSessionId ? `<button class="banner-settings-btn" onclick="editBannerImage(event, '${key}')"><i class="fa-solid fa-pen text-xs"></i></button>` : ''; }
 
+        function renderViewByCurrentState() {
+            if (state.view === 'home') renderHomeView();
+            else if (state.view === 'countries') drawCountriesGrid();
+            else if (state.view === 'regions') drawRegionsGrid();
+            else if (state.view === 'places') renderPlacesView();
+        }
+
         function renderHomeView() {
             const europeCount = viajesData.filter(i => getContinent(i.categoria) === 'Europa').length;
             const rowCount = viajesData.length - europeCount;
@@ -556,8 +558,10 @@
                 const esA = (normA === 'espana' || normA === 'espana'); const esB = (normB === 'espana' || normB === 'espana');
                 if (esA && !esB) return -1; if (!esA && esB) return 1; return a.localeCompare(b, 'es');
             });
-            const searchVal = (document.getElementById('countrySearchInput') || {}).value?.toLowerCase() || '';
-            if (searchVal) countries = countries.filter(c => c.toLowerCase().includes(searchVal));
+            
+            // MODIFICADO: Aplicamos normalizeString a la búsqueda y al texto filtrado
+            const searchVal = normalizeString((document.getElementById('countrySearchInput') || {}).value || '');
+            if (searchVal) countries = countries.filter(c => normalizeString(c).includes(searchVal));
 
             const grid = document.getElementById('countries-grid'); grid.innerHTML = '';
             if (countries.length === 0) { grid.innerHTML = `<p class="col-span-full text-center text-slate-400 py-10 font-semibold">No se encontraron países.</p>`; } 
@@ -587,12 +591,15 @@
         function drawRegionsGrid() {
             let regions = [...new Set(viajesData.filter(i => i.categoria === state.country && i.estado).map(i => i.estado))];
             regions.sort((a, b) => a.localeCompare(b, 'es'));
-            const searchVal = (document.getElementById('regionSearchInput') || {}).value?.toLowerCase() || '';
-            if (searchVal) regions = regions.filter(r => r.toLowerCase().includes(searchVal));
+            
+            // MODIFICADO: Aplicamos normalizeString a la búsqueda y al texto filtrado
+            const searchVal = normalizeString((document.getElementById('regionSearchInput') || {}).value || '');
+            if (searchVal) regions = regions.filter(r => normalizeString(r).includes(searchVal));
 
             const grid = document.getElementById('regions-grid'); grid.innerHTML = '';
 
-            if (!searchVal || "exploracion total".includes(searchVal) || state.country.toLowerCase().includes(searchVal)) {
+            // MODIFICADO: Búsqueda del país con normalización
+            if (!searchVal || "exploracion total".includes(searchVal) || normalizeString(state.country).includes(searchVal)) {
                 const totalPaisCount = viajesData.filter(i => i.categoria === state.country).length;
                 const globalKey = `global_${state.country}`;
                 grid.innerHTML += `
@@ -715,7 +722,8 @@
             const list = document.getElementById('placesList');
             list.innerHTML = ''; if (markersGroup) markersGroup.clearLayers();
 
-            const searchVal = document.getElementById('sidebarSearch').value.toLowerCase();
+            // MODIFICADO: Aplicamos normalizeString al input de búsqueda de lugares
+            const searchVal = normalizeString(document.getElementById('sidebarSearch').value);
             
             let regionPlaces = state.isGlobalCountryMode ? viajesData.filter(i => i.categoria === state.country) : viajesData.filter(i => i.categoria === state.country && i.estado === state.region);
             regionPlaces.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
@@ -735,7 +743,9 @@
                 filterBox.innerHTML += `<button style="background-color: ${isActive ? style.bg : '#fff'}; color: ${isActive ? '#fff' : style.bg}; border: 1px solid ${style.bg};" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold shadow-sm" onclick="filterTag('${t}')"><i class="fa-solid ${getTagIcon(t)}"></i> ${t}</button>`;
             });
 
-            let filtered = regionPlaces.filter(f => f.nombre.toLowerCase().includes(searchVal) || (f.descripcion || '').toLowerCase().includes(searchVal));
+            // MODIFICADO: Filtrado inteligente sin acentos para nombres y descripciones
+            let filtered = regionPlaces.filter(f => normalizeString(f.nombre).includes(searchVal) || normalizeString(f.descripcion).includes(searchVal));
+            
             if (state.statusFilter === 'Visitado') filtered = filtered.filter(f => f.visitado === 'Visitado');
             else if (state.statusFilter === 'Quiero ir') filtered = filtered.filter(f => f.visitado !== 'Visitado');
 
