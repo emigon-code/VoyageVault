@@ -218,7 +218,6 @@
         <div class="view-panel active-view" id="view-home">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1">Explora tus destinos</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una región geográfica para visualizar los lugares guardados.</p>
-            <!-- Aquí se inyectan las tarjetas principales y las de "Añadidos Recientemente" -->
             <div id="explorer-cards-container"></div>
         </div>
 
@@ -480,6 +479,29 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
+        // --- SISTEMA DE SEGUIMIENTO DE VISTAS RECIENTES EN LA NUBE (SUPABASE) ---
+        async function recordView(pais, region = null) {
+            if (!userSessionId) return;
+            
+            let history = [];
+            try { if (customBanners['recent_views']) { history = JSON.parse(customBanners['recent_views']); } } catch(e) {}
+            
+            // Reordenamos: quitamos si ya existe y lo ponemos el primero
+            history = history.filter(item => !(item.pais === pais && item.region === region));
+            history.unshift({ pais, region });
+            history = history.slice(0, 4); // Guardar máximo 4
+            
+            // Actualizar memoria local para que la UI reaccione rápido
+            customBanners['recent_views'] = JSON.stringify(history);
+            
+            // Enviar a la base de datos de Supabase silenciosamente
+            await supabaseClient.from('banners').upsert({ 
+                user_id: userSessionId, 
+                clave: 'recent_views', 
+                url: JSON.stringify(history) 
+            }, { onConflict: 'user_id, clave' });
+        }
+
         function navigateTo(viewId, pushToHistory = true) {
             state.view = viewId;
             document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active-view'));
@@ -521,46 +543,41 @@
             const europeCount = viajesData.filter(i => getContinent(i.categoria) === 'Europa').length;
             const rowCount = viajesData.length - europeCount;
             
-            // Lógica para calcular los "Añadidos Recientemente"
             let recentHTML = '';
-            if (viajesData && viajesData.length > 0) {
-                // Ordenamos por ID descendente (los últimos añadidos primero)
-                const sorted = [...viajesData].sort((a,b) => b.id - a.id);
-                const uniques = [];
-                for(let v of sorted) {
-                    const key = `${v.categoria}-${v.estado}`;
-                    if(!uniques.some(u => u.key === key) && v.categoria) {
-                        uniques.push({ key, pais: v.categoria, region: v.estado });
-                        if(uniques.length >= 4) break; // Mostramos solo los últimos 4
-                    }
-                }
-                
-                if (uniques.length > 0) {
-                    recentHTML = `
-                        <div class="mt-8 mb-4">
-                            <h3 class="text-sm md:text-sm font-extrabold text-slate-500 uppercase tracking-wider mb-4"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Agregados Recientemente</h3>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-[1100px]">
-                                ${uniques.map(u => {
-                                    const title = u.region || u.pais;
-                                    const subtitle = u.region ? u.pais : 'País';
-                                    const imgKey = u.region ? `${u.pais}_${u.region}` : u.pais;
-                                    const img = customBanners[imgKey] || DEFAULT_IMAGES[u.region ? 'region_default' : 'pais_default'];
-                                    
-                                    return `
-                                    <div class="relative h-20 md:h-24 rounded-xl overflow-hidden cursor-pointer border border-slate-200/80 shadow-sm hover:shadow-md transition-all group" onclick="${u.region ? `selectRecent('${u.pais}', '${u.region}')` : `selectCountry('${u.pais}')`}">
-                                        <div class="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-all duration-300 z-10"></div>
-                                        <img src="${img}" class="absolute inset-0 w-full h-full object-cover z-0 group-hover:scale-105 transition-transform duration-500">
-                                        <div class="absolute inset-0 z-20 p-3 md:p-4 flex flex-col justify-end">
-                                            <span class="text-[9px] md:text-[10px] text-sky-200 font-extrabold uppercase leading-none drop-shadow-md mb-1">${subtitle}</span>
-                                            <span class="text-xs md:text-sm text-white font-extrabold truncate drop-shadow-lg leading-tight">${title}</span>
-                                        </div>
+            let history = [];
+            
+            // Leemos el historial de la nube empaquetado en customBanners
+            try { if (customBanners['recent_views']) { history = JSON.parse(customBanners['recent_views']); } } catch(e) {}
+
+            let validHistory = history.filter(h =>
+                viajesData.some(v => v.categoria === h.pais && (h.region ? v.estado === h.region : true))
+            );
+            
+            if (validHistory.length > 0) {
+                recentHTML = `
+                    <div class="mt-8 mb-4">
+                        <h3 class="text-sm md:text-sm font-extrabold text-slate-500 uppercase tracking-wider mb-4"><i class="fa-solid fa-cloud-arrow-down mr-1"></i> Explorados Recientemente</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-[1100px]">
+                            ${validHistory.map(u => {
+                                const title = u.region || u.pais;
+                                const subtitle = u.region ? u.pais : 'País';
+                                const imgKey = u.region ? `${u.pais}_${u.region}` : u.pais;
+                                const img = customBanners[imgKey] || DEFAULT_IMAGES[u.region ? 'region_default' : 'pais_default'];
+                                
+                                return `
+                                <div class="relative h-20 md:h-24 rounded-xl overflow-hidden cursor-pointer border border-slate-200/80 shadow-sm hover:shadow-md transition-all group" onclick="${u.region ? `selectRecent('${u.pais}', '${u.region}')` : `selectCountry('${u.pais}')`}">
+                                    <div class="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-all duration-300 z-10"></div>
+                                    <img src="${img}" class="absolute inset-0 w-full h-full object-cover z-0 group-hover:scale-105 transition-transform duration-500">
+                                    <div class="absolute inset-0 z-20 p-3 md:p-4 flex flex-col justify-end">
+                                        <span class="text-[9px] md:text-[10px] text-sky-200 font-extrabold uppercase leading-none drop-shadow-md mb-1">${subtitle}</span>
+                                        <span class="text-xs md:text-sm text-white font-extrabold truncate drop-shadow-lg leading-tight">${title}</span>
                                     </div>
-                                    `;
-                                }).join('')}
-                            </div>
+                                </div>
+                                `;
+                            }).join('')}
                         </div>
-                    `;
-                }
+                    </div>
+                `;
             }
 
             document.getElementById('explorer-cards-container').innerHTML = `
@@ -586,7 +603,6 @@
             `;
         }
 
-        // Navegación rápida para la sección de "Agregados Recientemente"
         function selectRecent(pais, region) {
             state.continent = getContinent(pais);
             state.country = pais;
@@ -597,6 +613,7 @@
             if (document.getElementById('regionSearchInput')) document.getElementById('regionSearchInput').value = '';
             document.getElementById('places-sidebar-title').textContent = region;
             
+            recordView(pais, region);
             navigateTo('places');
         }
 
@@ -635,6 +652,7 @@
         function selectCountry(country) { 
             state.country = country; state.region = null;
             if (document.getElementById('regionSearchInput')) document.getElementById('regionSearchInput').value = '';
+            recordView(country); 
             navigateTo('regions'); 
         }
 
@@ -680,8 +698,27 @@
             document.getElementById('regions-title').textContent = state.country;
         }
 
-        function selectGlobalCountryMode() { state.isGlobalCountryMode = true; state.region = null; state.selectedTags = []; state.statusFilter = 'todos'; updateStatusFilterBarUI(); document.getElementById('places-sidebar-title').textContent = `Todo ${state.country}`; navigateTo('places'); }
-        function selectRegion(region) { state.isGlobalCountryMode = false; state.region = region; state.selectedTags = []; state.statusFilter = 'todos'; updateStatusFilterBarUI(); document.getElementById('places-sidebar-title').textContent = region; navigateTo('places'); }
+        function selectGlobalCountryMode() { 
+            state.isGlobalCountryMode = true; 
+            state.region = null; 
+            state.selectedTags = []; 
+            state.statusFilter = 'todos'; 
+            updateStatusFilterBarUI(); 
+            document.getElementById('places-sidebar-title').textContent = `Todo ${state.country}`; 
+            recordView(state.country); 
+            navigateTo('places'); 
+        }
+
+        function selectRegion(region) { 
+            state.isGlobalCountryMode = false; 
+            state.region = region; 
+            state.selectedTags = []; 
+            state.statusFilter = 'todos'; 
+            updateStatusFilterBarUI(); 
+            document.getElementById('places-sidebar-title').textContent = region; 
+            recordView(state.country, region); 
+            navigateTo('places'); 
+        }
 
         function setStatusFilter(filter) { state.statusFilter = filter; updateStatusFilterBarUI(); renderPlacesView(); }
 
@@ -844,7 +881,6 @@
                     coordsArray.push([finalLat, finalLng]);
                     const listaEtiquetas = (p.etiquetas || "General").split(',').map(t => t.trim()); const pinStyle = getTagStyle(listaEtiquetas[0]); const pinIcon = getTagIcon(listaEtiquetas[0]);
 
-                    // ESTILO DEL PIN: Hueco (Quiero ir) vs Relleno (Visitado)
                     const bgCol = isVisited ? pinStyle.bg : '#ffffff';
                     const borderCol = isVisited ? '#ffffff' : pinStyle.bg;
                     const textCol = isVisited ? '#ffffff' : pinStyle.bg;
@@ -1097,7 +1133,6 @@
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
             markersGroup = L.featureGroup().addTo(map);
 
-            // CONTROL DE GEOLOCALIZACIÓN
             L.Control.Locate = L.Control.extend({
                 onAdd: function(map) {
                     var btn = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
@@ -1118,7 +1153,6 @@
             });
             new L.Control.Locate({ position: 'bottomright' }).addTo(map);
 
-            // EVENTOS DE GEOLOCALIZACIÓN
             map.on('locationfound', function(e) {
                 var radius = e.accuracy / 2;
                 if (!userLocationMarker) {
@@ -1131,7 +1165,6 @@
                 }
             });
             
-            // Inicia la búsqueda pasiva al arrancar la app
             map.locate({watch: true, enableHighAccuracy: true});
 
             history.replaceState({ view: 'home', continent: null, country: null, region: null, isGlobalCountryMode: false }, "", "");
