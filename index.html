@@ -130,7 +130,7 @@
         .home-grid { grid-template-columns: 1fr; max-width: 1100px; }
         @media (min-width: 768px) { .home-grid { grid-template-columns: 1fr 1fr; } }
 
-        .banner-card { position: relative; height: 240px; border-radius: 24px; overflow: hidden; cursor: pointer; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: #fff; }
+        .banner-card { position: relative; height: 240px; border-radius: 24px; overflow: hidden; cursor: pointer; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: #334155; }
         @media (min-width: 768px) { .banner-card { height: 300px; } .home-grid .banner-card { height: 420px; } }
         .banner-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 0.1) 30%, rgba(15, 23, 42, 0) 50%); z-index: 2; transition: background 0.3s ease; }
         .banner-img { width: 100%; height: 100%; object-fit: cover; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); filter: contrast(1.05) saturate(1.1); }
@@ -382,6 +382,13 @@
 
         let viajesData = [];
         let customBanners = {};
+        
+        // Carga instantánea de portadas desde la memoria caché local
+        try {
+            const cachedBanners = localStorage.getItem('voyageVault_bannersCache');
+            if (cachedBanners) customBanners = JSON.parse(cachedBanners);
+        } catch(e) {}
+
         let userSessionId = null; 
         let supabaseClient = null;
         let map, markersGroup;
@@ -450,8 +457,11 @@
             viajesData = sitios || [];
 
             const { data: bannersData } = await supabaseClient.from('banners').select('*');
-            customBanners = {};
-            if (bannersData) { bannersData.forEach(b => { customBanners[b.clave] = b.url; }); }
+            if (bannersData) { 
+                bannersData.forEach(b => { customBanners[b.clave] = b.url; }); 
+                // Actualizamos la memoria caché local con lo descargado de la nube
+                try { localStorage.setItem('voyageVault_bannersCache', JSON.stringify(customBanners)); } catch(e) {}
+            }
             renderViewByCurrentState();
         }
 
@@ -463,8 +473,10 @@
                 const newUrl = prompt("Introduce la URL de la nueva imagen de portada:", currentImg);
                 if (newUrl !== null && newUrl.trim() !== "") {
                     customBanners[key] = newUrl.trim();
+                    try { localStorage.setItem('voyageVault_bannersCache', JSON.stringify(customBanners)); } catch(e) {}
+                    renderViewByCurrentState();
                     const { error } = await supabaseClient.from('banners').upsert({ user_id: userSessionId, clave: key, url: newUrl.trim() }, { onConflict: 'user_id, clave' });
-                    if(error) { showToast("Error", "No se guardó en la nube.", true); } else { showToast("Portada Actualizada", "Sincronizada con éxito."); renderViewByCurrentState(); }
+                    if(error) { showToast("Error", "No se guardó en la nube.", true); } else { showToast("Portada Actualizada", "Sincronizada con éxito."); }
                 }
             }, 50);
         }
@@ -479,22 +491,19 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // --- SISTEMA DE SEGUIMIENTO DE VISTAS RECIENTES EN LA NUBE (SUPABASE) ---
         async function recordView(pais, region = null) {
             if (!userSessionId) return;
             
             let history = [];
             try { if (customBanners['recent_views']) { history = JSON.parse(customBanners['recent_views']); } } catch(e) {}
             
-            // Reordenamos: quitamos si ya existe y lo ponemos el primero
             history = history.filter(item => !(item.pais === pais && item.region === region));
             history.unshift({ pais, region });
-            history = history.slice(0, 4); // Guardar máximo 4
+            history = history.slice(0, 4);
             
-            // Actualizar memoria local para que la UI reaccione rápido
             customBanners['recent_views'] = JSON.stringify(history);
+            try { localStorage.setItem('voyageVault_bannersCache', JSON.stringify(customBanners)); } catch(e) {}
             
-            // Enviar a la base de datos de Supabase silenciosamente
             await supabaseClient.from('banners').upsert({ 
                 user_id: userSessionId, 
                 clave: 'recent_views', 
@@ -546,7 +555,6 @@
             let recentHTML = '';
             let history = [];
             
-            // Leemos el historial de la nube empaquetado en customBanners
             try { if (customBanners['recent_views']) { history = JSON.parse(customBanners['recent_views']); } } catch(e) {}
 
             let validHistory = history.filter(h =>
