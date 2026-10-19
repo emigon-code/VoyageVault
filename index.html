@@ -43,16 +43,16 @@
             width: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Prohíbe el scroll del navegador principal */
+            overflow: hidden;
         }
         
         body { 
-            height: 100%; /* Fallback */
-            height: 100dvh; /* Alto dinámico real en móviles */
+            height: 100%;
+            height: 100dvh;
             width: 100%;
             margin: 0;
             padding: 0;
-            padding-top: 75px; /* Reserva el hueco físico exacto para la barra fija */
+            padding-top: 75px;
             background-color: #f8fafc; 
             color: #0f172a; 
             position: relative; 
@@ -77,7 +77,6 @@
         }
         @media (min-width: 768px) { nav#top-navbar { padding: 0 32px; } }
         
-        /* Controles de ancho máximo para que no desaparezca en móvil */
         .nav-left { display: flex; align-items: center; gap: 8px; z-index: 5; flex: 1; min-width: 0; }
         .nav-right { display: flex; align-items: center; gap: 8px; z-index: 5; flex-shrink: 0; }
         
@@ -86,11 +85,9 @@
         .logo h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(to right, #0ea5e9, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: none; }
         @media (min-width: 768px) { .logo h1 { display: block; } }
         
-        /* Breadcrumbs con scroll horizontal invisible */
         .breadcrumbs { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #475569; font-weight: 600; margin-left: 4px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .breadcrumbs::-webkit-scrollbar { display: none; }
         @media (min-width: 768px) { .breadcrumbs { gap: 8px; font-size: 13px; margin-left: 12px; } }
-        
         .breadcrumbs span { cursor: pointer; transition: all 0.3s ease; white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
         @media (min-width: 768px) { .breadcrumbs span { max-width: 160px; } }
         .breadcrumbs span:hover { color: #0284c7; }
@@ -161,10 +158,10 @@
         
         .modal-body-scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
         
-        /* ANIMACIONES MAPA */
-        .custom-pin-marker { display: flex; align-items: center; justify-content: center; width: 36px !important; height: 36px !important; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: -2px 2px 4px rgba(0,0,0,0.3); border: 2px solid #ffffff; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        /* ANIMACIONES MAPA Y PINES */
+        .custom-pin-marker { display: flex; align-items: center; justify-content: center; width: 36px !important; height: 36px !important; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: -2px 2px 4px rgba(0,0,0,0.3); cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .custom-pin-marker:hover { transform: rotate(-45deg) scale(1.15); z-index: 1000 !important; }
-        .custom-pin-marker i { transform: rotate(45deg); color: white; font-size: 14px; }
+        .custom-pin-marker i { transform: rotate(45deg); font-size: 14px; color: inherit; }
         
         @keyframes pulse-ring {
             0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.8); transform: rotate(-45deg) scale(1.2); }
@@ -180,7 +177,6 @@
         @media (min-width: 768px) { .notification-toast { bottom: 32px; left: 32px; right: auto; width: 340px; } }
         .notification-toast.show { transform: translateY(0); }
 
-        /* Scrollbar sutil para las etiquetas */
         .scrollbar-sutil::-webkit-scrollbar { width: 4px; }
         .scrollbar-sutil::-webkit-scrollbar-track { background: transparent; }
         .scrollbar-sutil::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
@@ -212,9 +208,7 @@
                 <span class="active">Inicio</span>
             </div>
         </div>
-        <div class="nav-right" id="navbar-actions">
-            <!-- Botones inyectados por JS -->
-        </div>
+        <div class="nav-right" id="navbar-actions"></div>
     </nav>
 
     <!-- VIEWPORT PRINCIPAL -->
@@ -224,7 +218,8 @@
         <div class="view-panel active-view" id="view-home">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-1">Explora tus destinos</h2>
             <p class="text-xs md:text-sm text-slate-500 font-medium mb-6">Selecciona una región geográfica para visualizar los lugares guardados.</p>
-            <div class="banner-grid home-grid" id="explorer-cards-container"></div>
+            <!-- Aquí se inyectan las tarjetas principales y las de "Añadidos Recientemente" -->
+            <div id="explorer-cards-container"></div>
         </div>
 
         <!-- 2. PAÍSES -->
@@ -273,7 +268,6 @@
                             <button onclick="setStatusFilter('Quiero ir')" id="filter-status-quieroir" class="flex-1 py-1.5 px-2 text-center rounded-lg text-slate-600">🧡 Quiero ir</button>
                         </div>
 
-                        <!-- Contenedor con altura máxima y barra de scroll para las etiquetas -->
                         <div class="tag-filter-container flex flex-wrap gap-1.5 max-h-[110px] overflow-y-auto pr-1 pb-1 scrollbar-sutil" id="tagFilters"></div>
                         
                         <div class="mobile-view-tabs">
@@ -361,7 +355,6 @@
                 <button class="text-slate-400 p-2 hover:text-slate-700 transition" onclick="closeModal('importModal')"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <!-- Zona de Texto -->
             <div class="mb-4">
                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pegado rápido (Desde tu Gema AI)</label>
                 <textarea id="csvTextInput" rows="4" placeholder='Pega las líneas aquí...&#10;Ej: "Chelva","España","Valencia",39.74,-0.99,...' class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-sky-400 focus:bg-white transition-colors resize-y"></textarea>
@@ -374,7 +367,6 @@
                 <div class="flex-grow border-t border-slate-200"></div>
             </div>
 
-            <!-- Zona de Archivo -->
             <div class="border-2 border-dashed border-slate-300 hover:border-sky-500 rounded-2xl p-6 text-center cursor-pointer bg-slate-50 transition mt-2 mb-4" onclick="document.getElementById('csvFileInput').click()">
                 <i class="fa-solid fa-file-csv text-3xl text-slate-400 mb-2"></i>
                 <p class="font-bold text-slate-600 text-sm">Subir copia de seguridad (.csv)</p>
@@ -394,10 +386,12 @@
         let userSessionId = null; 
         let supabaseClient = null;
         let map, markersGroup;
+        let userLocationMarker = null;
+        let userLocationCircle = null;
 
         let state = { view: 'home', continent: null, country: null, region: null, selectedTags: [], statusFilter: 'todos', mobileTab: 'list', isGlobalCountryMode: false };
         
-        const EUROPEAN_COUNTRIES = ["alemania", "andorra", "austria", "croacia", "españa", "espana", "francia", "italia", "portugal", "suiza", "reino unido", "grecia", "bélgica", "belgica", "paises bajos", "países bajos", "holanda", "eslovenia", "república checa", "republica checa", "rumanía", "rumania", "suecia", "noruega", "dinamarca", "finlandia", "polonia", "hungría", "hungria", "irlanda"];
+        const EUROPEAN_COUNTRIES = ["alemania", "andorra", "austria", "españa", "espana", "francia", "italia", "portugal", "suiza", "reino unido", "grecia", "bélgica", "belgica", "paises bajos", "países bajos", "holanda", "eslovenia", "república checa", "republica checa", "rumanía", "rumania", "suecia", "noruega", "dinamarca", "finlandia", "polonia", "hungría", "hungria", "irlanda"];
 
         const DEFAULT_IMAGES = {
             'Europa': 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=1000',
@@ -527,24 +521,83 @@
             const europeCount = viajesData.filter(i => getContinent(i.categoria) === 'Europa').length;
             const rowCount = viajesData.length - europeCount;
             
+            // Lógica para calcular los "Añadidos Recientemente"
+            let recentHTML = '';
+            if (viajesData && viajesData.length > 0) {
+                // Ordenamos por ID descendente (los últimos añadidos primero)
+                const sorted = [...viajesData].sort((a,b) => b.id - a.id);
+                const uniques = [];
+                for(let v of sorted) {
+                    const key = `${v.categoria}-${v.estado}`;
+                    if(!uniques.some(u => u.key === key) && v.categoria) {
+                        uniques.push({ key, pais: v.categoria, region: v.estado });
+                        if(uniques.length >= 4) break; // Mostramos solo los últimos 4
+                    }
+                }
+                
+                if (uniques.length > 0) {
+                    recentHTML = `
+                        <div class="mt-8 mb-4">
+                            <h3 class="text-sm md:text-sm font-extrabold text-slate-500 uppercase tracking-wider mb-4"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Agregados Recientemente</h3>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-[1100px]">
+                                ${uniques.map(u => {
+                                    const title = u.region || u.pais;
+                                    const subtitle = u.region ? u.pais : 'País';
+                                    const imgKey = u.region ? `${u.pais}_${u.region}` : u.pais;
+                                    const img = customBanners[imgKey] || DEFAULT_IMAGES[u.region ? 'region_default' : 'pais_default'];
+                                    
+                                    return `
+                                    <div class="relative h-20 md:h-24 rounded-xl overflow-hidden cursor-pointer border border-slate-200/80 shadow-sm hover:shadow-md transition-all group" onclick="${u.region ? `selectRecent('${u.pais}', '${u.region}')` : `selectCountry('${u.pais}')`}">
+                                        <div class="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-all duration-300 z-10"></div>
+                                        <img src="${img}" class="absolute inset-0 w-full h-full object-cover z-0 group-hover:scale-105 transition-transform duration-500">
+                                        <div class="absolute inset-0 z-20 p-3 md:p-4 flex flex-col justify-end">
+                                            <span class="text-[9px] md:text-[10px] text-sky-200 font-extrabold uppercase leading-none drop-shadow-md mb-1">${subtitle}</span>
+                                            <span class="text-xs md:text-sm text-white font-extrabold truncate drop-shadow-lg leading-tight">${title}</span>
+                                        </div>
+                                    </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
             document.getElementById('explorer-cards-container').innerHTML = `
-                <div class="banner-card" onclick="selectContinent('Europa')">
-                    ${getBannerEditHtml('Europa')}
-                    <img src="${customBanners['Europa'] || DEFAULT_IMAGES['Europa']}" class="banner-img">
-                    <div class="banner-content">
-                        <span class="banner-category">Continente</span><div class="banner-name">Europa</div>
-                        <div class="banner-count"><i class="fa-solid fa-location-dot"></i> ${europeCount} sitios</div>
+                <div class="banner-grid home-grid mb-6">
+                    <div class="banner-card" onclick="selectContinent('Europa')">
+                        ${getBannerEditHtml('Europa')}
+                        <img src="${customBanners['Europa'] || DEFAULT_IMAGES['Europa']}" class="banner-img">
+                        <div class="banner-content">
+                            <span class="banner-category">Continente</span><div class="banner-name">Europa</div>
+                            <div class="banner-count"><i class="fa-solid fa-location-dot"></i> ${europeCount} sitios</div>
+                        </div>
+                    </div>
+                    <div class="banner-card" onclick="selectContinent('Resto del Mundo')">
+                        ${getBannerEditHtml('Resto del Mundo')}
+                        <img src="${customBanners['Resto del Mundo'] || DEFAULT_IMAGES['Resto del Mundo']}" class="banner-img">
+                        <div class="banner-content">
+                            <span class="banner-category">Continente</span><div class="banner-name">Resto del Mundo</div>
+                            <div class="banner-count"><i class="fa-solid fa-globe"></i> ${rowCount} sitios</div>
+                        </div>
                     </div>
                 </div>
-                <div class="banner-card" onclick="selectContinent('Resto del Mundo')">
-                    ${getBannerEditHtml('Resto del Mundo')}
-                    <img src="${customBanners['Resto del Mundo'] || DEFAULT_IMAGES['Resto del Mundo']}" class="banner-img">
-                    <div class="banner-content">
-                        <span class="banner-category">Continente</span><div class="banner-name">Resto del Mundo</div>
-                        <div class="banner-count"><i class="fa-solid fa-globe"></i> ${rowCount} sitios</div>
-                    </div>
-                </div>
+                ${recentHTML}
             `;
+        }
+
+        // Navegación rápida para la sección de "Agregados Recientemente"
+        function selectRecent(pais, region) {
+            state.continent = getContinent(pais);
+            state.country = pais;
+            state.region = region;
+            state.isGlobalCountryMode = false;
+            
+            if (document.getElementById('countrySearchInput')) document.getElementById('countrySearchInput').value = '';
+            if (document.getElementById('regionSearchInput')) document.getElementById('regionSearchInput').value = '';
+            document.getElementById('places-sidebar-title').textContent = region;
+            
+            navigateTo('places');
         }
 
         function selectContinent(continent) { state.continent = continent; state.country = null; state.region = null; navigateTo('countries'); }
@@ -752,10 +805,9 @@
                 const isVisited = p.visitado === 'Visitado';
                 let finalLat = parseFloat(p.latitud); let finalLng = parseFloat(p.longitud);
 
-                // GENERACIÓN DE ENLACE GOOGLE MAPS
                 const gmapsUrl = (!isNaN(finalLat) && !isNaN(finalLng) && finalLat !== 0 && finalLat !== null)
                     ? `https://www.google.com/maps/search/?api=1&query=${finalLat},${finalLng}`
-                    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${p.nombre}, ${p.estado}, ${p.categoria}`)}`;
+                    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${p.nombre}, ${p.estado},${p.categoria}`)}`;
 
                 const card = document.createElement('div'); card.id = 'card-' + p.id; card.className = `p-4 mb-3 bg-white border border-slate-200 rounded-2xl shadow-sm active:bg-slate-50 transition-all duration-500 relative cursor-pointer hover:border-sky-300`;
                 card.onclick = () => { if (!isNaN(finalLat) && !isNaN(finalLng)) { if(window.innerWidth < 768) switchMobileView('map', true); setTimeout(() => { map.flyTo([finalLat, finalLng], 15, { animate: true, duration: 1.5 }); highlightPinOnMap(p.id); }, 200); } };
@@ -792,7 +844,19 @@
                     coordsArray.push([finalLat, finalLng]);
                     const listaEtiquetas = (p.etiquetas || "General").split(',').map(t => t.trim()); const pinStyle = getTagStyle(listaEtiquetas[0]); const pinIcon = getTagIcon(listaEtiquetas[0]);
 
-                    const markerIcon = L.divIcon({ className: 'custom-marker-wrapper', html: `<div id="pin-${p.id}" class="custom-pin-marker" style="background-color: ${pinStyle.bg}; border-color: #ffffff;"><i class="fa-solid ${pinIcon}"></i></div>`, iconSize: [36, 36], iconAnchor: [18, 36] });
+                    // ESTILO DEL PIN: Hueco (Quiero ir) vs Relleno (Visitado)
+                    const bgCol = isVisited ? pinStyle.bg : '#ffffff';
+                    const borderCol = isVisited ? '#ffffff' : pinStyle.bg;
+                    const textCol = isVisited ? '#ffffff' : pinStyle.bg;
+                    const borderThickness = isVisited ? '2px' : '3px';
+
+                    const markerIcon = L.divIcon({ 
+                        className: 'custom-marker-wrapper', 
+                        html: `<div id="pin-${p.id}" class="custom-pin-marker" style="background-color: ${bgCol}; border: ${borderThickness} solid ${borderCol}; color: ${textCol};"><i class="fa-solid ${pinIcon}"></i></div>`, 
+                        iconSize: [36, 36], 
+                        iconAnchor: [18, 36] 
+                    });
+
                     let badgeEstado = isVisited ? '<span style="background-color:#ecfdf5; color:#059669;" class="px-2 py-0.5 rounded text-[9px] font-extrabold mr-2">🟢 VISITADO</span>' : '<span style="background-color:#fffbeb; color:#d97706;" class="px-2 py-0.5 rounded text-[9px] font-extrabold mr-2">🧡 QUIERO IR</span>';
                     let badgesEtiquetasHTML = listaEtiquetas.slice(0, 2).map(tag => {
                         const s = getTagStyle(tag); const i = getTagIcon(tag); return `<span style="background-color:${s.bg}; color:#fff;" class="flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold"><i class="fa-solid ${i} text-[7px]"></i> ${tag}</span>`;
@@ -868,7 +932,7 @@
             if (coordInput) { const parts = coordInput.replace(/\s+/g, '').split(','); if (parts.length >= 2) { finalLat = parseFloat(parts[0]); finalLng = parseFloat(parts[1]); } }
 
             if (isNaN(finalLat) || isNaN(finalLng) || finalLat === null || finalLat === 0) {
-                try { let res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(`${nombre}, ${region}, ${pais}`)}&limit=1`); let data = await res.json(); if (data && data.length > 0) { finalLat = parseFloat(data[0].lat); finalLng = parseFloat(data[0].lon); } } catch(err) {}
+                try { let res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(`${nombre}, ${region},${pais}`)}&limit=1`); let data = await res.json(); if (data && data.length > 0) { finalLat = parseFloat(data[0].lat); finalLng = parseFloat(data[0].lon); } } catch(err) {}
             }
 
             const payload = { user_id: userSessionId, nombre: nombre, etiquetas: document.getElementById('formTipo').value.trim(), categoria: pais, estado: region, latitud: (isNaN(finalLat) || finalLat === 0) ? null : finalLat, longitud: (isNaN(finalLng) || finalLng === 0) ? null : finalLng, descripcion: document.getElementById('formNotas').value.trim(), link: document.getElementById('formLink').value.trim(), visitado: document.getElementById('formEstado').value, nivel: getContinent(pais) };
@@ -891,7 +955,7 @@
                 sidebar.classList.remove('sidebar-map-active'); listContainer.classList.remove('mobile-list-hidden'); mapContainer.classList.remove('active-mobile-map'); btnList.classList.add('active'); btnMap.classList.remove('active');
             } else {
                 sidebar.classList.add('sidebar-map-active'); listContainer.classList.add('mobile-list-hidden'); mapContainer.classList.add('active-mobile-map'); btnList.classList.remove('active'); btnMap.classList.add('active');
-                setTimeout(() => { if (map) { map.invalidateSize(); if (!preventFitBounds) { let bounds = markersGroup.getBounds(); if (bounds && bounds.isValid()) { map.fitBounds(bounds, { padding: [30, 30] }); } } } }, 150);
+                setTimeout(() => { if (map) { map.invalidateSize(); if (!preventFitBounds && markersGroup) { let bounds = markersGroup.getBounds(); if (bounds && bounds.isValid()) { map.fitBounds(bounds, { padding: [30, 30] }); } } } }, 150);
             }
         }
 
@@ -975,7 +1039,7 @@
                 for (let sitio of nuevosSitios) {
                     if (sitio.latitud === null || sitio.longitud === null) {
                         try { 
-                            let res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(`${sitio.nombre}, ${sitio.estado}, ${sitio.categoria}`)}&limit=1`); 
+                            let res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(`${sitio.nombre}, ${sitio.estado},${sitio.categoria}`)}&limit=1`); 
                             let data = await res.json(); 
                             if (data && data.length > 0) { 
                                 sitio.latitud = parseFloat(data[0].lat); 
@@ -1032,6 +1096,44 @@
             L.control.zoom({ position: 'bottomright' }).addTo(map);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
             markersGroup = L.featureGroup().addTo(map);
+
+            // CONTROL DE GEOLOCALIZACIÓN
+            L.Control.Locate = L.Control.extend({
+                onAdd: function(map) {
+                    var btn = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+                    btn.innerHTML = `<a href="#" title="Mi ubicación" style="display:flex; align-items:center; justify-content:center; width:30px; height:30px; background:#fff; color:#0f172a; text-decoration:none;">
+                                        <i class="fa-solid fa-location-crosshairs text-sm"></i>
+                                     </a>`;
+                    btn.onclick = function(e){
+                        e.stopPropagation(); e.preventDefault();
+                        if(userLocationMarker) {
+                            map.flyTo(userLocationMarker.getLatLng(), 15);
+                        } else {
+                            showToast("Buscando...", "Obteniendo tu ubicación exacta...");
+                            map.locate({setView: true, maxZoom: 15, enableHighAccuracy: true});
+                        }
+                    }
+                    return btn;
+                }
+            });
+            new L.Control.Locate({ position: 'bottomright' }).addTo(map);
+
+            // EVENTOS DE GEOLOCALIZACIÓN
+            map.on('locationfound', function(e) {
+                var radius = e.accuracy / 2;
+                if (!userLocationMarker) {
+                    userLocationMarker = L.circleMarker(e.latlng, { radius: 7, fillColor: "#0284c7", color: "#ffffff", weight: 2, opacity: 1, fillOpacity: 1 }).addTo(map);
+                    userLocationCircle = L.circle(e.latlng, radius, { color: '#0284c7', fillColor: '#0284c7', fillOpacity: 0.15, weight: 1 }).addTo(map);
+                } else {
+                    userLocationMarker.setLatLng(e.latlng);
+                    userLocationCircle.setLatLng(e.latlng);
+                    userLocationCircle.setRadius(radius);
+                }
+            });
+            
+            // Inicia la búsqueda pasiva al arrancar la app
+            map.locate({watch: true, enableHighAccuracy: true});
+
             history.replaceState({ view: 'home', continent: null, country: null, region: null, isGlobalCountryMode: false }, "", "");
         }
 
